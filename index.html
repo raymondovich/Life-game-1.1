@@ -1,0 +1,347 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="theme-color"
+        content="#050505"
+    >
+
+    <title>Life Game</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- HEADER -->
+        <header class="header">
+
+            <div class="header-title">
+
+                <div class="eyebrow">
+                    YOUR LIFE
+                </div>
+
+                <h1>
+                    LIFE GAME
+                </h1>
+
+            </div>
+
+            <div class="avatar">
+                B
+            </div>
+
+        </header>
+
+
+        <!-- LEVEL -->
+        <section class="level-card">
+
+            <div class="level-top">
+
+                <div class="level-info">
+
+                    <span class="label">
+                        CURRENT LEVEL
+                    </span>
+
+                    <div class="level-number">
+                        LVL 1
+                    </div>
+
+                </div>
+
+                <div class="xp-value">
+                    0 XP
+                </div>
+
+            </div>
+
+            <div class="xp-bar">
+                <div
+                    class="xp-fill"
+                    style="width: 0%;"
+                ></div>
+            </div>
+
+        </section>
+
+
+        <!-- LIFE PROGRESS -->
+        <section class="overall-section">
+
+            <div class="section-label">
+                LIFE PROGRESS
+            </div>
+
+            <div class="overall-value">
+                47<span>%</span>
+            </div>
+
+            <div class="overall-bar">
+                <div
+                    class="overall-fill"
+                    style="width: 47%;"
+                ></div>
+            </div>
+
+        </section>
+
+
+        <!-- MAIN CATEGORIES -->
+        <main class="categories">
+
+
+            <!-- FINANCE -->
+            <article
+                class="category-card"
+                data-category="finance"
+            >
+
+                <div class="category-header">
+
+                    <div class="category-title">
+
+                        <div class="category-icon">
+                            💰
+                        </div>
+
+                        <div class="category-name">
+
+                            <strong>
+                                FINANCE
+                            </strong>
+
+                            <span>
+                                Финансы
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="category-percent">
+                        62%
+                    </div>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        style="width: 62%;"
+                    ></div>
+
+                </div>
+
+            </article>
+
+
+            <!-- HEALTH -->
+            <article
+                class="category-card"
+                data-category="health"
+            >
+
+                <div class="category-header">
+
+                    <div class="category-title">
+
+                        <div class="category-icon">
+                            ❤️
+                        </div>
+
+                        <div class="category-name">
+
+                            <strong>
+                                HEALTH
+                            </strong>
+
+                            <span>
+                                Здоровье
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="category-percent">
+                        38%
+                    </div>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        style="width: 38%;"
+                    ></div>
+
+                </div>
+
+            </article>
+
+
+            <!-- DEVELOPMENT -->
+            <article
+                class="category-card"
+                data-category="development"
+            >
+
+                <div class="category-header">
+
+                    <div class="category-title">
+
+                        <div class="category-icon">
+                            🧠
+                        </div>
+
+                        <div class="category-name">
+
+                            <strong>
+                                DEVELOPMENT
+                            </strong>
+
+                            <span>
+                                Развитие
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="category-percent">
+                        54%
+                    </div>
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        style="width: 54%;"
+                    ></div>
+
+                </div>
+
+            </article>
+
+
+        </main>
+
+
+        <!-- DAILY QUEST -->
+        <button
+            class="quest-button"
+            type="button"
+        >
+
+            <span class="quest-icon">
+                +
+            </span>
+
+            DAILY QUEST
+
+        </button>
+
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+
+            <button
+                class="nav-item active"
+                type="button"
+            >
+
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span class="nav-label">
+                    Главная
+                </span>
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                type="button"
+                data-section="finance"
+            >
+
+                <span class="nav-icon">
+                    💰
+                </span>
+
+                <span class="nav-label">
+                    Финансы
+                </span>
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                type="button"
+                data-section="health"
+            >
+
+                <span class="nav-icon">
+                    ❤️
+                </span>
+
+                <span class="nav-label">
+                    Здоровье
+                </span>
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                type="button"
+                data-section="development"
+            >
+
+                <span class="nav-icon">
+                    🧠
+                </span>
+
+                <span class="nav-label">
+                    Развитие
+                </span>
+
+            </button>
+
+        </nav>
+
+    </div>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="app.js"></script>
+
+</body>
+</html>
+```
