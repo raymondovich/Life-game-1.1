@@ -1,15 +1,17 @@
-// =====================================================
+```javascript
+// ============================================================
 // LIFE GAME
 // APP.JS
 // Главный контроллер приложения
-// =====================================================
+// Новая архитектура
+// ============================================================
 
 'use strict';
 
 
-// =====================================================
+// ============================================================
 // IMPORTS
-// =====================================================
+// ============================================================
 
 import {
     createDefaultState
@@ -19,85 +21,172 @@ import {
     loadState,
     loadExpenses,
     loadUI,
-    saveAll
+    saveState,
+    saveExpenses,
+    saveUI
 } from './storage.js';
 
 import {
-    num,
     clamp,
-    fmt
-} from './utils.js';
+    fmt,
+    esc,
+    percent
+} from './utilities.js';
 
 import {
+    xpForLevel,
     levelFromXP,
-    xpForLevel
+    playerXPFromCategoryXP,
+    xpWithStreak
 } from './xp.js';
 
 
-// =====================================================
-// GLOBAL STATE
-// =====================================================
+// ============================================================
+// GLOBAL APP STATE
+// ============================================================
 
 let state = null;
 let expenses = [];
-let ui = null;
+let ui = {};
 
 let currentPage = 'home';
 
 
-// =====================================================
+// ============================================================
 // NORMALIZE STATE
-// =====================================================
+// ============================================================
 
 function normalizeState(data) {
 
     const defaults =
         createDefaultState();
 
-    const result = data || defaults;
+    const source =
+        data && typeof data === 'object'
+            ? data
+            : {};
 
-
-    if (!result.player) {
-        result.player =
-            defaults.player;
-    }
-
-    if (!result.categories) {
-        result.categories =
-            defaults.categories;
-    }
-
-    if (!result.simulator) {
-        result.simulator =
-            defaults.simulator;
-    }
-
-    if (!Array.isArray(result.quests)) {
-        result.quests =
-            defaults.quests;
-    }
-
-
-    const categories =
-        Object.keys(
-            defaults.categories
+    const result =
+        JSON.parse(
+            JSON.stringify(defaults)
         );
 
 
-    categories.forEach(
-        function(category) {
+    // --------------------------------------------------------
+    // PLAYER
+    // --------------------------------------------------------
+
+    if (source.player) {
+
+        Object.assign(
+            result.player,
+            source.player
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // CATEGORIES
+    // --------------------------------------------------------
+
+    if (source.categories) {
+
+        Object.keys(
+            result.categories
+        ).forEach(category => {
 
             if (
-                !result.categories[category]
+                source.categories[category]
             ) {
 
-                result.categories[category] =
-                    defaults.categories[category];
+                Object.assign(
+                    result.categories[category],
+                    source.categories[category]
+                );
 
             }
 
-        }
-    );
+        });
+
+    }
+
+
+    // --------------------------------------------------------
+    // SIMULATOR
+    // --------------------------------------------------------
+
+    if (source.simulator) {
+
+        Object.assign(
+            result.simulator,
+            source.simulator
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // QUESTS
+    // --------------------------------------------------------
+
+    if (Array.isArray(source.quests)) {
+
+        result.quests =
+            source.quests;
+
+    }
+
+
+    // --------------------------------------------------------
+    // SAFE NUMBERS
+    // --------------------------------------------------------
+
+    result.player.xp =
+        Math.max(
+            0,
+            Number(result.player.xp) || 0
+        );
+
+    result.player.level =
+        Math.max(
+            1,
+            Number(result.player.level) || 1
+        );
+
+
+    Object.keys(
+        result.categories
+    ).forEach(category => {
+
+        const item =
+            result.categories[category];
+
+        item.xp =
+            Math.max(
+                0,
+                Number(item.xp) || 0
+            );
+
+        item.level =
+            Math.max(
+                1,
+                Number(item.level) || 1
+            );
+
+        item.streak =
+            Math.max(
+                0,
+                Number(item.streak) || 0
+            );
+
+        item.bestStreak =
+            Math.max(
+                0,
+                Number(item.bestStreak) || 0
+            );
+
+    });
 
 
     return result;
@@ -105,276 +194,450 @@ function normalizeState(data) {
 }
 
 
-// =====================================================
-// INITIALIZATION
-// =====================================================
+// ============================================================
+// LOAD
+// ============================================================
 
-function init() {
-
-    console.log(
-        '🚀 LIFE GAME — new architecture'
-    );
-
-
-    // -----------------------------------------
-    // LOAD
-    // -----------------------------------------
+function loadGame() {
 
     state =
         loadState(
             normalizeState
         );
 
-
     expenses =
         loadExpenses();
-
 
     ui =
         loadUI();
 
 
-    if (!ui) {
+    if (!state) {
 
-        ui = {
-            expensesCollapsed: false
-        };
+        state =
+            createDefaultState();
 
     }
 
 
-    // -----------------------------------------
-    // SAVE NORMALIZED DATA
-    // -----------------------------------------
-
-    save();
-
-
-    // -----------------------------------------
-    // MAIN UI
-    // -----------------------------------------
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    setupNavigation();
-
-    setupGlobalHandlers();
-
-    setupQuest();
+    state =
+        normalizeState(state);
 
 
     console.log(
-        '✅ LIFE GAME initialized'
+        'LIFE GAME: state loaded',
+        state
     );
 
 }
 
 
-// =====================================================
+// ============================================================
 // SAVE
-// =====================================================
+// ============================================================
 
-function save() {
+function saveGame() {
 
-    saveAll(
-        state,
-        expenses,
-        ui
-    );
+    if (!state) {
+        return;
+    }
+
+    saveState(state);
+    saveExpenses(expenses);
+    saveUI(ui);
 
 }
 
 
-// =====================================================
-// HELPERS
-// =====================================================
+// ============================================================
+// TOAST
+// ============================================================
 
-function getCategory(
-    category
-) {
+function showToast(message) {
 
-    if (
-        !state ||
-        !state.categories
-    ) {
+    let toast =
+        document.querySelector('.toast');
 
-        return null;
+    if (!toast) {
+
+        toast =
+            document.createElement('div');
+
+        toast.className =
+            'toast';
+
+        document.body.appendChild(
+            toast
+        );
 
     }
 
+    toast.textContent =
+        message;
 
-    return state.categories[
-        category
-    ] || null;
+    toast.classList.add(
+        'show'
+    );
+
+
+    clearTimeout(
+        toast._timer
+    );
+
+
+    toast._timer =
+        setTimeout(() => {
+
+            toast.classList.remove(
+                'show'
+            );
+
+        }, 2500);
 
 }
 
 
-// =====================================================
+// ============================================================
 // PLAYER XP
-// =====================================================
+// ============================================================
 
-function updatePlayerUI() {
+function addPlayerXP(amount) {
 
-    if (!state || !state.player) {
+    amount =
+        Math.max(
+            0,
+            Number(amount) || 0
+        );
+
+    if (!amount) {
         return;
     }
 
 
-    const player =
-        state.player;
+    state.player.xp +=
+        amount;
 
 
-    const xp =
+    while (
+        state.player.xp >=
+        xpForLevel(
+            state.player.level + 1
+        )
+    ) {
+
+        state.player.xp -=
+            xpForLevel(
+                state.player.level + 1
+            );
+
+        state.player.level++;
+
+
+        showToast(
+            '🎉 УРОВЕНЬ ПОВЫШЕН! LVL ' +
+            state.player.level
+        );
+
+    }
+
+
+    saveGame();
+
+    updateAllUI();
+
+}
+
+
+// ============================================================
+// CATEGORY XP
+// ============================================================
+
+function addCategoryXP(
+    category,
+    amount
+) {
+
+    if (
+        !state.categories[category]
+    ) {
+
+        return;
+
+    }
+
+
+    amount =
         Math.max(
             0,
-            num(player.xp)
+            Number(amount) || 0
         );
 
 
-    const level =
+    if (!amount) {
+        return;
+    }
+
+
+    const item =
+        state.categories[category];
+
+
+    item.xp +=
+        amount;
+
+
+    item.level =
+        levelFromXP(
+            item.xp
+        );
+
+
+    const playerXP =
+        playerXPFromCategoryXP(
+            amount
+        );
+
+
+    if (playerXP > 0) {
+
+        addPlayerXP(
+            playerXP
+        );
+
+    } else {
+
+        saveGame();
+        updateAllUI();
+
+    }
+
+}
+
+
+// ============================================================
+// CATEGORY PROGRESS
+// ============================================================
+
+function financeProgress() {
+
+    const finance =
+        state.categories.finance;
+
+
+    const income =
         Math.max(
-            1,
-            num(player.level)
+            0,
+            Number(
+                finance.monthlyIncome
+            ) || 0
         );
 
 
-    const currentLevelXP =
-        xpForLevel(level);
+    if (!income) {
+        return 0;
+    }
 
 
-    const nextLevelXP =
-        xpForLevel(level + 1);
+    const spent =
+        expenses.reduce(
+            (sum, item) =>
+                sum +
+                Math.max(
+                    0,
+                    Number(item.amount) || 0
+                ),
+            0
+        );
 
 
-    const levelStart =
-        currentLevelXP;
-
-
-    const required =
+    const savings =
         Math.max(
-            1,
-            nextLevelXP -
-            levelStart
+            0,
+            Number(finance.savings) || 0
         );
 
 
-    const progress =
-        clamp(
-            (
-                xp -
-                levelStart
-            ) /
-            required *
+    const expensePercent =
+        Math.min(
             100,
+            spent / income * 100
+        );
+
+
+    const savingsPercent =
+        Math.min(
+            100,
+            savings / income * 100
+        );
+
+
+    const financialScore =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                100 -
+                expensePercent +
+                savingsPercent
+            )
+        );
+
+
+    return Math.round(
+        financialScore
+    );
+
+}
+
+
+function healthProgress() {
+
+    const x =
+        state.categories.health;
+
+
+    const routine =
+        clamp(
+            x.routine,
             0,
             100
         );
 
 
-    const levelEl =
-        document.getElementById(
-            'playerLevel'
+    const nutrition =
+        clamp(
+            x.nutrition,
+            0,
+            100
         );
 
 
-    const xpEl =
-        document.getElementById(
-            'playerXP'
+    const steps =
+        percent(
+            x.steps,
+            10000
         );
 
 
-    const fillEl =
-        document.getElementById(
-            'playerXPFill'
+    const training =
+        percent(
+            state.categories.training.workouts,
+            state.categories.training.monthlyTarget
         );
 
 
-    const nextEl =
-        document.getElementById(
-            'xpNext'
-        );
-
-
-    const rankEl =
-        document.getElementById(
-            'playerRank'
-        );
-
-
-    if (levelEl) {
-
-        levelEl.textContent =
-            'LVL ' + level;
-
-    }
-
-
-    if (xpEl) {
-
-        xpEl.textContent =
-            fmt(xp) + ' XP';
-
-    }
-
-
-    if (fillEl) {
-
-        fillEl.style.width =
-            progress + '%';
-
-    }
-
-
-    if (nextEl) {
-
-        const remaining =
-            Math.max(
-                0,
-                nextLevelXP - xp
-            );
-
-
-        nextEl.textContent =
-            fmt(remaining) +
-            ' XP TO NEXT LEVEL';
-
-    }
-
-
-    if (rankEl) {
-
-        const ranks = [
-            'BEGINNER',
-            'EXPLORER',
-            'ADVENTURER',
-            'HERO',
-            'LEGEND'
-        ];
-
-
-        const index =
-            Math.min(
-                Math.floor(
-                    level / 3
-                ),
-                ranks.length - 1
-            );
-
-
-        rankEl.textContent =
-            ranks[index];
-
-    }
+    return Math.round(
+        (
+            routine +
+            nutrition +
+            steps +
+            training
+        ) / 4
+    );
 
 }
 
 
-// =====================================================
+function developmentProgress() {
+
+    const x =
+        state.categories.development;
+
+
+    const books =
+        percent(
+            x.books,
+            2
+        );
+
+
+    const language =
+        percent(
+            x.languageMinutes,
+            30
+        );
+
+
+    const meditation =
+        percent(
+            x.meditationMinutes,
+            15
+        );
+
+
+    return Math.round(
+        (
+            books +
+            language +
+            meditation
+        ) / 3
+    );
+
+}
+
+
+// ============================================================
+// LIFE PROGRESS
+// ============================================================
+
+function lifeProgress() {
+
+    const finance =
+        financeProgress();
+
+    const health =
+        healthProgress();
+
+    const development =
+        developmentProgress();
+
+
+    return Math.round(
+        (
+            finance +
+            health +
+            development
+        ) / 3
+    );
+
+}
+
+
+// ============================================================
+// RANK
+// ============================================================
+
+function getRank(level) {
+
+    const ranks = [
+        'BEGINNER',
+        'EXPLORER',
+        'ADVENTURER',
+        'HERO',
+        'LEGEND'
+    ];
+
+
+    const index =
+        Math.min(
+            Math.floor(
+                Math.max(
+                    1,
+                    level
+                ) / 3
+            ),
+            ranks.length - 1
+        );
+
+
+    return ranks[index];
+
+}
+
+
+// ============================================================
 // HOME UI
-// =====================================================
+// ============================================================
 
 function updateHomeUI() {
 
@@ -383,291 +646,112 @@ function updateHomeUI() {
     }
 
 
-    const finance =
-        getCategory(
-            'finance'
-        );
+    const player =
+        state.player;
 
 
-    const health =
-        getCategory(
-            'health'
-        );
-
-
-    const development =
-        getCategory(
-            'development'
-        );
-
-
-    // -----------------------------------------
-    // FINANCE
-    // -----------------------------------------
-
-    let financePercent = 0;
-
-
-    if (
-        window.LifeGameFinance &&
-        typeof
-            window.LifeGameFinance.progress ===
-            'function'
-    ) {
-
-        financePercent =
-            window.LifeGameFinance.progress(
-                state,
-                expenses
-            );
-
-    }
-
-
-    // -----------------------------------------
-    // HEALTH
-    // -----------------------------------------
-
-    let healthPercent = 0;
-
-
-    if (health) {
-
-        const routine =
-            clamp(
-                health.routine,
-                0,
-                100
-            );
-
-
-        const nutrition =
-            clamp(
-                health.nutrition,
-                0,
-                100
-            );
-
-
-        const steps =
-            clamp(
-                num(health.steps) /
-                10000 *
-                100,
-                0,
-                100
-            );
-
-
-        healthPercent =
-            Math.round(
-                (
-                    routine +
-                    nutrition +
-                    steps
-                ) / 3
-            );
-
-    }
-
-
-    // -----------------------------------------
-    // DEVELOPMENT
-    // -----------------------------------------
-
-    let developmentPercent = 0;
-
-
-    if (
-        window.LifeGameDevelopment &&
-        typeof
-            window.LifeGameDevelopment.progress ===
-            'function'
-    ) {
-
-        developmentPercent =
-            window.LifeGameDevelopment.progress(
-                state
-            );
-
-    }
-    else if (development) {
-
-        const books =
-            clamp(
-                num(development.books) /
-                2 *
-                100,
-                0,
-                100
-            );
-
-
-        const language =
-            clamp(
-                num(
-                    development.languageMinutes
-                ) /
-                30 *
-                100,
-                0,
-                100
-            );
-
-
-        const meditation =
-            clamp(
-                num(
-                    development.meditationMinutes
-                ) /
-                15 *
-                100,
-                0,
-                100
-            );
-
-
-        developmentPercent =
-            Math.round(
-                (
-                    books +
-                    language +
-                    meditation
-                ) / 3
-            );
-
-    }
-
-
-    // -----------------------------------------
-    // FINANCE
-    // -----------------------------------------
-
-    const financeEl =
+    const playerLevel =
         document.getElementById(
-            'financePercent'
+            'playerLevel'
         );
 
 
-    const financeFill =
+    const playerXP =
         document.getElementById(
-            'financeFill'
+            'playerXP'
         );
 
 
-    if (financeEl) {
-
-        financeEl.textContent =
-            Math.round(
-                financePercent
-            ) + '%';
-
-    }
-
-
-    if (financeFill) {
-
-        financeFill.style.width =
-            clamp(
-                financePercent,
-                0,
-                100
-            ) + '%';
-
-    }
-
-
-    // -----------------------------------------
-    // DEVELOPMENT
-    // -----------------------------------------
-
-    const developmentEl =
+    const playerXPFill =
         document.getElementById(
-            'developmentPercent'
+            'playerXPFill'
         );
 
 
-    const developmentFill =
+    const xpNext =
         document.getElementById(
-            'developmentFill'
+            'xpNext'
         );
 
 
-    if (developmentEl) {
-
-        developmentEl.textContent =
-            Math.round(
-                developmentPercent
-            ) + '%';
-
-    }
-
-
-    if (developmentFill) {
-
-        developmentFill.style.width =
-            clamp(
-                developmentPercent,
-                0,
-                100
-            ) + '%';
-
-    }
-
-
-    // -----------------------------------------
-    // HEALTH
-    // -----------------------------------------
-
-    const healthEl =
+    const playerRank =
         document.getElementById(
-            'healthPercent'
+            'playerRank'
         );
 
 
-    const healthFill =
-        document.getElementById(
-            'healthFill'
-        );
+    if (playerLevel) {
 
-
-    if (healthEl) {
-
-        healthEl.textContent =
-            Math.round(
-                healthPercent
-            ) + '%';
+        playerLevel.textContent =
+            'LVL ' +
+            player.level;
 
     }
 
 
-    if (healthFill) {
+    if (playerXP) {
 
-        healthFill.style.width =
-            clamp(
-                healthPercent,
-                0,
-                100
-            ) + '%';
+        playerXP.textContent =
+            fmt(player.xp) +
+            ' XP';
 
     }
 
 
-    // -----------------------------------------
-    // LIFE PROGRESS
-    // -----------------------------------------
-
-    const lifeProgress =
-        Math.round(
-            (
-                financePercent +
-                developmentPercent +
-                healthPercent
-            ) / 3
+    const nextXP =
+        xpForLevel(
+            player.level + 1
         );
 
 
-    const lifeEl =
+    const xpPercent =
+        clamp(
+            player.xp /
+            nextXP *
+            100,
+            0,
+            100
+        );
+
+
+    if (playerXPFill) {
+
+        playerXPFill.style.width =
+            xpPercent + '%';
+
+    }
+
+
+    if (xpNext) {
+
+        xpNext.textContent =
+            fmt(
+                Math.max(
+                    0,
+                    nextXP -
+                    player.xp
+                )
+            ) +
+            ' XP TO NEXT LEVEL';
+
+    }
+
+
+    if (playerRank) {
+
+        playerRank.textContent =
+            getRank(
+                player.level
+            );
+
+    }
+
+
+    const progress =
+        lifeProgress();
+
+
+    const lifeProgressEl =
         document.getElementById(
             'lifeProgress'
         );
@@ -679,14 +763,10 @@ function updateHomeUI() {
         );
 
 
-    if (lifeEl) {
+    if (lifeProgressEl) {
 
-        lifeEl.innerHTML =
-            clamp(
-                lifeProgress,
-                0,
-                100
-            ) +
+        lifeProgressEl.innerHTML =
+            progress +
             '<span>%</span>';
 
     }
@@ -695,111 +775,1383 @@ function updateHomeUI() {
     if (lifeFill) {
 
         lifeFill.style.width =
-            clamp(
-                lifeProgress,
-                0,
-                100
-            ) + '%';
+            progress + '%';
+
+    }
+
+
+    const finance =
+        financeProgress();
+
+
+    const financePercent =
+        document.getElementById(
+            'financePercent'
+        );
+
+
+    const financeFill =
+        document.getElementById(
+            'financeFill'
+        );
+
+
+    if (financePercent) {
+
+        financePercent.textContent =
+            finance + '%';
+
+    }
+
+
+    if (financeFill) {
+
+        financeFill.style.width =
+            finance + '%';
+
+    }
+
+
+    const development =
+        developmentProgress();
+
+
+    const developmentPercent =
+        document.getElementById(
+            'developmentPercent'
+        );
+
+
+    const developmentFill =
+        document.getElementById(
+            'developmentFill'
+        );
+
+
+    if (developmentPercent) {
+
+        developmentPercent.textContent =
+            development + '%';
+
+    }
+
+
+    if (developmentFill) {
+
+        developmentFill.style.width =
+            development + '%';
+
+    }
+
+
+    const health =
+        healthProgress();
+
+
+    const healthPercent =
+        document.getElementById(
+            'healthPercent'
+        );
+
+
+    const healthFill =
+        document.getElementById(
+            'healthFill'
+        );
+
+
+    if (healthPercent) {
+
+        healthPercent.textContent =
+            health + '%';
+
+    }
+
+
+    if (healthFill) {
+
+        healthFill.style.width =
+            health + '%';
 
     }
 
 }
 
 
-// =====================================================
-// NAVIGATION
-// =====================================================
+// ============================================================
+// UPDATE ALL UI
+// ============================================================
 
-function setupNavigation() {
+function updateAllUI() {
 
-    const buttons =
-        document.querySelectorAll(
-            '.nav button[data-nav]'
-        );
+    updateHomeUI();
 
 
-    buttons.forEach(
-        function(button) {
+    if (
+        currentPage === 'finance'
+    ) {
 
-            button.addEventListener(
-                'click',
-                function(event) {
+        renderFinancePage();
 
-                    event.preventDefault();
-
-                    const page =
-                        button.dataset.nav;
+    }
 
 
-                    if (!page) {
-                        return;
-                    }
+    if (
+        currentPage === 'health'
+    ) {
+
+        renderHealthPage();
+
+    }
 
 
-                    openPage(page);
+    if (
+        currentPage === 'development'
+    ) {
 
-                }
-            );
+        renderDevelopmentPage();
 
-        }
-    );
+    }
 
 }
 
 
-// =====================================================
+// ============================================================
+// PAGE SHELL
+// ============================================================
+
+function pageShell(
+    title,
+    content
+) {
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    type="button"
+                    data-action="close-page"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    ${esc(title)}
+                </h2>
+
+            </div>
+
+            ${content}
+
+        </div>
+
+    `;
+
+}
+
+
+// ============================================================
+// FINANCE PAGE
+// ============================================================
+
+function renderFinancePage() {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    const x =
+        state.categories.finance;
+
+
+    const income =
+        Math.max(
+            0,
+            Number(x.monthlyIncome) || 0
+        );
+
+
+    const goal =
+        Math.max(
+            0,
+            Number(x.monthlyGoal) || 0
+        );
+
+
+    const savings =
+        Math.max(
+            0,
+            Number(x.savings) || 0
+        );
+
+
+    const totalExpenses =
+        expenses.reduce(
+            (sum, item) =>
+                sum +
+                Math.max(
+                    0,
+                    Number(item.amount) || 0
+                ),
+            0
+        );
+
+
+    const expensePercent =
+        income > 0
+            ? Math.min(
+                100,
+                Math.round(
+                    totalExpenses /
+                    income *
+                    100
+                )
+            )
+            : 0;
+
+
+    const savingsPercent =
+        income > 0
+            ? Math.min(
+                100,
+                Math.round(
+                    savings /
+                    income *
+                    100
+                )
+            )
+            : 0;
+
+
+    const goalPercent =
+        goal > 0
+            ? Math.min(
+                100,
+                Math.round(
+                    income /
+                    goal *
+                    100
+                )
+            )
+            : 0;
+
+
+    const balance =
+        income -
+        totalExpenses;
+
+
+    const financialState =
+        financeProgress();
+
+
+    page.innerHTML =
+        pageShell(
+            'Финансы',
+
+            `
+
+            <div class="summary">
+
+                <div class="section-label">
+                    ФИНАНСОВОЕ СОСТОЯНИЕ
+                </div>
+
+                <div class="summary-number">
+                    ${financialState}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="width:${financialState}%"
+                    ></i>
+
+                </div>
+
+                <div class="finance-box">
+
+                    <div class="finance-line">
+
+                        <span>
+                            ЗАРАБОТАНО ЗА МЕСЯЦ
+                        </span>
+
+                        <strong>
+                            ${fmt(income)} ₽
+                        </strong>
+
+                    </div>
+
+                    <div class="finance-line">
+
+                        <span>
+                            РАСХОДЫ
+                        </span>
+
+                        <strong>
+                            ${fmt(totalExpenses)} ₽
+                            · ${expensePercent}%
+                        </strong>
+
+                    </div>
+
+                    <div class="finance-line">
+
+                        <span>
+                            ФИНАНСОВАЯ ПОДУШКА
+                        </span>
+
+                        <strong>
+                            ${fmt(savings)} ₽
+                            · ${savingsPercent}%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                💵
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Заработано за месяц
+                                </strong>
+
+                                <span>
+                                    ${fmt(income)} ₽
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${goalPercent}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${goalPercent}%"
+                        ></i>
+
+                    </div>
+
+                    <button
+                        class="edit"
+                        type="button"
+                        data-action="edit-income"
+                    >
+                        ИЗМЕНИТЬ ДОХОД
+                    </button>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                🎯
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Цель за месяц
+                                </strong>
+
+                                <span>
+                                    ${fmt(goal)} ₽
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${goalPercent}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${goalPercent}%"
+                        ></i>
+
+                    </div>
+
+                    <button
+                        class="edit"
+                        type="button"
+                        data-action="edit-goal"
+                    >
+                        ИЗМЕНИТЬ ЦЕЛЬ
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="metric expenses ${
+                        ui.expensesCollapsed
+                            ? 'collapsed'
+                            : ''
+                    }"
+                >
+
+                    <button
+                        class="expenses-title"
+                        type="button"
+                        data-action="toggle-expenses"
+                    >
+
+                        <div class="expenses-title-left">
+
+                            <span>
+                                💳
+                            </span>
+
+                            <span>
+                                ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
+                            </span>
+
+                            <strong>
+                                ${fmt(totalExpenses)} ₽
+                            </strong>
+
+                        </div>
+
+                    </button>
+
+
+                    <div class="expense-content">
+
+                        <div class="expense-list">
+
+                            ${
+                                expenses.length
+                                    ? expenses.map(
+                                        createExpenseHTML
+                                    ).join('')
+                                    : `
+                                    <div class="notice">
+                                        Пока обязательных расходов нет.
+                                    </div>
+                                    `
+                            }
+
+                        </div>
+
+
+                        <button
+                            class="add"
+                            type="button"
+                            data-action="add-expense"
+                            style="margin-top:9px"
+                        >
+                            + ДОБАВИТЬ РАСХОД
+                        </button>
+
+
+                        <div class="ratio">
+
+                            <span>
+                                РАСХОДЫ ОТ ДОХОДА
+                            </span>
+
+                            <strong>
+                                ${expensePercent}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                🛡️
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Финансовая подушка
+                                </strong>
+
+                                <span>
+                                    ${fmt(savings)} ₽
+                                    · ${savingsPercent}% от дохода
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${savingsPercent}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${savingsPercent}%"
+                        ></i>
+
+                    </div>
+
+                    <button
+                        class="edit"
+                        type="button"
+                        data-action="edit-savings"
+                    >
+                        ИЗМЕНИТЬ НАКОПЛЕНИЯ
+                    </button>
+
+                </div>
+
+
+                <div class="summary">
+
+                    <div class="section-label">
+                        ФИНАНСОВОЕ СОСТОЯНИЕ
+                    </div>
+
+                    <div class="summary-number">
+                        ${financialState}%
+                    </div>
+
+                    <div class="progress">
+
+                        <i
+                            style="width:${financialState}%"
+                        ></i>
+
+                    </div>
+
+                    <div class="finance-box">
+
+                        <div class="finance-line">
+
+                            <span>
+                                ДОХОД
+                            </span>
+
+                            <strong>
+                                ${fmt(income)} ₽
+                            </strong>
+
+                        </div>
+
+                        <div class="finance-line">
+
+                            <span>
+                                ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
+                            </span>
+
+                            <strong>
+                                -${fmt(totalExpenses)} ₽
+                            </strong>
+
+                        </div>
+
+                        <div class="finance-line">
+
+                            <span>
+                                ОСТАЛОСЬ
+                            </span>
+
+                            <strong>
+                                ${fmt(balance)} ₽
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="notice">
+
+                    Чем выше доход,
+                    ниже обязательные расходы
+                    и больше накопления —
+                    тем выше финансовое состояние.
+
+                </div>
+
+            </div>
+
+            `
+
+        );
+
+}
+
+
+// ============================================================
+// EXPENSE HTML
+// ============================================================
+
+function createExpenseHTML(
+    expense
+) {
+
+    return `
+
+        <div
+            class="expense-swipe"
+            data-expense-id="${esc(expense.id)}"
+        >
+
+            <div
+                class="expense-delete-reveal"
+            ></div>
+
+            <div
+                class="expense"
+                data-expense-id="${esc(expense.id)}"
+            >
+
+                <div class="expense-info">
+
+                    <div class="expense-name">
+                        ${esc(expense.name)}
+                    </div>
+
+                    <div class="expense-amount">
+                        ${fmt(expense.amount)} ₽
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ============================================================
+// HEALTH PAGE
+// ============================================================
+
+function renderHealthPage() {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    const x =
+        state.categories.health;
+
+
+    const routine =
+        clamp(
+            x.routine,
+            0,
+            100
+        );
+
+
+    const nutrition =
+        clamp(
+            x.nutrition,
+            0,
+            100
+        );
+
+
+    const steps =
+        percent(
+            x.steps,
+            10000
+        );
+
+
+    const training =
+        state.categories.training;
+
+
+    const workouts =
+        Math.max(
+            0,
+            Number(training.workouts) || 0
+        );
+
+
+    const target =
+        Math.max(
+            1,
+            Number(training.monthlyTarget) || 12
+        );
+
+
+    const workoutPercent =
+        percent(
+            workouts,
+            target
+        );
+
+
+    const health =
+        healthProgress();
+
+
+    page.innerHTML =
+        pageShell(
+            'Здоровье',
+
+            `
+
+            <div class="summary">
+
+                <div class="section-label">
+                    HEALTH LEVEL
+                </div>
+
+                <div class="summary-number">
+                    ${health}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="width:${health}%"
+                    ></i>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+
+                ${healthMetric(
+                    '⏰',
+                    'Режим дня',
+                    routine,
+                    'routine'
+                )}
+
+
+                ${healthMetric(
+                    '🍎',
+                    'Питание',
+                    nutrition,
+                    'nutrition'
+                )}
+
+
+                ${healthMetric(
+                    '🚶',
+                    'Шаги',
+                    steps,
+                    'steps',
+                    fmt(x.steps) +
+                    ' шагов / 10 000 шагов'
+                )}
+
+
+                ${healthMetric(
+                    '🏋️',
+                    'Тренировки',
+                    workoutPercent,
+                    'workout',
+                    workouts +
+                    ' из ' +
+                    target +
+                    ' за месяц'
+                )}
+
+
+                <div class="notice">
+
+                    Прогресс здоровья считается
+                    автоматически на основе режима,
+                    питания, шагов и тренировок.
+
+                </div>
+
+            </div>
+
+            `
+
+        );
+
+}
+
+
+function healthMetric(
+    icon,
+    title,
+    value,
+    action,
+    text
+) {
+
+    return `
+
+        <div class="metric">
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${title}
+                        </strong>
+
+                        <span>
+                            ${
+                                text ||
+                                value + '% / 100%'
+                            }
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="metric-percent">
+                    ${value}%
+                </div>
+
+            </div>
+
+            <div class="metric-bar">
+
+                <i
+                    style="width:${clamp(
+                        value,
+                        0,
+                        100
+                    )}%"
+                ></i>
+
+            </div>
+
+            <button
+                class="edit"
+                type="button"
+                data-health-action="${action}"
+            >
+                ИЗМЕНИТЬ
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+// ============================================================
+// DEVELOPMENT PAGE
+// ============================================================
+
+function renderDevelopmentPage() {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    const x =
+        state.categories.development;
+
+
+    const books =
+        percent(
+            x.books,
+            2
+        );
+
+
+    const language =
+        percent(
+            x.languageMinutes,
+            30
+        );
+
+
+    const meditation =
+        percent(
+            x.meditationMinutes,
+            15
+        );
+
+
+    const progress =
+        developmentProgress();
+
+
+    page.innerHTML =
+        pageShell(
+            'Развитие',
+
+            `
+
+            <div class="summary">
+
+                <div class="section-label">
+                    DEVELOPMENT LEVEL
+                    ${x.level}
+                </div>
+
+                <div class="summary-number">
+                    ${progress}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="width:${progress}%"
+                    ></i>
+
+                </div>
+
+                <div class="finance-box">
+
+                    <div class="finance-line">
+
+                        <span>
+                            DEVELOPMENT XP
+                        </span>
+
+                        <strong>
+                            ${fmt(x.xp)} XP
+                        </strong>
+
+                    </div>
+
+                    <div class="finance-line">
+
+                        <span>
+                            STREAK
+                        </span>
+
+                        <strong>
+                            🔥 ${x.streak}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+
+                ${developmentMetric(
+                    '📚',
+                    'Чтение книг',
+                    x.books,
+                    2,
+                    'books'
+                )}
+
+
+                ${developmentMetric(
+                    '🌐',
+                    'Изучение языка',
+                    x.languageMinutes,
+                    30,
+                    'languageMinutes',
+                    ' мин'
+                )}
+
+
+                ${developmentMetric(
+                    '🧘',
+                    'Медитация',
+                    x.meditationMinutes,
+                    15,
+                    'meditationMinutes',
+                    ' мин'
+                )}
+
+
+                <div class="notice">
+
+                    Прогресс сохраняется
+                    автоматически.
+
+                    XP и уровень развития
+                    обновляются после изменения
+                    показателей.
+
+                </div>
+
+            </div>
+
+            `
+
+        );
+
+}
+
+
+function developmentMetric(
+    icon,
+    title,
+    value,
+    target,
+    action,
+    suffix = ''
+) {
+
+    const p =
+        percent(
+            value,
+            target
+        );
+
+
+    return `
+
+        <div class="metric">
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${title}
+                        </strong>
+
+                        <span>
+                            ${fmt(value)}${suffix}
+                            / ${fmt(target)}${suffix}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="metric-percent">
+                    ${p}%
+                </div>
+
+            </div>
+
+            <div class="metric-bar">
+
+                <i
+                    style="width:${p}%"
+                ></i>
+
+            </div>
+
+            <button
+                class="edit"
+                type="button"
+                data-development-action="${action}"
+            >
+                ИЗМЕНИТЬ
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+// ============================================================
+// HOME PAGE
+// ============================================================
+
+function renderHomePage() {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    const progress =
+        lifeProgress();
+
+
+    page.innerHTML =
+        pageShell(
+            'Главная',
+
+            `
+
+            <div class="summary">
+
+                <div class="section-label">
+                    ОБЩИЙ ПРОГРЕСС
+                </div>
+
+                <div class="summary-number">
+                    ${progress}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="width:${progress}%"
+                    ></i>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                💰
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Финансы
+                                </strong>
+
+                                <span>
+                                    ${financeProgress()}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${financeProgress()}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${financeProgress()}%"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                ❤️
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Здоровье
+                                </strong>
+
+                                <span>
+                                    ${healthProgress()}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${healthProgress()}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${healthProgress()}%"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                🧠
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Развитие
+                                </strong>
+
+                                <span>
+                                    ${developmentProgress()}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${developmentProgress()}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="width:${developmentProgress()}%"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+            `
+
+        );
+
+}
+
+
+// ============================================================
 // OPEN PAGE
-// =====================================================
+// ============================================================
 
 function openPage(
     pageName
 ) {
 
-    const creators = {
-
-        home:
-            createHomePage,
-
-        finance:
-            createFinancePage,
-
-        health:
-            createHealthPage,
-
-        development:
-            createDevelopmentPage
-
-    };
-
-
-    const creator =
-        creators[pageName];
+    const allowed = [
+        'home',
+        'finance',
+        'health',
+        'development'
+    ];
 
 
     if (
-        typeof creator !==
-        'function'
-    ) {
-
-        console.warn(
-            'Unknown page:',
+        !allowed.includes(
             pageName
-        );
+        )
+    ) {
 
         return;
 
     }
 
 
-    const oldPage =
+    const existing =
         document.querySelector(
             '.page'
         );
 
 
-    if (oldPage) {
+    if (existing) {
 
-        oldPage.remove();
+        existing.remove();
 
     }
 
@@ -812,10 +2164,6 @@ function openPage(
 
     page.className =
         'page';
-
-
-    page.innerHTML =
-        creator();
 
 
     document.body.appendChild(
@@ -832,19 +2180,61 @@ function openPage(
     );
 
 
-    updateNavigation();
+    document.querySelectorAll(
+        '.nav button'
+    ).forEach(button => {
+
+        button.classList.toggle(
+            'active',
+            button.dataset.nav ===
+            pageName
+        );
+
+    });
 
 
-    setupPageHandlers(
-        pageName
-    );
+    if (
+        pageName === 'finance'
+    ) {
+
+        renderFinancePage();
+
+    }
+
+
+    else if (
+        pageName === 'health'
+    ) {
+
+        renderHealthPage();
+
+    }
+
+
+    else if (
+        pageName === 'development'
+    ) {
+
+        renderDevelopmentPage();
+
+    }
+
+
+    else {
+
+        renderHomePage();
+
+    }
+
+
+    setupPageHandlers();
 
 }
 
 
-// =====================================================
+// ============================================================
 // CLOSE PAGE
-// =====================================================
+// ============================================================
 
 function closePage() {
 
@@ -870,824 +2260,759 @@ function closePage() {
         'home';
 
 
-    updateNavigation();
+    document.querySelectorAll(
+        '.nav button'
+    ).forEach(button => {
+
+        button.classList.toggle(
+            'active',
+            button.dataset.nav ===
+            'home'
+        );
+
+    });
+
 
     updateHomeUI();
 
-    updatePlayerUI();
-
 }
 
 
-// =====================================================
-// NAVIGATION ACTIVE STATE
-// =====================================================
+// ============================================================
+// EDIT FINANCE
+// ============================================================
 
-function updateNavigation() {
+function editIncome() {
 
-    document
-        .querySelectorAll(
-            '.nav button[data-nav]'
-        )
-        .forEach(
-            function(button) {
+    const current =
+        state.categories.finance.monthlyIncome;
 
-                button.classList.toggle(
-                    'active',
-                    button.dataset.nav ===
-                    currentPage
-                );
 
-            }
+    const value =
+        prompt(
+            'Введите доход за месяц:',
+            String(current || 0)
         );
-
-}
-
-
-// =====================================================
-// HOME PAGE
-// =====================================================
-
-function createHomePage() {
-
-    const finance =
-        getCategory(
-            'finance'
-        );
-
-
-    const health =
-        getCategory(
-            'health'
-        );
-
-
-    const development =
-        getCategory(
-            'development'
-        );
-
-
-    let financePercent = 0;
 
 
     if (
-        window.LifeGameFinance &&
-        typeof
-            window.LifeGameFinance.progress ===
-            'function'
+        value === null
     ) {
 
-        financePercent =
-            window.LifeGameFinance.progress(
-                state,
-                expenses
-            );
+        return;
 
     }
 
 
-    let healthPercent = 0;
-
-
-    if (health) {
-
-        healthPercent =
-            Math.round(
-                (
-                    clamp(
-                        health.routine,
-                        0,
-                        100
-                    ) +
-                    clamp(
-                        health.nutrition,
-                        0,
-                        100
-                    ) +
-                    clamp(
-                        num(health.steps) /
-                        10000 *
-                        100,
-                        0,
-                        100
-                    )
-                ) / 3
-            );
-
-    }
-
-
-    let developmentPercent = 0;
+    const amount =
+        Number(value);
 
 
     if (
-        window.LifeGameDevelopment &&
-        typeof
-            window.LifeGameDevelopment.progress ===
-            'function'
+        !Number.isFinite(amount) ||
+        amount < 0
     ) {
 
-        developmentPercent =
-            window.LifeGameDevelopment.progress(
-                state
-            );
+        showToast(
+            '⚠️ Введите корректную сумму'
+        );
+
+        return;
 
     }
 
 
-    const life =
-        Math.round(
-            (
-                financePercent +
-                healthPercent +
-                developmentPercent
-            ) / 3
-        );
+    state.categories.finance.monthlyIncome =
+        amount;
 
 
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    type="button"
-                    data-close-page
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Главная
-                </h2>
-
-            </div>
+    addCategoryXP(
+        'finance',
+        15
+    );
 
 
-            <div class="summary">
-
-                <div class="section-label">
-                    ОБЩИЙ ПРОГРЕСС
-                </div>
-
-                <div class="summary-number">
-                    ${life}%
-                </div>
-
-                <div class="progress">
-
-                    <i
-                        style="
-                            width:${life}%;
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
+    saveGame();
 
 
-            <div class="cards">
+    showToast(
+        '💵 Доход обновлён'
+    );
 
-                ${homeMetric(
-                    '❤️',
-                    'Здоровье',
-                    healthPercent
-                )}
 
-                ${homeMetric(
-                    '💰',
-                    'Финансы',
-                    financePercent
-                )}
-
-                ${homeMetric(
-                    '🧠',
-                    'Развитие',
-                    developmentPercent
-                )}
-
-            </div>
-
-        </div>
-
-    `;
+    renderFinancePage();
+    updateHomeUI();
 
 }
 
 
-// =====================================================
-// HOME METRIC
-// =====================================================
+function editGoal() {
 
-function homeMetric(
-    icon,
-    title,
-    percent
+    const current =
+        state.categories.finance.monthlyGoal;
+
+
+    const value =
+        prompt(
+            'Введите цель за месяц:',
+            String(current || 0)
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const amount =
+        Number(value);
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректную сумму'
+        );
+
+        return;
+
+    }
+
+
+    state.categories.finance.monthlyGoal =
+        amount;
+
+
+    saveGame();
+
+
+    showToast(
+        '🎯 Цель обновлена'
+    );
+
+
+    renderFinancePage();
+    updateHomeUI();
+
+}
+
+
+function editSavings() {
+
+    const current =
+        state.categories.finance.savings;
+
+
+    const value =
+        prompt(
+            'Введите сумму накоплений:',
+            String(current || 0)
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const amount =
+        Number(value);
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректную сумму'
+        );
+
+        return;
+
+    }
+
+
+    state.categories.finance.savings =
+        amount;
+
+
+    addCategoryXP(
+        'finance',
+        10
+    );
+
+
+    saveGame();
+
+
+    showToast(
+        '🛡️ Накопления обновлены'
+    );
+
+
+    renderFinancePage();
+    updateHomeUI();
+
+}
+
+
+// ============================================================
+// ADD EXPENSE
+// ============================================================
+
+function addExpense() {
+
+    const name =
+        prompt(
+            'Название обязательного расхода:'
+        );
+
+
+    if (
+        !name ||
+        !name.trim()
+    ) {
+
+        return;
+
+    }
+
+
+    const value =
+        prompt(
+            'Сумма расхода:'
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const amount =
+        Number(value);
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректную сумму'
+        );
+
+        return;
+
+    }
+
+
+    expenses.push({
+
+        id:
+            String(
+                Date.now() +
+                Math.random()
+            ),
+
+        name:
+            name.trim(),
+
+        amount:
+            amount
+
+    });
+
+
+    saveGame();
+
+
+    showToast(
+        '💳 Расход добавлен'
+    );
+
+
+    renderFinancePage();
+    updateHomeUI();
+
+}
+
+
+// ============================================================
+// DELETE EXPENSE
+// ============================================================
+
+function deleteExpense(
+    id
 ) {
 
-    return `
-
-        <div class="metric">
-
-            <div class="metric-head">
-
-                <div class="metric-left">
-
-                    <div class="metric-icon">
-                        ${icon}
-                    </div>
-
-                    <div class="metric-text">
-
-                        <strong>
-                            ${title}
-                        </strong>
-
-                        <span>
-                            ${Math.round(
-                                percent
-                            )}%
-                        </span>
-
-                    </div>
-
-                </div>
+    expenses =
+        expenses.filter(
+            expense =>
+                String(expense.id) !==
+                String(id)
+        );
 
 
-                <div class="metric-percent">
-                    ${Math.round(
-                        percent
-                    )}%
-                </div>
-
-            </div>
+    saveGame();
 
 
-            <div class="metric-bar">
+    showToast(
+        '🗑️ Расход удалён'
+    );
 
-                <i
-                    style="
-                        width:${clamp(
-                            percent,
-                            0,
-                            100
-                        )}%;
-                    "
-                ></i>
 
-            </div>
-
-        </div>
-
-    `;
+    renderFinancePage();
+    updateHomeUI();
 
 }
 
 
-// =====================================================
-// FINANCE PAGE
-// =====================================================
+// ============================================================
+// TOGGLE EXPENSES
+// ============================================================
 
-function createFinancePage() {
+function toggleExpenses() {
 
-    if (
-        !window.LifeGameFinance ||
-        typeof
-            window.LifeGameFinance.page !==
-            'function'
-    ) {
-
-        return moduleUnavailable(
-            'Финансовый модуль не загружен.'
-        );
-
-    }
+    ui.expensesCollapsed =
+        !ui.expensesCollapsed;
 
 
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    type="button"
-                    data-close-page
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Финансы
-                </h2>
-
-            </div>
+    saveUI(
+        ui
+    );
 
 
-            ${window.LifeGameFinance.page(
-                state,
-                expenses,
-                ui
-            )}
-
-        </div>
-
-    `;
+    renderFinancePage();
 
 }
 
 
-// =====================================================
-// HEALTH PAGE
-// =====================================================
-
-function createHealthPage() {
-
-    if (
-        window.LifeGameHealth &&
-        typeof
-            window.LifeGameHealth.page ===
-            'function'
-    ) {
-
-        return `
-
-            <div class="page-inner">
-
-                <div class="page-head">
-
-                    <button
-                        class="back"
-                        type="button"
-                        data-close-page
-                    >
-                        ←
-                    </button>
-
-                    <h2>
-                        Здоровье
-                    </h2>
-
-                </div>
-
-
-                ${window.LifeGameHealth.page(
-                    state,
-                    {
-                        metric,
-                        fmt,
-                        clamp,
-                        esc,
-                        creatorHTML
-                    }
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    return createFallbackHealthPage();
-
-}
-
-
-// =====================================================
-// DEVELOPMENT PAGE
-// =====================================================
-
-function createDevelopmentPage() {
-
-    if (
-        window.LifeGameDevelopment &&
-        typeof
-            window.LifeGameDevelopment.page ===
-            'function'
-    ) {
-
-        return `
-
-            <div class="page-inner">
-
-                <div class="page-head">
-
-                    <button
-                        class="back"
-                        type="button"
-                        data-close-page
-                    >
-                        ←
-                    </button>
-
-                    <h2>
-                        Развитие
-                    </h2>
-
-                </div>
-
-
-                ${window.LifeGameDevelopment.page(
-                    state,
-                    {
-                        metric,
-                        fmt,
-                        clamp,
-                        esc,
-                        creatorHTML
-                    }
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    return createFallbackDevelopmentPage();
-
-}
-
-
-// =====================================================
-// FALLBACK HEALTH
-// =====================================================
-
-function createFallbackHealthPage() {
-
-    const health =
-        getCategory(
-            'health'
-        ) || {};
-
-
-    const routine =
-        clamp(
-            health.routine,
-            0,
-            100
-        );
-
-
-    const nutrition =
-        clamp(
-            health.nutrition,
-            0,
-            100
-        );
-
-
-    const steps =
-        clamp(
-            num(health.steps) /
-            10000 *
-            100,
-            0,
-            100
-        );
-
-
-    const progress =
-        Math.round(
-            (
-                routine +
-                nutrition +
-                steps
-            ) / 3
-        );
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                HEALTH LEVEL
-                ${num(health.level) || 1}
-            </div>
-
-            <div class="summary-number">
-                ${progress}%
-            </div>
-
-            <div class="progress">
-
-                <i
-                    style="
-                        width:${progress}%;
-                    "
-                ></i>
-
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-            ${metric(
-                '⏰',
-                'Режим дня',
-                routine + '%',
-                '100%',
-                routine,
-                'healthRoutine'
-            )}
-
-            ${metric(
-                '🍎',
-                'Питание',
-                nutrition + '%',
-                '100%',
-                nutrition,
-                'healthNutrition'
-            )}
-
-            ${metric(
-                '🚶',
-                'Шаги',
-                fmt(
-                    num(health.steps)
-                ),
-                '10 000',
-                steps,
-                'healthSteps'
-            )}
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// FALLBACK DEVELOPMENT
-// =====================================================
-
-function createFallbackDevelopmentPage() {
-
-    const development =
-        getCategory(
-            'development'
-        ) || {};
-
-
-    const books =
-        clamp(
-            num(development.books) /
-            2 *
-            100,
-            0,
-            100
-        );
-
-
-    const language =
-        clamp(
-            num(
-                development.languageMinutes
-            ) /
-            30 *
-            100,
-            0,
-            100
-        );
-
-
-    const meditation =
-        clamp(
-            num(
-                development.meditationMinutes
-            ) /
-            15 *
-            100,
-            0,
-            100
-        );
-
-
-    const progress =
-        Math.round(
-            (
-                books +
-                language +
-                meditation
-            ) / 3
-        );
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                DEVELOPMENT LEVEL
-                ${num(development.level) || 1}
-            </div>
-
-            <div class="summary-number">
-                ${progress}%
-            </div>
-
-            <div class="progress">
-
-                <i
-                    style="
-                        width:${progress}%;
-                    "
-                ></i>
-
-            </div>
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-
-                    <span>
-                        DEVELOPMENT XP
-                    </span>
-
-                    <strong>
-                        ${fmt(
-                            development.xp
-                        )} XP
-                    </strong>
-
-                </div>
-
-                <div class="finance-line">
-
-                    <span>
-                        STREAK
-                    </span>
-
-                    <strong>
-                        🔥 ${num(
-                            development.streak
-                        )}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-            ${metric(
-                '📚',
-                'Книги',
-                num(development.books),
-                '2',
-                books,
-                'books'
-            )}
-
-            ${metric(
-                '🌐',
-                'Изучение языка',
-                fmt(
-                    development.languageMinutes
-                ) + ' мин',
-                '30 мин',
-                language,
-                'languageMinutes'
-            )}
-
-            ${metric(
-                '🧘',
-                'Медитация',
-                fmt(
-                    development.meditationMinutes
-                ) + ' мин',
-                '15 мин',
-                meditation,
-                'meditationMinutes'
-            )}
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// COMMON METRIC
-// =====================================================
-
-function metric(
-    icon,
-    title,
-    current,
-    target,
-    percent,
-    edit
+// ============================================================
+// HEALTH EDIT
+// ============================================================
+
+function editHealth(
+    type
 ) {
 
-    return `
-
-        <div class="metric">
-
-            <div class="metric-head">
-
-                <div class="metric-left">
-
-                    <div class="metric-icon">
-                        ${icon}
-                    </div>
-
-                    <div class="metric-text">
-
-                        <strong>
-                            ${escapeHTML(title)}
-                        </strong>
-
-                        <span>
-                            ${escapeHTML(
-                                current
-                            )}
-                            /
-                            ${escapeHTML(
-                                target
-                            )}
-                        </span>
-
-                    </div>
-
-                </div>
+    const health =
+        state.categories.health;
 
 
-                <div class="metric-percent">
-                    ${Math.round(
-                        clamp(
-                            percent,
-                            0,
-                            100
-                        )
-                    )}%
-                </div>
+    if (
+        type === 'routine'
+    ) {
 
-            </div>
-
-
-            <div class="metric-bar">
-
-                <i
-                    style="
-                        width:${clamp(
-                            percent,
-                            0,
-                            100
-                        )}%;
-                    "
-                ></i>
-
-            </div>
+        const value =
+            prompt(
+                'Режим дня (0-100):',
+                String(
+                    health.routine
+                )
+            );
 
 
-            ${
-                edit
-                    ? `
+        if (
+            value === null
+        ) {
+            return;
+        }
 
-                        <button
-                            class="edit"
-                            type="button"
-                            data-edit="${escapeHTML(
-                                edit
-                            )}"
-                        >
-                            ✎ ИЗМЕНИТЬ
-                        </button>
 
-                    `
-                    : ''
-            }
+        const n =
+            Number(value);
 
-        </div>
 
-    `;
+        if (
+            !Number.isFinite(n)
+        ) {
+            return;
+        }
+
+
+        health.routine =
+            clamp(
+                n,
+                0,
+                100
+            );
+
+
+        addCategoryXP(
+            'health',
+            5
+        );
+
+    }
+
+
+    else if (
+        type === 'nutrition'
+    ) {
+
+        const value =
+            prompt(
+                'Питание (0-100):',
+                String(
+                    health.nutrition
+                )
+            );
+
+
+        if (
+            value === null
+        ) {
+            return;
+        }
+
+
+        const n =
+            Number(value);
+
+
+        if (
+            !Number.isFinite(n)
+        ) {
+            return;
+        }
+
+
+        health.nutrition =
+            clamp(
+                n,
+                0,
+                100
+            );
+
+
+        addCategoryXP(
+            'health',
+            5
+        );
+
+    }
+
+
+    else if (
+        type === 'steps'
+    ) {
+
+        const value =
+            prompt(
+                'Количество шагов:',
+                String(
+                    health.steps
+                )
+            );
+
+
+        if (
+            value === null
+        ) {
+            return;
+        }
+
+
+        const n =
+            Number(value);
+
+
+        if (
+            !Number.isFinite(n)
+        ) {
+            return;
+        }
+
+
+        health.steps =
+            Math.max(
+                0,
+                Math.min(
+                    100000,
+                    n
+                )
+            );
+
+
+        addCategoryXP(
+            'health',
+            3
+        );
+
+    }
+
+
+    else if (
+        type === 'workout'
+    ) {
+
+        state.categories.training.workouts++;
+
+
+        addCategoryXP(
+            'training',
+            30
+        );
+
+
+        showToast(
+            '🏋️ Тренировка выполнена'
+        );
+
+    }
+
+
+    saveGame();
+
+
+    renderHealthPage();
+    updateHomeUI();
 
 }
 
 
-// =====================================================
+// ============================================================
+// DEVELOPMENT EDIT
+// ============================================================
+
+function editDevelopment(
+    type
+) {
+
+    const x =
+        state.categories.development;
+
+
+    let current = 0;
+    let label = '';
+
+
+    if (
+        type === 'books'
+    ) {
+
+        current =
+            x.books;
+
+        label =
+            'Количество прочитанных книг:';
+
+    }
+
+
+    else if (
+        type === 'languageMinutes'
+    ) {
+
+        current =
+            x.languageMinutes;
+
+        label =
+            'Минут изучения языка:';
+
+    }
+
+
+    else if (
+        type === 'meditationMinutes'
+    ) {
+
+        current =
+            x.meditationMinutes;
+
+        label =
+            'Минут медитации:';
+
+    }
+
+
+    const value =
+        prompt(
+            label,
+            String(current)
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const n =
+        Number(value);
+
+
+    if (
+        !Number.isFinite(n) ||
+        n < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректное значение'
+        );
+
+        return;
+
+    }
+
+
+    x[type] =
+        n;
+
+
+    addCategoryXP(
+        'development',
+        10
+    );
+
+
+    saveGame();
+
+
+    showToast(
+        '🧠 Показатель развития обновлён'
+    );
+
+
+    renderDevelopmentPage();
+    updateHomeUI();
+
+}
+
+
+// ============================================================
+// DAILY QUEST
+// ============================================================
+
+function completeDailyQuest() {
+
+    const button =
+        document.getElementById(
+            'dailyQuest'
+        );
+
+
+    if (
+        button &&
+        button.dataset.completed ===
+        'true'
+    ) {
+
+        return;
+
+    }
+
+
+    const rewards = [
+
+        {
+            category: 'health',
+            amount: 10,
+            text: '❤️ +10 здоровья'
+        },
+
+        {
+            category: 'finance',
+            amount: 20,
+            text: '💰 +20 финансового XP'
+        },
+
+        {
+            category: 'development',
+            amount: 10,
+            text: '🧠 +10 XP развития'
+        }
+
+    ];
+
+
+    const reward =
+        rewards[
+            Math.floor(
+                Math.random() *
+                rewards.length
+            )
+        ];
+
+
+    addCategoryXP(
+        reward.category,
+        reward.amount
+    );
+
+
+    showToast(
+        '⚡ Квест выполнен! ' +
+        reward.text
+    );
+
+
+    if (button) {
+
+        button.dataset.completed =
+            'true';
+
+        button.textContent =
+            '✅ QUEST COMPLETED';
+
+        button.style.opacity =
+            '.5';
+
+        button.disabled =
+            true;
+
+
+        setTimeout(() => {
+
+            button.dataset.completed =
+                'false';
+
+            button.textContent =
+                '⚡ DAILY QUEST';
+
+            button.style.opacity =
+                '1';
+
+            button.disabled =
+                false;
+
+        }, 30000);
+
+    }
+
+
+    saveGame();
+    updateAllUI();
+
+}
+
+
+// ============================================================
 // PAGE HANDLERS
-// =====================================================
+// ============================================================
 
-function setupPageHandlers(
-    pageName
-) {
+function setupPageHandlers() {
 
     const page =
         document.querySelector(
@@ -1700,179 +3025,134 @@ function setupPageHandlers(
     }
 
 
-    // -----------------------------------------
-    // BACK
-    // -----------------------------------------
+    page.addEventListener(
+        'click',
+        function(event) {
 
-    page.querySelectorAll(
-        '[data-close-page]'
-    ).forEach(
-        function(button) {
-
-            button.addEventListener(
-                'click',
-                closePage
-            );
-
-        }
-    );
+            const actionElement =
+                event.target.closest(
+                    '[data-action]'
+                );
 
 
-    // -----------------------------------------
-    // FINANCE
-    // -----------------------------------------
+            if (
+                actionElement
+            ) {
 
-    if (
-        pageName === 'finance'
-    ) {
-
-        setupFinanceHandlers(
-            page
-        );
-
-    }
+                const action =
+                    actionElement.dataset.action;
 
 
-    // -----------------------------------------
-    // HEALTH
-    // -----------------------------------------
+                if (
+                    action ===
+                    'close-page'
+                ) {
 
-    if (
-        pageName === 'health'
-    ) {
+                    closePage();
 
-        setupHealthHandlers(
-            page
-        );
-
-    }
-
-
-    // -----------------------------------------
-    // DEVELOPMENT
-    // -----------------------------------------
-
-    if (
-        pageName === 'development'
-    ) {
-
-        setupDevelopmentHandlers(
-            page
-        );
-
-    }
-
-
-    // -----------------------------------------
-    // GENERIC EDIT
-    // -----------------------------------------
-
-    page.querySelectorAll(
-        '[data-edit]'
-    ).forEach(
-        function(button) {
-
-            button.addEventListener(
-                'click',
-                function(event) {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-
-                    const id =
-                        button.dataset.edit;
-
-
-                    handleEdit(
-                        id
-                    );
+                    return;
 
                 }
-            );
-
-        }
-    );
-
-}
 
 
-// =====================================================
-// FINANCE HANDLERS
-// =====================================================
+                if (
+                    action ===
+                    'edit-income'
+                ) {
 
-function setupFinanceHandlers(
-    page
-) {
+                    editIncome();
 
-    const addExpense =
-        page.querySelector(
-            '#addExpense'
-        );
-
-
-    if (addExpense) {
-
-        addExpense.addEventListener(
-            'click',
-            function() {
-
-                openExpenseModal();
-
-            }
-        );
-
-    }
-
-
-    const toggle =
-        page.querySelector(
-            '#expensesToggle'
-        );
-
-
-    if (toggle) {
-
-        toggle.addEventListener(
-            'click',
-            function() {
-
-                ui.expensesCollapsed =
-                    !ui.expensesCollapsed;
-
-
-                save();
-
-
-                refreshCurrentPage();
-
-            }
-        );
-
-    }
-
-
-    page.querySelectorAll(
-        '.expense-edit'
-    ).forEach(
-        function(button) {
-
-            button.addEventListener(
-                'click',
-                function(event) {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-
-                    openExpenseModal(
-                        button.dataset.id
-                    );
+                    return;
 
                 }
-            );
+
+
+                if (
+                    action ===
+                    'edit-goal'
+                ) {
+
+                    editGoal();
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'edit-savings'
+                ) {
+
+                    editSavings();
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'add-expense'
+                ) {
+
+                    addExpense();
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'toggle-expenses'
+                ) {
+
+                    toggleExpenses();
+
+                    return;
+
+                }
+
+            }
+
+
+            const healthAction =
+                event.target.closest(
+                    '[data-health-action]'
+                );
+
+
+            if (
+                healthAction
+            ) {
+
+                editHealth(
+                    healthAction.dataset.healthAction
+                );
+
+                return;
+
+            }
+
+
+            const developmentAction =
+                event.target.closest(
+                    '[data-development-action]'
+                );
+
+
+            if (
+                developmentAction
+            ) {
+
+                editDevelopment(
+                    developmentAction.dataset.developmentAction
+                );
+
+                return;
+
+            }
 
         }
     );
@@ -1885,190 +3165,234 @@ function setupFinanceHandlers(
 }
 
 
-// =====================================================
+// ============================================================
 // EXPENSE SWIPE
-// =====================================================
+// ============================================================
 
 function setupExpenseSwipe(
     page
 ) {
 
-    const wrappers =
+    const rows =
         page.querySelectorAll(
             '.expense-swipe'
         );
 
 
-    wrappers.forEach(
-        function(wrapper) {
+    rows.forEach(row => {
 
-            const expense =
-                wrapper.querySelector(
-                    '.expense'
+        const expense =
+            row.querySelector(
+                '.expense'
+            );
+
+
+        if (!expense) {
+            return;
+        }
+
+
+        let startX = 0;
+        let currentX = 0;
+        let swiping = false;
+
+
+        expense.addEventListener(
+            'touchstart',
+            event => {
+
+                if (
+                    !event.touches.length
+                ) {
+                    return;
+                }
+
+
+                startX =
+                    event.touches[0].clientX;
+
+                currentX =
+                    startX;
+
+                swiping =
+                    true;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        expense.addEventListener(
+            'touchmove',
+            event => {
+
+                if (
+                    !swiping ||
+                    !event.touches.length
+                ) {
+                    return;
+                }
+
+
+                currentX =
+                    event.touches[0].clientX;
+
+
+                const delta =
+                    currentX -
+                    startX;
+
+
+                if (
+                    delta < 0
+                ) {
+
+                    const offset =
+                        Math.max(
+                            -76,
+                            delta
+                        );
+
+
+                    expense.style.transform =
+                        'translateX(' +
+                        offset +
+                        'px)';
+
+                }
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        expense.addEventListener(
+            'touchend',
+            () => {
+
+                if (!swiping) {
+                    return;
+                }
+
+
+                swiping =
+                    false;
+
+
+                const delta =
+                    currentX -
+                    startX;
+
+
+                if (
+                    delta < -45
+                ) {
+
+                    expense.classList.add(
+                        'swiped'
+                    );
+
+                    expense.style.transform =
+                        '';
+
+                }
+
+                else if (
+                    delta > 30
+                ) {
+
+                    expense.classList.remove(
+                        'swiped'
+                    );
+
+                    expense.style.transform =
+                        '';
+
+                }
+
+                else {
+
+                    expense.style.transform =
+                        '';
+
+                }
+
+            }
+        );
+
+
+        expense.addEventListener(
+            'click',
+            () => {
+
+                if (
+                    expense.classList.contains(
+                        'swiped'
+                    )
+                ) {
+
+                    deleteExpense(
+                        row.dataset.expenseId
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+}
+
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+function setupNavigation() {
+
+    const nav =
+        document.querySelector(
+            '.nav'
+        );
+
+
+    if (!nav) {
+
+        console.error(
+            'LIFE GAME: .nav not found'
+        );
+
+        return;
+
+    }
+
+
+    nav.addEventListener(
+        'click',
+        function(event) {
+
+            const button =
+                event.target.closest(
+                    'button[data-nav]'
                 );
 
 
-            if (!expense) {
+            if (!button) {
                 return;
             }
 
 
-            let startX = 0;
-            let startY = 0;
-            let currentX = 0;
-            let tracking = false;
+            const page =
+                button.dataset.nav;
 
 
-            expense.addEventListener(
-                'touchstart',
-                function(event) {
-
-                    const touch =
-                        event.touches[0];
-
-
-                    startX =
-                        touch.clientX;
-
-                    startY =
-                        touch.clientY;
-
-                    currentX =
-                        startX;
-
-                    tracking =
-                        true;
-
-                },
-                {
-                    passive: true
-                }
-            );
-
-
-            expense.addEventListener(
-                'touchmove',
-                function(event) {
-
-                    if (!tracking) {
-                        return;
-                    }
-
-
-                    const touch =
-                        event.touches[0];
-
-
-                    currentX =
-                        touch.clientX;
-
-
-                    const dx =
-                        currentX -
-                        startX;
-
-
-                    const dy =
-                        touch.clientY -
-                        startY;
-
-
-                    if (
-                        Math.abs(dy) >
-                        Math.abs(dx)
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    if (dx < 0) {
-
-                        const distance =
-                            Math.max(
-                                -76,
-                                dx
-                            );
-
-
-                        expense.style.transition =
-                            'none';
-
-
-                        expense.style.transform =
-                            `translateX(${distance}px)`;
-
-                    }
-
-                },
-                {
-                    passive: true
-                }
-            );
-
-
-            expense.addEventListener(
-                'touchend',
-                function() {
-
-                    if (!tracking) {
-                        return;
-                    }
-
-
-                    tracking =
-                        false;
-
-
-                    const dx =
-                        currentX -
-                        startX;
-
-
-                    expense.style.transition =
-                        'transform .2s ease';
-
-
-                    if (dx < -45) {
-
-                        expense.classList.add(
-                            'swiped'
-                        );
-
-                    }
-                    else {
-
-                        expense.classList.remove(
-                            'swiped'
-                        );
-
-                        expense.style.transform =
-                            '';
-
-                    }
-
-
-                    if (dx < -120) {
-
-                        const id =
-                            wrapper.dataset.id;
-
-
-                        setTimeout(
-                            function() {
-
-                                deleteExpense(
-                                    id
-                                );
-
-                            },
-                            120
-                        );
-
-                    }
-
-                }
+            openPage(
+                page
             );
 
         }
@@ -2077,1041 +3401,30 @@ function setupExpenseSwipe(
 }
 
 
-// =====================================================
-// HEALTH HANDLERS
-// =====================================================
-
-function setupHealthHandlers(
-    page
-) {
-
-    page.querySelectorAll(
-        '[data-health-action]'
-    ).forEach(
-        function(button) {
-
-            button.addEventListener(
-                'click',
-                function() {
-
-                    const action =
-                        button.dataset.healthAction;
-
-
-                    if (
-                        action ===
-                        'workout' &&
-                        typeof
-                            window.completeWorkout ===
-                            'function'
-                    ) {
-
-                        window.completeWorkout();
-
-                        refreshCurrentPage();
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// DEVELOPMENT HANDLERS
-// =====================================================
-
-function setupDevelopmentHandlers(
-    page
-) {
-
-    page.querySelectorAll(
-        '[data-development-action]'
-    ).forEach(
-        function(button) {
-
-            button.addEventListener(
-                'click',
-                function() {
-
-                    const action =
-                        button.dataset
-                            .developmentAction;
-
-
-                    if (
-                        action === 'book'
-                    ) {
-
-                        addDevelopmentXP(
-                            10
-                        );
-
-                    }
-
-
-                    refreshCurrentPage();
-
-                }
-            );
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// GENERIC EDIT
-// =====================================================
-
-function handleEdit(
-    id
-) {
-
-    if (!id) {
-        return;
-    }
-
-
-    // -----------------------------------------
-    // FINANCE
-    // -----------------------------------------
-
-    if (
-        id === 'income'
-    ) {
-
-        editFinanceValue(
-            'monthlyIncome',
-            'Введите доход за месяц:'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'yearlyGoal'
-    ) {
-
-        editFinanceValue(
-            'yearlyGoal',
-            'Введите цель на год:'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'savings'
-    ) {
-
-        editFinanceValue(
-            'savings',
-            'Введите сумму накоплений:'
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // DEVELOPMENT
-    // -----------------------------------------
-
-    if (
-        id === 'books'
-    ) {
-
-        editDevelopmentValue(
-            'books',
-            'Введите количество книг:'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'languageMinutes'
-    ) {
-
-        editDevelopmentValue(
-            'languageMinutes',
-            'Введите минуты изучения языка:'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'meditationMinutes'
-    ) {
-
-        editDevelopmentValue(
-            'meditationMinutes',
-            'Введите минуты медитации:'
-        );
-
-        return;
-
-    }
-
-
-    // -----------------------------------------
-    // HEALTH
-    // -----------------------------------------
-
-    if (
-        id === 'healthRoutine'
-    ) {
-
-        editHealthValue(
-            'routine',
-            'Введите процент режима дня (0-100):'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'healthNutrition'
-    ) {
-
-        editHealthValue(
-            'nutrition',
-            'Введите процент питания (0-100):'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        id === 'healthSteps'
-    ) {
-
-        editHealthValue(
-            'steps',
-            'Введите количество шагов:'
-        );
-
-        return;
-
-    }
-
-
-    console.warn(
-        'Unknown edit:',
-        id
-    );
-
-}
-
-
-// =====================================================
-// FINANCE EDIT
-// =====================================================
-
-function editFinanceValue(
-    key,
-    message
-) {
-
-    const finance =
-        getCategory(
-            'finance'
-        );
-
-
-    if (!finance) {
-        return;
-    }
-
-
-    const current =
-        num(
-            finance[key]
-        );
-
-
-    const value =
-        prompt(
-            message,
-            String(current)
-        );
-
-
-    if (
-        value === null ||
-        value.trim() === ''
-    ) {
-
-        return;
-
-    }
-
-
-    const number =
-        Number(
-            value.replace(
-                /\s/g,
-                ''
-            ).replace(
-                ',',
-                '.'
-            )
-        );
-
-
-    if (
-        !Number.isFinite(number) ||
-        number < 0
-    ) {
-
-        showToast(
-            '⚠️ Введите корректное число'
-        );
-
-        return;
-
-    }
-
-
-    finance[key] =
-        number;
-
-
-    // -----------------------------------------
-    // XP
-    // -----------------------------------------
-
-    finance.xp =
-        num(finance.xp) + 5;
-
-
-    finance.level =
-        levelFromXP(
-            finance.xp
-        );
-
-
-    save();
-
-
-    showToast(
-        '💾 Финансовые данные обновлены'
-    );
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    refreshCurrentPage();
-
-}
-
-
-// =====================================================
-// EXPENSE MODAL
-// =====================================================
-
-function openExpenseModal(
-    id = null
-) {
-
-    const existing =
-        id
-            ? expenses.find(
-                function(expense) {
-                    return String(
-                        expense.id
-                    ) === String(id);
-                }
-            )
-            : null;
-
-
-    const name =
-        prompt(
-            'Название обязательного расхода:',
-            existing
-                ? existing.name
-                : ''
-        );
-
-
-    if (
-        name === null
-    ) {
-
-        return;
-
-    }
-
-
-    const cleanName =
-        name.trim();
-
-
-    if (!cleanName) {
-
-        showToast(
-            '⚠️ Укажите название расхода'
-        );
-
-        return;
-
-    }
-
-
-    const amountInput =
-        prompt(
-            'Сумма обязательного расхода:',
-            existing
-                ? String(
-                    existing.amount
-                )
-                : ''
-        );
-
-
-    if (
-        amountInput === null
-    ) {
-
-        return;
-
-    }
-
-
-    const amount =
-        Number(
-            amountInput
-                .replace(
-                    /\s/g,
-                    ''
-                )
-                .replace(
-                    ',',
-                    '.'
-                )
-        );
-
-
-    if (
-        !Number.isFinite(amount) ||
-        amount <= 0
-    ) {
-
-        showToast(
-            '⚠️ Укажите корректную сумму'
-        );
-
-        return;
-
-    }
-
-
-    if (existing) {
-
-        existing.name =
-            cleanName;
-
-        existing.amount =
-            amount;
-
-
-        showToast(
-            '✎ Расход изменён'
-        );
-
-    }
-    else {
-
-        expenses.push({
-
-            id:
-                String(
-                    Date.now()
-                ) +
-                Math.random()
-                    .toString(36)
-                    .slice(2),
-
-            name:
-                cleanName,
-
-            amount:
-                amount
-
-        });
-
-
-        showToast(
-            '💳 Расход добавлен'
-        );
-
-    }
-
-
-    const finance =
-        getCategory(
-            'finance'
-        );
-
-
-    if (finance) {
-
-        finance.xp =
-            num(finance.xp) + 5;
-
-        finance.level =
-            levelFromXP(
-                finance.xp
-            );
-
-    }
-
-
-    save();
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    refreshCurrentPage();
-
-}
-
-
-// =====================================================
-// DELETE EXPENSE
-// =====================================================
-
-function deleteExpense(
-    id
-) {
-
-    const index =
-        expenses.findIndex(
-            function(expense) {
-
-                return String(
-                    expense.id
-                ) === String(id);
-
-            }
-        );
-
-
-    if (
-        index === -1
-    ) {
-
-        return;
-
-    }
-
-
-    expenses.splice(
-        index,
-        1
-    );
-
-
-    save();
-
-
-    showToast(
-        '🗑 Расход удалён'
-    );
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    refreshCurrentPage();
-
-}
-
-
-// =====================================================
-// DEVELOPMENT EDIT
-// =====================================================
-
-function editDevelopmentValue(
-    key,
-    message
-) {
-
-    const development =
-        getCategory(
-            'development'
-        );
-
-
-    if (!development) {
-        return;
-    }
-
-
-    const current =
-        num(
-            development[key]
-        );
-
-
-    const value =
-        prompt(
-            message,
-            String(current)
-        );
-
-
-    if (
-        value === null
-    ) {
-
-        return;
-
-    }
-
-
-    const number =
-        Number(
-            value.replace(
-                /\s/g,
-                ''
-            )
-        );
-
-
-    if (
-        !Number.isFinite(number) ||
-        number < 0
-    ) {
-
-        showToast(
-            '⚠️ Введите корректное число'
-        );
-
-        return;
-
-    }
-
-
-    development[key] =
-        number;
-
-
-    development.xp =
-        num(
-            development.xp
-        ) + 5;
-
-
-    development.level =
-        levelFromXP(
-            development.xp
-        );
-
-
-    save();
-
-
-    showToast(
-        '🧠 Развитие обновлено'
-    );
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    refreshCurrentPage();
-
-}
-
-
-// =====================================================
-// HEALTH EDIT
-// =====================================================
-
-function editHealthValue(
-    key,
-    message
-) {
-
-    const health =
-        getCategory(
-            'health'
-        );
-
-
-    if (!health) {
-        return;
-    }
-
-
-    const current =
-        num(
-            health[key]
-        );
-
-
-    const value =
-        prompt(
-            message,
-            String(current)
-        );
-
-
-    if (
-        value === null
-    ) {
-
-        return;
-
-    }
-
-
-    const number =
-        Number(
-            value.replace(
-                /\s/g,
-                ''
-            )
-        );
-
-
-    if (
-        !Number.isFinite(number) ||
-        number < 0
-    ) {
-
-        showToast(
-            '⚠️ Введите корректное число'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        key === 'routine' ||
-        key === 'nutrition'
-    ) {
-
-        health[key] =
-            clamp(
-                number,
-                0,
-                100
-            );
-
-    }
-    else {
-
-        health[key] =
-            clamp(
-                number,
-                0,
-                100000
-            );
-
-    }
-
-
-    health.xp =
-        num(
-            health.xp
-        ) + 5;
-
-
-    health.level =
-        levelFromXP(
-            health.xp
-        );
-
-
-    save();
-
-
-    showToast(
-        '❤️ Данные здоровья обновлены'
-    );
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-    refreshCurrentPage();
-
-}
-
-
-// =====================================================
-// DEVELOPMENT XP
-// =====================================================
-
-function addDevelopmentXP(
-    amount
-) {
-
-    const development =
-        getCategory(
-            'development'
-        );
-
-
-    if (!development) {
-        return;
-    }
-
-
-    development.xp =
-        num(
-            development.xp
-        ) +
-        num(amount);
-
-
-    development.level =
-        levelFromXP(
-            development.xp
-        );
-
-
-    save();
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-}
-
-
-// =====================================================
-// QUEST
-// =====================================================
-
-function setupQuest() {
-
-    const button =
-        document.getElementById(
-            'dailyQuest'
-        );
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        'click',
-        completeDailyQuest
-    );
-
-}
-
-
-// =====================================================
-// DAILY QUEST
-// =====================================================
-
-function completeDailyQuest() {
-
-    const button =
-        document.getElementById(
-            'dailyQuest'
-        );
-
-
-    if (
-        !button ||
-        button.disabled
-    ) {
-
-        return;
-
-    }
-
-
-    const quests =
-        Array.isArray(
-            state.quests
-        )
-            ? state.quests
-            : [];
-
-
-    const available =
-        quests.find(
-            function(quest) {
-
-                return !quest.done;
-
-            }
-        );
-
-
-    if (!available) {
-
-        showToast(
-            '✅ Все квесты выполнены'
-        );
-
-        return;
-
-    }
-
-
-    available.done =
-        true;
-
-
-    const reward =
-        num(
-            available.xp
-        );
-
-
-    state.player.xp =
-        num(
-            state.player.xp
-        ) +
-        reward;
-
-
-    state.player.level =
-        levelFromXP(
-            state.player.xp
-        );
-
-
-    const category =
-        getCategory(
-            available.category
-        );
-
-
-    if (category) {
-
-        category.xp =
-            num(category.xp) +
-            reward;
-
-
-        category.level =
-            levelFromXP(
-                category.xp
-            );
-
-    }
-
-
-    save();
-
-
-    showToast(
-        '⚡ Квест выполнен! +' +
-        reward +
-        ' XP'
-    );
-
-
-    button.textContent =
-        '✅ QUEST COMPLETED';
-
-
-    button.disabled =
-        true;
-
-
-    button.style.opacity =
-        '0.5';
-
-
-    updateHomeUI();
-
-    updatePlayerUI();
-
-
-    setTimeout(
-        function() {
-
-            resetDailyQuestButton();
-
-        },
-        30000
-    );
-
-}
-
-
-// =====================================================
-// QUEST RESET UI
-// =====================================================
-
-function resetDailyQuestButton() {
-
-    const button =
-        document.getElementById(
-            'dailyQuest'
-        );
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.textContent =
-        '⚡ DAILY QUEST';
-
-
-    button.disabled =
-        false;
-
-
-    button.style.opacity =
-        '1';
-
-}
-
-
-// =====================================================
-// GLOBAL HANDLERS
-// =====================================================
+// ============================================================
+// GLOBAL CLICKS
+// ============================================================
 
 function setupGlobalHandlers() {
 
-    // -----------------------------------------
-    // ESC
-    // -----------------------------------------
+    document.addEventListener(
+        'click',
+        function(event) {
+
+            if (
+                event.target ===
+                document.querySelector(
+                    '.page'
+                )
+            ) {
+
+                closePage();
+
+            }
+
+        }
+    );
+
 
     document.addEventListener(
         'keydown',
@@ -3122,21 +3435,6 @@ function setupGlobalHandlers() {
                 'Escape'
             ) {
 
-                const overlay =
-                    document.querySelector(
-                        '.overlay'
-                    );
-
-
-                if (overlay) {
-
-                    overlay.remove();
-
-                    return;
-
-                }
-
-
                 closePage();
 
             }
@@ -3145,265 +3443,116 @@ function setupGlobalHandlers() {
     );
 
 
-    // -----------------------------------------
-    // OUTSIDE PAGE
-    // -----------------------------------------
-
-    document.addEventListener(
-        'click',
-        function(event) {
-
-            if (
-                event.target.classList.contains(
-                    'page'
-                )
-            ) {
-
-                closePage();
-
-            }
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// REFRESH CURRENT PAGE
-// =====================================================
-
-function refreshCurrentPage() {
-
-    if (
-        currentPage ===
-        'home'
-    ) {
-
-        updateHomeUI();
-
-        updatePlayerUI();
-
-        return;
-
-    }
-
-
-    openPage(
-        currentPage
-    );
-
-}
-
-
-// =====================================================
-// CREATOR
-// =====================================================
-
-function creatorHTML() {
-
-    return `
-
-        <a
-            class="creator"
-            href="https://t.me/shkeltinsh"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            Created by
-            <strong>
-                &nbsp;@shkeltinsh
-            </strong>
-        </a>
-
-    `;
-
-}
-
-
-// =====================================================
-// ESCAPE HTML
-// =====================================================
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value === undefined ||
-        value === null
-            ? ''
-            : value
-    ).replace(
-        /[&<>"']/g,
-        function(character) {
-
-            return {
-
-                '&':
-                    '&amp;',
-
-                '<':
-                    '&lt;',
-
-                '>':
-                    '&gt;',
-
-                '"':
-                    '&quot;',
-
-                "'":
-                    '&#039;'
-
-            }[character];
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// MODULE UNAVAILABLE
-// =====================================================
-
-function moduleUnavailable(
-    message
-) {
-
-    return `
-
-        <div class="notice">
-
-            ⚠️
-            ${escapeHTML(
-                message
-            )}
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// TOAST
-// =====================================================
-
-function showToast(
-    message
-) {
-
-    let toast =
-        document.querySelector(
-            '.toast'
+    const quest =
+        document.getElementById(
+            'dailyQuest'
         );
 
 
-    if (!toast) {
+    if (quest) {
 
-        toast =
-            document.createElement(
-                'div'
-            );
-
-        toast.className =
-            'toast';
-
-        document.body.appendChild(
-            toast
+        quest.addEventListener(
+            'click',
+            completeDailyQuest
         );
 
     }
 
-
-    toast.textContent =
-        message;
-
-
-    toast.classList.add(
-        'show'
-    );
-
-
-    clearTimeout(
-        toast._timer
-    );
-
-
-    toast._timer =
-        setTimeout(
-            function() {
-
-                toast.classList.remove(
-                    'show'
-                );
-
-            },
-            2500
-        );
-
 }
 
 
-// =====================================================
+// ============================================================
 // GLOBAL API
-// =====================================================
+// ============================================================
 
-window.LifeGameApp = {
+window.LifeGame =
+    {
 
-    getState:
-        function() {
-            return state;
-        },
+        getState:
+            () => state,
 
-    getExpenses:
-        function() {
-            return expenses;
-        },
+        save:
+            saveGame,
 
-    getUI:
-        function() {
-            return ui;
-        },
+        openPage:
+            openPage,
 
-    save:
-        save,
+        closePage:
+            closePage,
 
-    openPage:
-        openPage,
+        addXP:
+            addPlayerXP,
 
-    closePage:
-        closePage,
+        addCategoryXP:
+            addCategoryXP,
 
-    refresh:
-        refreshCurrentPage,
+        update:
+            updateAllUI
 
-    updateHomeUI:
-        updateHomeUI,
-
-    updatePlayerUI:
-        updatePlayerUI
-
-};
+    };
 
 
-window.openPage =
+// Compatibility for old modules
+window.showToast =
+    showToast;
+
+window.updateAllUI =
+    updateAllUI;
+
+window.updateLifeProgressUI =
+    updateHomeUI;
+
+window.addXP =
+    addPlayerXP;
+
+window.openCategoryPage =
     openPage;
-
 
 window.closePage =
     closePage;
 
+window.handleWorkout =
+    () =>
+        editHealth('workout');
 
-window.showToast =
-    showToast;
+window.handleHealthEdit =
+    type =>
+        editHealth(type);
 
 
-// =====================================================
-// START
-// =====================================================
+// ============================================================
+// INITIALIZATION
+// ============================================================
+
+function init() {
+
+    console.log(
+        '🚀 LIFE GAME — initializing'
+    );
+
+
+    loadGame();
+
+
+    setupNavigation();
+
+
+    setupGlobalHandlers();
+
+
+    updateAllUI();
+
+
+    console.log(
+        '✅ LIFE GAME — application ready'
+    );
+
+}
+
+
+// ============================================================
+// DOM READY
+// ============================================================
 
 if (
     document.readyState ===
@@ -3419,8 +3568,10 @@ if (
     );
 
 }
+
 else {
 
     init();
 
 }
+```
