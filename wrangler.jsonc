@@ -1,4 +1,3 @@
-```json
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "life-game-1-1",
@@ -8,4 +7,3 @@
     "binding": "ASSETS"
   }
 }
-```
