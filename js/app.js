@@ -1,15 +1,14 @@
-```javascript
 // =====================================================
 // LIFE GAME
 // APP.JS
-// Главный координатор приложения
+// Главный контроллер приложения
 // =====================================================
 
 'use strict';
 
 
 // =====================================================
-// CORE MODULES
+// IMPORTS
 // =====================================================
 
 import {
@@ -18,173 +17,87 @@ import {
 
 import {
     loadState,
-    saveState
+    loadExpenses,
+    loadUI,
+    saveAll
 } from './storage.js';
 
 import {
+    num,
     clamp,
-    fmt,
-    esc,
-    percent
-} from './utilities.js';
+    fmt
+} from './utils.js';
 
 import {
     levelFromXP,
-    xpForLevel,
-    playerXPFromCategoryXP
+    xpForLevel
 } from './xp.js';
 
 
 // =====================================================
-// GLOBAL APPLICATION STATE
+// GLOBAL STATE
 // =====================================================
 
 let state = null;
+let expenses = [];
+let ui = null;
 
 let currentPage = 'home';
-
-let modulesLoaded = false;
-
-
-// =====================================================
-// MODULE REFERENCES
-// =====================================================
-
-let Finance = null;
-let Health = null;
-let Development = null;
 
 
 // =====================================================
 // NORMALIZE STATE
 // =====================================================
 
-function normalizeState(input) {
+function normalizeState(data) {
 
     const defaults =
         createDefaultState();
 
-    const source =
-        input && typeof input === 'object'
-            ? input
-            : {};
-
-    const result =
-        JSON.parse(
-            JSON.stringify(defaults)
-        );
+    const result = data || defaults;
 
 
-    // -------------------------------------------------
-    // PLAYER
-    // -------------------------------------------------
+    if (!result.player) {
+        result.player =
+            defaults.player;
+    }
 
-    result.player = {
-        ...result.player,
-        ...(source.player || {})
-    };
+    if (!result.categories) {
+        result.categories =
+            defaults.categories;
+    }
 
+    if (!result.simulator) {
+        result.simulator =
+            defaults.simulator;
+    }
 
-    // -------------------------------------------------
-    // CATEGORIES
-    // -------------------------------------------------
-
-    result.categories = {
-        ...result.categories,
-        ...(source.categories || {})
-    };
-
-
-    Object.keys(
-        defaults.categories
-    ).forEach(category => {
-
-        result.categories[category] = {
-            ...defaults.categories[category],
-            ...(source.categories?.[category] || {})
-        };
-
-    });
-
-
-    // -------------------------------------------------
-    // SIMULATOR
-    // -------------------------------------------------
-
-    result.simulator = {
-        ...result.simulator,
-        ...(source.simulator || {})
-    };
-
-
-    // -------------------------------------------------
-    // QUESTS
-    // -------------------------------------------------
-
-    if (Array.isArray(source.quests)) {
-
+    if (!Array.isArray(result.quests)) {
         result.quests =
-            source.quests;
-
+            defaults.quests;
     }
 
 
-    // -------------------------------------------------
-    // NUMERIC SAFETY
-    // -------------------------------------------------
-
-    result.player.xp =
-        Math.max(
-            0,
-            Number(result.player.xp) || 0
+    const categories =
+        Object.keys(
+            defaults.categories
         );
 
-    result.player.level =
-        Math.max(
-            1,
-            Number(result.player.level) || 1
-        );
 
-    result.player.rating =
-        Number(result.player.rating) || 0;
+    categories.forEach(
+        function(category) {
 
+            if (
+                !result.categories[category]
+            ) {
 
-    // -------------------------------------------------
-    // CATEGORY XP / LEVEL
-    // -------------------------------------------------
+                result.categories[category] =
+                    defaults.categories[category];
 
-    Object.keys(
-        result.categories
-    ).forEach(category => {
+            }
 
-        const x =
-            result.categories[category];
-
-        x.xp =
-            Math.max(
-                0,
-                Number(x.xp) || 0
-            );
-
-        x.level =
-            Math.max(
-                1,
-                Number(x.level) || 1
-            );
-
-        x.streak =
-            Math.max(
-                0,
-                Number(x.streak) || 0
-            );
-
-        x.bestStreak =
-            Math.max(
-                0,
-                Number(x.bestStreak) || 0
-            );
-
-    });
+        }
+    );
 
 
     return result;
@@ -193,265 +106,19 @@ function normalizeState(input) {
 
 
 // =====================================================
-// LOAD MODULES
+// INITIALIZATION
 // =====================================================
 
-async function loadApplicationModules() {
-
-    try {
-
-        /*
-         * Modules are loaded dynamically.
-         *
-         * This allows both architectures:
-         *
-         * 1. ES module export
-         * 2. window.LifeGame...
-         *
-         * to work.
-         */
-
-
-        const [
-            financeModule,
-            healthModule,
-            developmentModule
-        ] = await Promise.all([
-
-            import('./finance.js'),
-
-            import('./health.js'),
-
-            import('./development.js')
-
-        ]);
-
-
-        Finance =
-            financeModule.default ||
-            financeModule.LifeGameFinance ||
-            window.LifeGameFinance ||
-            null;
-
-
-        Health =
-            healthModule.default ||
-            healthModule.LifeGameHealth ||
-            window.LifeGameHealth ||
-            null;
-
-
-        Development =
-            developmentModule.default ||
-            developmentModule.LifeGameDevelopment ||
-            window.LifeGameDevelopment ||
-            null;
-
-
-        /*
-         * Some versions of the modules register
-         * themselves on window after execution.
-         */
-
-        if (!Finance) {
-
-            Finance =
-                window.LifeGameFinance ||
-                null;
-
-        }
-
-        if (!Health) {
-
-            Health =
-                window.LifeGameHealth ||
-                null;
-
-        }
-
-        if (!Development) {
-
-            Development =
-                window.LifeGameDevelopment ||
-                null;
-
-        }
-
-
-        modulesLoaded = true;
-
-
-        console.log(
-            'LIFE GAME: modules loaded',
-            {
-                finance: !!Finance,
-                health: !!Health,
-                development: !!Development
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            'LIFE GAME: module loading error',
-            error
-        );
-
-        /*
-         * We do not stop the application completely.
-         * This makes debugging easier.
-         */
-
-        modulesLoaded = true;
-
-    }
-
-}
-
-
-// =====================================================
-// MODULE HELPERS
-// =====================================================
-
-function getHelpers() {
-
-    return {
-
-        metric: createMetric,
-
-        fmt,
-
-        clamp,
-
-        esc,
-
-        percent,
-
-        creatorHTML,
-
-        state
-
-    };
-
-}
-
-
-// =====================================================
-// CREATOR
-// =====================================================
-
-function creatorHTML() {
-
-    return `
-        <a
-            class="creator"
-            href="https://t.me/shkeltinsh"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            Created by
-            <strong>&nbsp;@shkeltinsh</strong>
-        </a>
-    `;
-
-}
-
-
-// =====================================================
-// METRIC
-// =====================================================
-
-function createMetric(
-    icon,
-    title,
-    value,
-    target,
-    progress,
-    id
-) {
-
-    const p =
-        clamp(
-            progress,
-            0,
-            100
-        );
-
-
-    return `
-        <div
-            class="metric"
-            data-metric="${esc(id || '')}"
-        >
-
-            <div class="metric-head">
-
-                <div class="metric-left">
-
-                    <div class="metric-icon">
-                        ${icon}
-                    </div>
-
-                    <div class="metric-text">
-
-                        <strong>
-                            ${esc(title)}
-                        </strong>
-
-                        <span>
-                            ${esc(value)}
-                            ${target
-                                ? ` / ${esc(target)}`
-                                : ''
-                            }
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <div class="metric-percent">
-                    ${p}%
-                </div>
-
-            </div>
-
-            <div class="metric-bar">
-
-                <i
-                    style="width:${p}%"
-                ></i>
-
-            </div>
-
-        </div>
-    `;
-
-}
-
-
-// =====================================================
-// INIT
-// =====================================================
-
-async function initApp() {
+function init() {
 
     console.log(
-        '🚀 LIFE GAME — starting'
+        '🚀 LIFE GAME — new architecture'
     );
 
 
-    // -------------------------------------------------
-    // LOAD MODULES
-    // -------------------------------------------------
-
-    await loadApplicationModules();
-
-
-    // -------------------------------------------------
-    // LOAD STATE
-    // -------------------------------------------------
+    // -----------------------------------------
+    // LOAD
+    // -----------------------------------------
 
     state =
         loadState(
@@ -459,66 +126,47 @@ async function initApp() {
         );
 
 
-    if (!state) {
+    expenses =
+        loadExpenses();
 
-        state =
-            createDefaultState();
+
+    ui =
+        loadUI();
+
+
+    if (!ui) {
+
+        ui = {
+            expensesCollapsed: false
+        };
 
     }
 
 
-    // -------------------------------------------------
-    // GLOBAL STATE
-    // -------------------------------------------------
+    // -----------------------------------------
+    // SAVE NORMALIZED DATA
+    // -----------------------------------------
 
-    window.lifeGameState =
-        state;
-
-
-    // -------------------------------------------------
-    // INITIAL UI
-    // -------------------------------------------------
-
-    updateAllUI();
+    save();
 
 
-    // -------------------------------------------------
-    // NAVIGATION
-    // -------------------------------------------------
+    // -----------------------------------------
+    // MAIN UI
+    // -----------------------------------------
+
+    updateHomeUI();
+
+    updatePlayerUI();
 
     setupNavigation();
 
+    setupGlobalHandlers();
 
-    // -------------------------------------------------
-    // HOME CATEGORY CLICK
-    // -------------------------------------------------
-
-    setupCategoryClicks();
-
-
-    // -------------------------------------------------
-    // DAILY QUEST
-    // -------------------------------------------------
-
-    setupDailyQuest();
-
-
-    // -------------------------------------------------
-    // GENERAL EVENTS
-    // -------------------------------------------------
-
-    setupGlobalEvents();
-
-
-    // -------------------------------------------------
-    // GLOBAL API
-    // -------------------------------------------------
-
-    exposeGlobalAPI();
+    setupQuest();
 
 
     console.log(
-        '✅ LIFE GAME — application ready'
+        '✅ LIFE GAME initialized'
     );
 
 }
@@ -528,90 +176,102 @@ async function initApp() {
 // SAVE
 // =====================================================
 
-function persist() {
+function save() {
 
-    if (!state) {
-        return;
-    }
-
-    try {
-
-        saveState(state);
-
-    } catch (error) {
-
-        console.error(
-            'LIFE GAME: save error',
-            error
-        );
-
-    }
+    saveAll(
+        state,
+        expenses,
+        ui
+    );
 
 }
 
 
 // =====================================================
-// UPDATE ALL UI
+// HELPERS
 // =====================================================
 
-function updateAllUI() {
+function getCategory(
+    category
+) {
 
-    if (!state) {
-        return;
+    if (
+        !state ||
+        !state.categories
+    ) {
+
+        return null;
+
     }
 
 
-    updatePlayerUI();
-
-    updateLifeUI();
-
-    updateCategoryCards();
-
-    persist();
+    return state.categories[
+        category
+    ] || null;
 
 }
 
 
 // =====================================================
-// PLAYER UI
+// PLAYER XP
 // =====================================================
 
 function updatePlayerUI() {
+
+    if (!state || !state.player) {
+        return;
+    }
+
 
     const player =
         state.player;
 
 
-    const level =
-        Math.max(
-            1,
-            Number(player.level) || 1
-        );
-
-
     const xp =
         Math.max(
             0,
-            Number(player.xp) || 0
+            num(player.xp)
         );
+
+
+    const level =
+        Math.max(
+            1,
+            num(player.level)
+        );
+
+
+    const currentLevelXP =
+        xpForLevel(level);
+
+
+    const nextLevelXP =
+        xpForLevel(level + 1);
+
+
+    const levelStart =
+        currentLevelXP;
 
 
     const required =
-        xpForLevel(
-            level + 1
+        Math.max(
+            1,
+            nextLevelXP -
+            levelStart
         );
 
 
-    const xpPercent =
-        required > 0
-            ? clamp(
-                Math.round(
-                    xp / required * 100
-                ),
-                0,
-                100
-            )
-            : 0;
+    const progress =
+        clamp(
+            (
+                xp -
+                levelStart
+            ) /
+            required *
+            100,
+            0,
+            100
+        );
 
 
     const levelEl =
@@ -619,20 +279,24 @@ function updatePlayerUI() {
             'playerLevel'
         );
 
+
     const xpEl =
         document.getElementById(
             'playerXP'
         );
 
-    const xpFill =
+
+    const fillEl =
         document.getElementById(
             'playerXPFill'
         );
 
-    const xpNext =
+
+    const nextEl =
         document.getElementById(
             'xpNext'
         );
+
 
     const rankEl =
         document.getElementById(
@@ -643,7 +307,7 @@ function updatePlayerUI() {
     if (levelEl) {
 
         levelEl.textContent =
-            `LVL ${level}`;
+            'LVL ' + level;
 
     }
 
@@ -651,28 +315,31 @@ function updatePlayerUI() {
     if (xpEl) {
 
         xpEl.textContent =
-            `${fmt(xp)} XP`;
+            fmt(xp) + ' XP';
 
     }
 
 
-    if (xpFill) {
+    if (fillEl) {
 
-        xpFill.style.width =
-            `${xpPercent}%`;
+        fillEl.style.width =
+            progress + '%';
 
     }
 
 
-    if (xpNext) {
+    if (nextEl) {
 
-        xpNext.textContent =
-            `${fmt(
-                Math.max(
-                    0,
-                    required - xp
-                )
-            )} XP TO NEXT LEVEL`;
+        const remaining =
+            Math.max(
+                0,
+                nextLevelXP - xp
+            );
+
+
+        nextEl.textContent =
+            fmt(remaining) +
+            ' XP TO NEXT LEVEL';
 
     }
 
@@ -680,23 +347,18 @@ function updatePlayerUI() {
     if (rankEl) {
 
         const ranks = [
-
             'BEGINNER',
             'EXPLORER',
             'ADVENTURER',
             'HERO',
             'LEGEND'
-
         ];
 
 
         const index =
             Math.min(
                 Math.floor(
-                    Math.max(
-                        1,
-                        level
-                    ) / 3
+                    level / 3
                 ),
                 ranks.length - 1
             );
@@ -711,202 +373,297 @@ function updatePlayerUI() {
 
 
 // =====================================================
-// LIFE PROGRESS
+// HOME UI
 // =====================================================
 
-function calculateCategoryProgress(
-    category
-) {
+function updateHomeUI() {
 
-    const x =
-        state.categories[category];
-
-
-    if (!x) {
-        return 0;
+    if (!state) {
+        return;
     }
 
-
-    // -------------------------------------------------
-    // FINANCE
-    // -------------------------------------------------
-
-    if (
-        category === 'finance' &&
-        Finance &&
-        typeof Finance.progress === 'function'
-    ) {
-
-        return clamp(
-            Finance.progress(state),
-            0,
-            100
-        );
-
-    }
-
-
-    // -------------------------------------------------
-    // HEALTH
-    // -------------------------------------------------
-
-    if (
-        category === 'health' &&
-        Health &&
-        typeof Health.progress === 'function'
-    ) {
-
-        return clamp(
-            Health.progress(state),
-            0,
-            100
-        );
-
-    }
-
-
-    // -------------------------------------------------
-    // DEVELOPMENT
-    // -------------------------------------------------
-
-    if (
-        category === 'development' &&
-        Development &&
-        typeof Development.progress === 'function'
-    ) {
-
-        return clamp(
-            Development.progress(state),
-            0,
-            100
-        );
-
-    }
-
-
-    // -------------------------------------------------
-    // FALLBACK
-    // -------------------------------------------------
-
-    if (
-        category === 'development'
-    ) {
-
-        const books =
-            percent(
-                x.books,
-                2
-            );
-
-        const language =
-            percent(
-                x.languageMinutes,
-                30
-            );
-
-        const meditation =
-            percent(
-                x.meditationMinutes,
-                15
-            );
-
-
-        return Math.round(
-            (
-                books +
-                language +
-                meditation
-            ) / 3
-        );
-
-    }
-
-
-    if (
-        category === 'health'
-    ) {
-
-        const routine =
-            clamp(
-                x.routine,
-                0,
-                100
-            );
-
-        const nutrition =
-            clamp(
-                x.nutrition,
-                0,
-                100
-            );
-
-        const steps =
-            percent(
-                x.steps,
-                10000
-            );
-
-
-        return Math.round(
-            (
-                routine +
-                nutrition +
-                steps
-            ) / 3
-        );
-
-    }
-
-
-    return clamp(
-        Number(x.level) || 0,
-        0,
-        100
-    );
-
-}
-
-
-// =====================================================
-// LIFE UI
-// =====================================================
-
-function updateLifeUI() {
 
     const finance =
-        calculateCategoryProgress(
+        getCategory(
             'finance'
         );
 
+
     const health =
-        calculateCategoryProgress(
+        getCategory(
             'health'
         );
 
+
     const development =
-        calculateCategoryProgress(
+        getCategory(
             'development'
         );
 
 
-    const values = [
+    // -----------------------------------------
+    // FINANCE
+    // -----------------------------------------
 
-        finance,
-
-        health,
-
-        development
-
-    ];
+    let financePercent = 0;
 
 
-    const progress =
+    if (
+        window.LifeGameFinance &&
+        typeof
+            window.LifeGameFinance.progress ===
+            'function'
+    ) {
+
+        financePercent =
+            window.LifeGameFinance.progress(
+                state,
+                expenses
+            );
+
+    }
+
+
+    // -----------------------------------------
+    // HEALTH
+    // -----------------------------------------
+
+    let healthPercent = 0;
+
+
+    if (health) {
+
+        const routine =
+            clamp(
+                health.routine,
+                0,
+                100
+            );
+
+
+        const nutrition =
+            clamp(
+                health.nutrition,
+                0,
+                100
+            );
+
+
+        const steps =
+            clamp(
+                num(health.steps) /
+                10000 *
+                100,
+                0,
+                100
+            );
+
+
+        healthPercent =
+            Math.round(
+                (
+                    routine +
+                    nutrition +
+                    steps
+                ) / 3
+            );
+
+    }
+
+
+    // -----------------------------------------
+    // DEVELOPMENT
+    // -----------------------------------------
+
+    let developmentPercent = 0;
+
+
+    if (
+        window.LifeGameDevelopment &&
+        typeof
+            window.LifeGameDevelopment.progress ===
+            'function'
+    ) {
+
+        developmentPercent =
+            window.LifeGameDevelopment.progress(
+                state
+            );
+
+    }
+    else if (development) {
+
+        const books =
+            clamp(
+                num(development.books) /
+                2 *
+                100,
+                0,
+                100
+            );
+
+
+        const language =
+            clamp(
+                num(
+                    development.languageMinutes
+                ) /
+                30 *
+                100,
+                0,
+                100
+            );
+
+
+        const meditation =
+            clamp(
+                num(
+                    development.meditationMinutes
+                ) /
+                15 *
+                100,
+                0,
+                100
+            );
+
+
+        developmentPercent =
+            Math.round(
+                (
+                    books +
+                    language +
+                    meditation
+                ) / 3
+            );
+
+    }
+
+
+    // -----------------------------------------
+    // FINANCE
+    // -----------------------------------------
+
+    const financeEl =
+        document.getElementById(
+            'financePercent'
+        );
+
+
+    const financeFill =
+        document.getElementById(
+            'financeFill'
+        );
+
+
+    if (financeEl) {
+
+        financeEl.textContent =
+            Math.round(
+                financePercent
+            ) + '%';
+
+    }
+
+
+    if (financeFill) {
+
+        financeFill.style.width =
+            clamp(
+                financePercent,
+                0,
+                100
+            ) + '%';
+
+    }
+
+
+    // -----------------------------------------
+    // DEVELOPMENT
+    // -----------------------------------------
+
+    const developmentEl =
+        document.getElementById(
+            'developmentPercent'
+        );
+
+
+    const developmentFill =
+        document.getElementById(
+            'developmentFill'
+        );
+
+
+    if (developmentEl) {
+
+        developmentEl.textContent =
+            Math.round(
+                developmentPercent
+            ) + '%';
+
+    }
+
+
+    if (developmentFill) {
+
+        developmentFill.style.width =
+            clamp(
+                developmentPercent,
+                0,
+                100
+            ) + '%';
+
+    }
+
+
+    // -----------------------------------------
+    // HEALTH
+    // -----------------------------------------
+
+    const healthEl =
+        document.getElementById(
+            'healthPercent'
+        );
+
+
+    const healthFill =
+        document.getElementById(
+            'healthFill'
+        );
+
+
+    if (healthEl) {
+
+        healthEl.textContent =
+            Math.round(
+                healthPercent
+            ) + '%';
+
+    }
+
+
+    if (healthFill) {
+
+        healthFill.style.width =
+            clamp(
+                healthPercent,
+                0,
+                100
+            ) + '%';
+
+    }
+
+
+    // -----------------------------------------
+    // LIFE PROGRESS
+    // -----------------------------------------
+
+    const lifeProgress =
         Math.round(
-            values.reduce(
-                (sum, value) =>
-                    sum + value,
-                0
-            ) / values.length
+            (
+                financePercent +
+                developmentPercent +
+                healthPercent
+            ) / 3
         );
 
 
@@ -914,6 +671,7 @@ function updateLifeUI() {
         document.getElementById(
             'lifeProgress'
         );
+
 
     const lifeFill =
         document.getElementById(
@@ -924,7 +682,12 @@ function updateLifeUI() {
     if (lifeEl) {
 
         lifeEl.innerHTML =
-            `${progress}<span>%</span>`;
+            clamp(
+                lifeProgress,
+                0,
+                100
+            ) +
+            '<span>%</span>';
 
     }
 
@@ -932,85 +695,11 @@ function updateLifeUI() {
     if (lifeFill) {
 
         lifeFill.style.width =
-            `${progress}%`;
-
-    }
-
-}
-
-
-// =====================================================
-// CATEGORY CARDS
-// =====================================================
-
-function updateCategoryCards() {
-
-    updateCategoryCard(
-        'finance',
-        calculateCategoryProgress(
-            'finance'
-        )
-    );
-
-
-    updateCategoryCard(
-        'health',
-        calculateCategoryProgress(
-            'health'
-        )
-    );
-
-
-    updateCategoryCard(
-        'development',
-        calculateCategoryProgress(
-            'development'
-        )
-    );
-
-}
-
-
-// =====================================================
-// SINGLE CATEGORY CARD
-// =====================================================
-
-function updateCategoryCard(
-    category,
-    value
-) {
-
-    const percentEl =
-        document.getElementById(
-            `${category}Percent`
-        );
-
-    const fillEl =
-        document.getElementById(
-            `${category}Fill`
-        );
-
-
-    const p =
-        clamp(
-            Math.round(value),
-            0,
-            100
-        );
-
-
-    if (percentEl) {
-
-        percentEl.textContent =
-            `${p}%`;
-
-    }
-
-
-    if (fillEl) {
-
-        fillEl.style.width =
-            `${p}%`;
+            clamp(
+                lifeProgress,
+                0,
+                100
+            ) + '%';
 
     }
 
@@ -1023,64 +712,37 @@ function updateCategoryCard(
 
 function setupNavigation() {
 
-    document
-        .querySelectorAll(
-            '.nav button'
-        )
-        .forEach(button => {
+    const buttons =
+        document.querySelectorAll(
+            '.nav button[data-nav]'
+        );
+
+
+    buttons.forEach(
+        function(button) {
 
             button.addEventListener(
                 'click',
-                () => {
+                function(event) {
+
+                    event.preventDefault();
 
                     const page =
                         button.dataset.nav;
 
+
                     if (!page) {
                         return;
                     }
+
 
                     openPage(page);
 
                 }
             );
 
-        });
-
-}
-
-
-// =====================================================
-// CATEGORY CLICKS
-// =====================================================
-
-function setupCategoryClicks() {
-
-    document
-        .querySelectorAll(
-            '.category[data-category]'
-        )
-        .forEach(card => {
-
-            card.addEventListener(
-                'click',
-                () => {
-
-                    const category =
-                        card.dataset.category;
-
-                    if (category) {
-
-                        openPage(
-                            category
-                        );
-
-                    }
-
-                }
-            );
-
-        });
+        }
+    );
 
 }
 
@@ -1093,14 +755,53 @@ function openPage(
     pageName
 ) {
 
-    if (!state) {
+    const creators = {
+
+        home:
+            createHomePage,
+
+        finance:
+            createFinancePage,
+
+        health:
+            createHealthPage,
+
+        development:
+            createDevelopmentPage
+
+    };
+
+
+    const creator =
+        creators[pageName];
+
+
+    if (
+        typeof creator !==
+        'function'
+    ) {
+
+        console.warn(
+            'Unknown page:',
+            pageName
+        );
+
         return;
+
     }
 
 
-    closePage(
-        false
-    );
+    const oldPage =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (oldPage) {
+
+        oldPage.remove();
+
+    }
 
 
     const page =
@@ -1113,87 +814,8 @@ function openPage(
         'page';
 
 
-    page.dataset.page =
-        pageName;
-
-
-    let html = '';
-
-
-    // -------------------------------------------------
-    // HOME
-    // -------------------------------------------------
-
-    if (
-        pageName === 'home'
-    ) {
-
-        html =
-            createHomePage();
-
-    }
-
-
-    // -------------------------------------------------
-    // FINANCE
-    // -------------------------------------------------
-
-    else if (
-        pageName === 'finance'
-    ) {
-
-        html =
-            createModulePage(
-                Finance,
-                'finance'
-            );
-
-    }
-
-
-    // -------------------------------------------------
-    // HEALTH
-    // -------------------------------------------------
-
-    else if (
-        pageName === 'health'
-    ) {
-
-        html =
-            createModulePage(
-                Health,
-                'health'
-            );
-
-    }
-
-
-    // -------------------------------------------------
-    // DEVELOPMENT
-    // -------------------------------------------------
-
-    else if (
-        pageName === 'development'
-    ) {
-
-        html =
-            createModulePage(
-                Development,
-                'development'
-            );
-
-    }
-
-
-    else {
-
-        return;
-
-    }
-
-
     page.innerHTML =
-        html;
+        creator();
 
 
     document.body.appendChild(
@@ -1210,9 +832,7 @@ function openPage(
     );
 
 
-    updateActiveNavigation(
-        pageName
-    );
+    updateNavigation();
 
 
     setupPageHandlers(
@@ -1223,264 +843,10 @@ function openPage(
 
 
 // =====================================================
-// CREATE MODULE PAGE
-// =====================================================
-
-function createModulePage(
-    module,
-    category
-) {
-
-    if (
-        module &&
-        typeof module.page === 'function'
-    ) {
-
-        return module.page(
-            state,
-            getHelpers()
-        );
-
-    }
-
-
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    type="button"
-                    onclick="closePage()"
-                >
-                    ←
-                </button>
-
-                <h2>
-                    ${esc(
-                        category
-                    )}
-                </h2>
-
-            </div>
-
-            <div class="notice">
-
-                Модуль ${esc(category)}
-                не загружен.
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// HOME PAGE
-// =====================================================
-
-function createHomePage() {
-
-    const finance =
-        calculateCategoryProgress(
-            'finance'
-        );
-
-    const health =
-        calculateCategoryProgress(
-            'health'
-        );
-
-    const development =
-        calculateCategoryProgress(
-            'development'
-        );
-
-
-    const progress =
-        Math.round(
-            (
-                finance +
-                health +
-                development
-            ) / 3
-        );
-
-
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    type="button"
-                    onclick="closePage()"
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Главная
-                </h2>
-
-            </div>
-
-
-            <div class="summary">
-
-                <div class="section-label">
-                    LIFE PROGRESS
-                </div>
-
-                <div class="summary-number">
-                    ${progress}%
-                </div>
-
-                <div class="progress">
-
-                    <i
-                        style="width:${progress}%"
-                    ></i>
-
-                </div>
-
-            </div>
-
-
-            <div class="cards">
-
-                ${homeMetric(
-                    '❤️',
-                    'Здоровье',
-                    health
-                )}
-
-                ${homeMetric(
-                    '💰',
-                    'Финансы',
-                    finance
-                )}
-
-                ${homeMetric(
-                    '🧠',
-                    'Развитие',
-                    development
-                )}
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// HOME METRIC
-// =====================================================
-
-function homeMetric(
-    icon,
-    title,
-    value
-) {
-
-    const p =
-        clamp(
-            Math.round(value),
-            0,
-            100
-        );
-
-
-    return `
-
-        <div class="metric">
-
-            <div class="metric-head">
-
-                <div class="metric-left">
-
-                    <div class="metric-icon">
-                        ${icon}
-                    </div>
-
-                    <div class="metric-text">
-
-                        <strong>
-                            ${title}
-                        </strong>
-
-                        <span>
-                            ${p}%
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <div class="metric-percent">
-                    ${p}%
-                </div>
-
-            </div>
-
-
-            <div class="metric-bar">
-
-                <i
-                    style="width:${p}%"
-                ></i>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// =====================================================
-// ACTIVE NAV
-// =====================================================
-
-function updateActiveNavigation(
-    pageName
-) {
-
-    document
-        .querySelectorAll(
-            '.nav button'
-        )
-        .forEach(button => {
-
-            button.classList.toggle(
-                'active',
-                button.dataset.nav ===
-                    pageName
-            );
-
-        });
-
-}
-
-
-// =====================================================
 // CLOSE PAGE
 // =====================================================
 
-function closePage(
-    updateNavigation = true
-) {
+function closePage() {
 
     const page =
         document.querySelector(
@@ -1504,13 +870,813 @@ function closePage(
         'home';
 
 
-    if (updateNavigation) {
+    updateNavigation();
 
-        updateActiveNavigation(
-            'home'
+    updateHomeUI();
+
+    updatePlayerUI();
+
+}
+
+
+// =====================================================
+// NAVIGATION ACTIVE STATE
+// =====================================================
+
+function updateNavigation() {
+
+    document
+        .querySelectorAll(
+            '.nav button[data-nav]'
+        )
+        .forEach(
+            function(button) {
+
+                button.classList.toggle(
+                    'active',
+                    button.dataset.nav ===
+                    currentPage
+                );
+
+            }
+        );
+
+}
+
+
+// =====================================================
+// HOME PAGE
+// =====================================================
+
+function createHomePage() {
+
+    const finance =
+        getCategory(
+            'finance'
+        );
+
+
+    const health =
+        getCategory(
+            'health'
+        );
+
+
+    const development =
+        getCategory(
+            'development'
+        );
+
+
+    let financePercent = 0;
+
+
+    if (
+        window.LifeGameFinance &&
+        typeof
+            window.LifeGameFinance.progress ===
+            'function'
+    ) {
+
+        financePercent =
+            window.LifeGameFinance.progress(
+                state,
+                expenses
+            );
+
+    }
+
+
+    let healthPercent = 0;
+
+
+    if (health) {
+
+        healthPercent =
+            Math.round(
+                (
+                    clamp(
+                        health.routine,
+                        0,
+                        100
+                    ) +
+                    clamp(
+                        health.nutrition,
+                        0,
+                        100
+                    ) +
+                    clamp(
+                        num(health.steps) /
+                        10000 *
+                        100,
+                        0,
+                        100
+                    )
+                ) / 3
+            );
+
+    }
+
+
+    let developmentPercent = 0;
+
+
+    if (
+        window.LifeGameDevelopment &&
+        typeof
+            window.LifeGameDevelopment.progress ===
+            'function'
+    ) {
+
+        developmentPercent =
+            window.LifeGameDevelopment.progress(
+                state
+            );
+
+    }
+
+
+    const life =
+        Math.round(
+            (
+                financePercent +
+                healthPercent +
+                developmentPercent
+            ) / 3
+        );
+
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    type="button"
+                    data-close-page
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Главная
+                </h2>
+
+            </div>
+
+
+            <div class="summary">
+
+                <div class="section-label">
+                    ОБЩИЙ ПРОГРЕСС
+                </div>
+
+                <div class="summary-number">
+                    ${life}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="
+                            width:${life}%;
+                        "
+                    ></i>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+                ${homeMetric(
+                    '❤️',
+                    'Здоровье',
+                    healthPercent
+                )}
+
+                ${homeMetric(
+                    '💰',
+                    'Финансы',
+                    financePercent
+                )}
+
+                ${homeMetric(
+                    '🧠',
+                    'Развитие',
+                    developmentPercent
+                )}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// HOME METRIC
+// =====================================================
+
+function homeMetric(
+    icon,
+    title,
+    percent
+) {
+
+    return `
+
+        <div class="metric">
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${title}
+                        </strong>
+
+                        <span>
+                            ${Math.round(
+                                percent
+                            )}%
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric-percent">
+                    ${Math.round(
+                        percent
+                    )}%
+                </div>
+
+            </div>
+
+
+            <div class="metric-bar">
+
+                <i
+                    style="
+                        width:${clamp(
+                            percent,
+                            0,
+                            100
+                        )}%;
+                    "
+                ></i>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// FINANCE PAGE
+// =====================================================
+
+function createFinancePage() {
+
+    if (
+        !window.LifeGameFinance ||
+        typeof
+            window.LifeGameFinance.page !==
+            'function'
+    ) {
+
+        return moduleUnavailable(
+            'Финансовый модуль не загружен.'
         );
 
     }
+
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    type="button"
+                    data-close-page
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Финансы
+                </h2>
+
+            </div>
+
+
+            ${window.LifeGameFinance.page(
+                state,
+                expenses,
+                ui
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// HEALTH PAGE
+// =====================================================
+
+function createHealthPage() {
+
+    if (
+        window.LifeGameHealth &&
+        typeof
+            window.LifeGameHealth.page ===
+            'function'
+    ) {
+
+        return `
+
+            <div class="page-inner">
+
+                <div class="page-head">
+
+                    <button
+                        class="back"
+                        type="button"
+                        data-close-page
+                    >
+                        ←
+                    </button>
+
+                    <h2>
+                        Здоровье
+                    </h2>
+
+                </div>
+
+
+                ${window.LifeGameHealth.page(
+                    state,
+                    {
+                        metric,
+                        fmt,
+                        clamp,
+                        esc,
+                        creatorHTML
+                    }
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    return createFallbackHealthPage();
+
+}
+
+
+// =====================================================
+// DEVELOPMENT PAGE
+// =====================================================
+
+function createDevelopmentPage() {
+
+    if (
+        window.LifeGameDevelopment &&
+        typeof
+            window.LifeGameDevelopment.page ===
+            'function'
+    ) {
+
+        return `
+
+            <div class="page-inner">
+
+                <div class="page-head">
+
+                    <button
+                        class="back"
+                        type="button"
+                        data-close-page
+                    >
+                        ←
+                    </button>
+
+                    <h2>
+                        Развитие
+                    </h2>
+
+                </div>
+
+
+                ${window.LifeGameDevelopment.page(
+                    state,
+                    {
+                        metric,
+                        fmt,
+                        clamp,
+                        esc,
+                        creatorHTML
+                    }
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    return createFallbackDevelopmentPage();
+
+}
+
+
+// =====================================================
+// FALLBACK HEALTH
+// =====================================================
+
+function createFallbackHealthPage() {
+
+    const health =
+        getCategory(
+            'health'
+        ) || {};
+
+
+    const routine =
+        clamp(
+            health.routine,
+            0,
+            100
+        );
+
+
+    const nutrition =
+        clamp(
+            health.nutrition,
+            0,
+            100
+        );
+
+
+    const steps =
+        clamp(
+            num(health.steps) /
+            10000 *
+            100,
+            0,
+            100
+        );
+
+
+    const progress =
+        Math.round(
+            (
+                routine +
+                nutrition +
+                steps
+            ) / 3
+        );
+
+
+    return `
+
+        <div class="summary">
+
+            <div class="section-label">
+                HEALTH LEVEL
+                ${num(health.level) || 1}
+            </div>
+
+            <div class="summary-number">
+                ${progress}%
+            </div>
+
+            <div class="progress">
+
+                <i
+                    style="
+                        width:${progress}%;
+                    "
+                ></i>
+
+            </div>
+
+        </div>
+
+
+        <div class="cards">
+
+            ${metric(
+                '⏰',
+                'Режим дня',
+                routine + '%',
+                '100%',
+                routine,
+                'healthRoutine'
+            )}
+
+            ${metric(
+                '🍎',
+                'Питание',
+                nutrition + '%',
+                '100%',
+                nutrition,
+                'healthNutrition'
+            )}
+
+            ${metric(
+                '🚶',
+                'Шаги',
+                fmt(
+                    num(health.steps)
+                ),
+                '10 000',
+                steps,
+                'healthSteps'
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// FALLBACK DEVELOPMENT
+// =====================================================
+
+function createFallbackDevelopmentPage() {
+
+    const development =
+        getCategory(
+            'development'
+        ) || {};
+
+
+    const books =
+        clamp(
+            num(development.books) /
+            2 *
+            100,
+            0,
+            100
+        );
+
+
+    const language =
+        clamp(
+            num(
+                development.languageMinutes
+            ) /
+            30 *
+            100,
+            0,
+            100
+        );
+
+
+    const meditation =
+        clamp(
+            num(
+                development.meditationMinutes
+            ) /
+            15 *
+            100,
+            0,
+            100
+        );
+
+
+    const progress =
+        Math.round(
+            (
+                books +
+                language +
+                meditation
+            ) / 3
+        );
+
+
+    return `
+
+        <div class="summary">
+
+            <div class="section-label">
+                DEVELOPMENT LEVEL
+                ${num(development.level) || 1}
+            </div>
+
+            <div class="summary-number">
+                ${progress}%
+            </div>
+
+            <div class="progress">
+
+                <i
+                    style="
+                        width:${progress}%;
+                    "
+                ></i>
+
+            </div>
+
+            <div class="finance-box">
+
+                <div class="finance-line">
+
+                    <span>
+                        DEVELOPMENT XP
+                    </span>
+
+                    <strong>
+                        ${fmt(
+                            development.xp
+                        )} XP
+                    </strong>
+
+                </div>
+
+                <div class="finance-line">
+
+                    <span>
+                        STREAK
+                    </span>
+
+                    <strong>
+                        🔥 ${num(
+                            development.streak
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="cards">
+
+            ${metric(
+                '📚',
+                'Книги',
+                num(development.books),
+                '2',
+                books,
+                'books'
+            )}
+
+            ${metric(
+                '🌐',
+                'Изучение языка',
+                fmt(
+                    development.languageMinutes
+                ) + ' мин',
+                '30 мин',
+                language,
+                'languageMinutes'
+            )}
+
+            ${metric(
+                '🧘',
+                'Медитация',
+                fmt(
+                    development.meditationMinutes
+                ) + ' мин',
+                '15 мин',
+                meditation,
+                'meditationMinutes'
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// COMMON METRIC
+// =====================================================
+
+function metric(
+    icon,
+    title,
+    current,
+    target,
+    percent,
+    edit
+) {
+
+    return `
+
+        <div class="metric">
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${escapeHTML(title)}
+                        </strong>
+
+                        <span>
+                            ${escapeHTML(
+                                current
+                            )}
+                            /
+                            ${escapeHTML(
+                                target
+                            )}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric-percent">
+                    ${Math.round(
+                        clamp(
+                            percent,
+                            0,
+                            100
+                        )
+                    )}%
+                </div>
+
+            </div>
+
+
+            <div class="metric-bar">
+
+                <i
+                    style="
+                        width:${clamp(
+                            percent,
+                            0,
+                            100
+                        )}%;
+                    "
+                ></i>
+
+            </div>
+
+
+            ${
+                edit
+                    ? `
+
+                        <button
+                            class="edit"
+                            type="button"
+                            data-edit="${escapeHTML(
+                                edit
+                            )}"
+                        >
+                            ✎ ИЗМЕНИТЬ
+                        </button>
+
+                    `
+                    : ''
+            }
+
+        </div>
+
+    `;
 
 }
 
@@ -1534,180 +1700,1224 @@ function setupPageHandlers(
     }
 
 
-    /*
-     * Allow modules to install their
-     * own event handlers.
-     */
+    // -----------------------------------------
+    // BACK
+    // -----------------------------------------
 
-    let module = null;
+    page.querySelectorAll(
+        '[data-close-page]'
+    ).forEach(
+        function(button) {
 
+            button.addEventListener(
+                'click',
+                closePage
+            );
+
+        }
+    );
+
+
+    // -----------------------------------------
+    // FINANCE
+    // -----------------------------------------
 
     if (
         pageName === 'finance'
     ) {
 
-        module =
-            Finance;
+        setupFinanceHandlers(
+            page
+        );
 
     }
 
-    else if (
+
+    // -----------------------------------------
+    // HEALTH
+    // -----------------------------------------
+
+    if (
         pageName === 'health'
     ) {
 
-        module =
-            Health;
+        setupHealthHandlers(
+            page
+        );
 
     }
 
-    else if (
+
+    // -----------------------------------------
+    // DEVELOPMENT
+    // -----------------------------------------
+
+    if (
         pageName === 'development'
     ) {
 
-        module =
-            Development;
+        setupDevelopmentHandlers(
+            page
+        );
 
     }
 
 
-    if (
-        module &&
-        typeof module.mount === 'function'
-    ) {
+    // -----------------------------------------
+    // GENERIC EDIT
+    // -----------------------------------------
 
-        try {
-
-            module.mount(
-                page,
-                state,
-                getHelpers()
-            );
-
-        } catch (error) {
-
-            console.error(
-                `LIFE GAME: ${pageName} mount error`,
-                error
-            );
-
-        }
-
-    }
-
-
-    /*
-     * Generic buttons used by modules.
-     */
-
-    page
-        .querySelectorAll(
-            '[data-action]'
-        )
-        .forEach(button => {
+    page.querySelectorAll(
+        '[data-edit]'
+    ).forEach(
+        function(button) {
 
             button.addEventListener(
                 'click',
-                event => {
+                function(event) {
 
-                    const action =
-                        button.dataset.action;
+                    event.preventDefault();
 
-                    handleAction(
-                        action,
-                        button,
-                        event
+                    event.stopPropagation();
+
+
+                    const id =
+                        button.dataset.edit;
+
+
+                    handleEdit(
+                        id
                     );
 
                 }
             );
 
-        });
+        }
+    );
 
 }
 
 
 // =====================================================
-// GENERIC ACTION HANDLER
+// FINANCE HANDLERS
 // =====================================================
 
-function handleAction(
-    action,
-    button,
-    event
+function setupFinanceHandlers(
+    page
 ) {
 
-    if (!action) {
-        return;
-    }
+    const addExpense =
+        page.querySelector(
+            '#addExpense'
+        );
 
 
-    // -------------------------------------------------
-    // CLOSE
-    // -------------------------------------------------
+    if (addExpense) {
 
-    if (
-        action === 'close'
-    ) {
+        addExpense.addEventListener(
+            'click',
+            function() {
 
-        closePage();
+                openExpenseModal();
 
-        return;
-
-    }
-
-
-    // -------------------------------------------------
-    // SAVE
-    // -------------------------------------------------
-
-    if (
-        action === 'save'
-    ) {
-
-        persist();
-
-        updateAllUI();
-
-        return;
+            }
+        );
 
     }
 
 
-    /*
-     * Try to call a global function.
-     */
+    const toggle =
+        page.querySelector(
+            '#expensesToggle'
+        );
 
-    if (
-        typeof window[action] ===
-        'function'
-    ) {
 
-        try {
+    if (toggle) {
 
-            window[action](
-                button,
-                event
-            );
+        toggle.addEventListener(
+            'click',
+            function() {
 
-        } catch (error) {
+                ui.expensesCollapsed =
+                    !ui.expensesCollapsed;
 
-            console.error(
-                `LIFE GAME: action ${action} error`,
-                error
+
+                save();
+
+
+                refreshCurrentPage();
+
+            }
+        );
+
+    }
+
+
+    page.querySelectorAll(
+        '.expense-edit'
+    ).forEach(
+        function(button) {
+
+            button.addEventListener(
+                'click',
+                function(event) {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+
+                    openExpenseModal(
+                        button.dataset.id
+                    );
+
+                }
             );
 
         }
+    );
 
-    }
+
+    setupExpenseSwipe(
+        page
+    );
 
 }
 
 
 // =====================================================
-// DAILY QUEST
+// EXPENSE SWIPE
 // =====================================================
 
-function setupDailyQuest() {
+function setupExpenseSwipe(
+    page
+) {
+
+    const wrappers =
+        page.querySelectorAll(
+            '.expense-swipe'
+        );
+
+
+    wrappers.forEach(
+        function(wrapper) {
+
+            const expense =
+                wrapper.querySelector(
+                    '.expense'
+                );
+
+
+            if (!expense) {
+                return;
+            }
+
+
+            let startX = 0;
+            let startY = 0;
+            let currentX = 0;
+            let tracking = false;
+
+
+            expense.addEventListener(
+                'touchstart',
+                function(event) {
+
+                    const touch =
+                        event.touches[0];
+
+
+                    startX =
+                        touch.clientX;
+
+                    startY =
+                        touch.clientY;
+
+                    currentX =
+                        startX;
+
+                    tracking =
+                        true;
+
+                },
+                {
+                    passive: true
+                }
+            );
+
+
+            expense.addEventListener(
+                'touchmove',
+                function(event) {
+
+                    if (!tracking) {
+                        return;
+                    }
+
+
+                    const touch =
+                        event.touches[0];
+
+
+                    currentX =
+                        touch.clientX;
+
+
+                    const dx =
+                        currentX -
+                        startX;
+
+
+                    const dy =
+                        touch.clientY -
+                        startY;
+
+
+                    if (
+                        Math.abs(dy) >
+                        Math.abs(dx)
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (dx < 0) {
+
+                        const distance =
+                            Math.max(
+                                -76,
+                                dx
+                            );
+
+
+                        expense.style.transition =
+                            'none';
+
+
+                        expense.style.transform =
+                            `translateX(${distance}px)`;
+
+                    }
+
+                },
+                {
+                    passive: true
+                }
+            );
+
+
+            expense.addEventListener(
+                'touchend',
+                function() {
+
+                    if (!tracking) {
+                        return;
+                    }
+
+
+                    tracking =
+                        false;
+
+
+                    const dx =
+                        currentX -
+                        startX;
+
+
+                    expense.style.transition =
+                        'transform .2s ease';
+
+
+                    if (dx < -45) {
+
+                        expense.classList.add(
+                            'swiped'
+                        );
+
+                    }
+                    else {
+
+                        expense.classList.remove(
+                            'swiped'
+                        );
+
+                        expense.style.transform =
+                            '';
+
+                    }
+
+
+                    if (dx < -120) {
+
+                        const id =
+                            wrapper.dataset.id;
+
+
+                        setTimeout(
+                            function() {
+
+                                deleteExpense(
+                                    id
+                                );
+
+                            },
+                            120
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// HEALTH HANDLERS
+// =====================================================
+
+function setupHealthHandlers(
+    page
+) {
+
+    page.querySelectorAll(
+        '[data-health-action]'
+    ).forEach(
+        function(button) {
+
+            button.addEventListener(
+                'click',
+                function() {
+
+                    const action =
+                        button.dataset.healthAction;
+
+
+                    if (
+                        action ===
+                        'workout' &&
+                        typeof
+                            window.completeWorkout ===
+                            'function'
+                    ) {
+
+                        window.completeWorkout();
+
+                        refreshCurrentPage();
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// DEVELOPMENT HANDLERS
+// =====================================================
+
+function setupDevelopmentHandlers(
+    page
+) {
+
+    page.querySelectorAll(
+        '[data-development-action]'
+    ).forEach(
+        function(button) {
+
+            button.addEventListener(
+                'click',
+                function() {
+
+                    const action =
+                        button.dataset
+                            .developmentAction;
+
+
+                    if (
+                        action === 'book'
+                    ) {
+
+                        addDevelopmentXP(
+                            10
+                        );
+
+                    }
+
+
+                    refreshCurrentPage();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// GENERIC EDIT
+// =====================================================
+
+function handleEdit(
+    id
+) {
+
+    if (!id) {
+        return;
+    }
+
+
+    // -----------------------------------------
+    // FINANCE
+    // -----------------------------------------
+
+    if (
+        id === 'income'
+    ) {
+
+        editFinanceValue(
+            'monthlyIncome',
+            'Введите доход за месяц:'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'yearlyGoal'
+    ) {
+
+        editFinanceValue(
+            'yearlyGoal',
+            'Введите цель на год:'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'savings'
+    ) {
+
+        editFinanceValue(
+            'savings',
+            'Введите сумму накоплений:'
+        );
+
+        return;
+
+    }
+
+
+    // -----------------------------------------
+    // DEVELOPMENT
+    // -----------------------------------------
+
+    if (
+        id === 'books'
+    ) {
+
+        editDevelopmentValue(
+            'books',
+            'Введите количество книг:'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'languageMinutes'
+    ) {
+
+        editDevelopmentValue(
+            'languageMinutes',
+            'Введите минуты изучения языка:'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'meditationMinutes'
+    ) {
+
+        editDevelopmentValue(
+            'meditationMinutes',
+            'Введите минуты медитации:'
+        );
+
+        return;
+
+    }
+
+
+    // -----------------------------------------
+    // HEALTH
+    // -----------------------------------------
+
+    if (
+        id === 'healthRoutine'
+    ) {
+
+        editHealthValue(
+            'routine',
+            'Введите процент режима дня (0-100):'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'healthNutrition'
+    ) {
+
+        editHealthValue(
+            'nutrition',
+            'Введите процент питания (0-100):'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        id === 'healthSteps'
+    ) {
+
+        editHealthValue(
+            'steps',
+            'Введите количество шагов:'
+        );
+
+        return;
+
+    }
+
+
+    console.warn(
+        'Unknown edit:',
+        id
+    );
+
+}
+
+
+// =====================================================
+// FINANCE EDIT
+// =====================================================
+
+function editFinanceValue(
+    key,
+    message
+) {
+
+    const finance =
+        getCategory(
+            'finance'
+        );
+
+
+    if (!finance) {
+        return;
+    }
+
+
+    const current =
+        num(
+            finance[key]
+        );
+
+
+    const value =
+        prompt(
+            message,
+            String(current)
+        );
+
+
+    if (
+        value === null ||
+        value.trim() === ''
+    ) {
+
+        return;
+
+    }
+
+
+    const number =
+        Number(
+            value.replace(
+                /\s/g,
+                ''
+            ).replace(
+                ',',
+                '.'
+            )
+        );
+
+
+    if (
+        !Number.isFinite(number) ||
+        number < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректное число'
+        );
+
+        return;
+
+    }
+
+
+    finance[key] =
+        number;
+
+
+    // -----------------------------------------
+    // XP
+    // -----------------------------------------
+
+    finance.xp =
+        num(finance.xp) + 5;
+
+
+    finance.level =
+        levelFromXP(
+            finance.xp
+        );
+
+
+    save();
+
+
+    showToast(
+        '💾 Финансовые данные обновлены'
+    );
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+    refreshCurrentPage();
+
+}
+
+
+// =====================================================
+// EXPENSE MODAL
+// =====================================================
+
+function openExpenseModal(
+    id = null
+) {
+
+    const existing =
+        id
+            ? expenses.find(
+                function(expense) {
+                    return String(
+                        expense.id
+                    ) === String(id);
+                }
+            )
+            : null;
+
+
+    const name =
+        prompt(
+            'Название обязательного расхода:',
+            existing
+                ? existing.name
+                : ''
+        );
+
+
+    if (
+        name === null
+    ) {
+
+        return;
+
+    }
+
+
+    const cleanName =
+        name.trim();
+
+
+    if (!cleanName) {
+
+        showToast(
+            '⚠️ Укажите название расхода'
+        );
+
+        return;
+
+    }
+
+
+    const amountInput =
+        prompt(
+            'Сумма обязательного расхода:',
+            existing
+                ? String(
+                    existing.amount
+                )
+                : ''
+        );
+
+
+    if (
+        amountInput === null
+    ) {
+
+        return;
+
+    }
+
+
+    const amount =
+        Number(
+            amountInput
+                .replace(
+                    /\s/g,
+                    ''
+                )
+                .replace(
+                    ',',
+                    '.'
+                )
+        );
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
+        showToast(
+            '⚠️ Укажите корректную сумму'
+        );
+
+        return;
+
+    }
+
+
+    if (existing) {
+
+        existing.name =
+            cleanName;
+
+        existing.amount =
+            amount;
+
+
+        showToast(
+            '✎ Расход изменён'
+        );
+
+    }
+    else {
+
+        expenses.push({
+
+            id:
+                String(
+                    Date.now()
+                ) +
+                Math.random()
+                    .toString(36)
+                    .slice(2),
+
+            name:
+                cleanName,
+
+            amount:
+                amount
+
+        });
+
+
+        showToast(
+            '💳 Расход добавлен'
+        );
+
+    }
+
+
+    const finance =
+        getCategory(
+            'finance'
+        );
+
+
+    if (finance) {
+
+        finance.xp =
+            num(finance.xp) + 5;
+
+        finance.level =
+            levelFromXP(
+                finance.xp
+            );
+
+    }
+
+
+    save();
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+    refreshCurrentPage();
+
+}
+
+
+// =====================================================
+// DELETE EXPENSE
+// =====================================================
+
+function deleteExpense(
+    id
+) {
+
+    const index =
+        expenses.findIndex(
+            function(expense) {
+
+                return String(
+                    expense.id
+                ) === String(id);
+
+            }
+        );
+
+
+    if (
+        index === -1
+    ) {
+
+        return;
+
+    }
+
+
+    expenses.splice(
+        index,
+        1
+    );
+
+
+    save();
+
+
+    showToast(
+        '🗑 Расход удалён'
+    );
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+    refreshCurrentPage();
+
+}
+
+
+// =====================================================
+// DEVELOPMENT EDIT
+// =====================================================
+
+function editDevelopmentValue(
+    key,
+    message
+) {
+
+    const development =
+        getCategory(
+            'development'
+        );
+
+
+    if (!development) {
+        return;
+    }
+
+
+    const current =
+        num(
+            development[key]
+        );
+
+
+    const value =
+        prompt(
+            message,
+            String(current)
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const number =
+        Number(
+            value.replace(
+                /\s/g,
+                ''
+            )
+        );
+
+
+    if (
+        !Number.isFinite(number) ||
+        number < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректное число'
+        );
+
+        return;
+
+    }
+
+
+    development[key] =
+        number;
+
+
+    development.xp =
+        num(
+            development.xp
+        ) + 5;
+
+
+    development.level =
+        levelFromXP(
+            development.xp
+        );
+
+
+    save();
+
+
+    showToast(
+        '🧠 Развитие обновлено'
+    );
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+    refreshCurrentPage();
+
+}
+
+
+// =====================================================
+// HEALTH EDIT
+// =====================================================
+
+function editHealthValue(
+    key,
+    message
+) {
+
+    const health =
+        getCategory(
+            'health'
+        );
+
+
+    if (!health) {
+        return;
+    }
+
+
+    const current =
+        num(
+            health[key]
+        );
+
+
+    const value =
+        prompt(
+            message,
+            String(current)
+        );
+
+
+    if (
+        value === null
+    ) {
+
+        return;
+
+    }
+
+
+    const number =
+        Number(
+            value.replace(
+                /\s/g,
+                ''
+            )
+        );
+
+
+    if (
+        !Number.isFinite(number) ||
+        number < 0
+    ) {
+
+        showToast(
+            '⚠️ Введите корректное число'
+        );
+
+        return;
+
+    }
+
+
+    if (
+        key === 'routine' ||
+        key === 'nutrition'
+    ) {
+
+        health[key] =
+            clamp(
+                number,
+                0,
+                100
+            );
+
+    }
+    else {
+
+        health[key] =
+            clamp(
+                number,
+                0,
+                100000
+            );
+
+    }
+
+
+    health.xp =
+        num(
+            health.xp
+        ) + 5;
+
+
+    health.level =
+        levelFromXP(
+            health.xp
+        );
+
+
+    save();
+
+
+    showToast(
+        '❤️ Данные здоровья обновлены'
+    );
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+    refreshCurrentPage();
+
+}
+
+
+// =====================================================
+// DEVELOPMENT XP
+// =====================================================
+
+function addDevelopmentXP(
+    amount
+) {
+
+    const development =
+        getCategory(
+            'development'
+        );
+
+
+    if (!development) {
+        return;
+    }
+
+
+    development.xp =
+        num(
+            development.xp
+        ) +
+        num(amount);
+
+
+    development.level =
+        levelFromXP(
+            development.xp
+        );
+
+
+    save();
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
+}
+
+
+// =====================================================
+// QUEST
+// =====================================================
+
+function setupQuest() {
 
     const button =
         document.getElementById(
@@ -1729,35 +2939,49 @@ function setupDailyQuest() {
 
 
 // =====================================================
-// DAILY QUEST LOGIC
+// DAILY QUEST
 // =====================================================
 
 function completeDailyQuest() {
 
-    if (!state) {
+    const button =
+        document.getElementById(
+            'dailyQuest'
+        );
+
+
+    if (
+        !button ||
+        button.disabled
+    ) {
+
         return;
+
     }
 
 
     const quests =
-        Array.isArray(state.quests)
+        Array.isArray(
+            state.quests
+        )
             ? state.quests
             : [];
 
 
     const available =
-        quests.filter(
-            quest =>
-                !quest.done
+        quests.find(
+            function(quest) {
+
+                return !quest.done;
+
+            }
         );
 
 
-    if (
-        available.length === 0
-    ) {
+    if (!available) {
 
         showToast(
-            '⚡ Все квесты выполнены'
+            '✅ Все квесты выполнены'
         );
 
         return;
@@ -1765,26 +2989,39 @@ function completeDailyQuest() {
     }
 
 
-    const quest =
-        available[0];
-
-
-    const category =
-        state.categories[
-            quest.category
-        ];
+    available.done =
+        true;
 
 
     const reward =
-        Math.max(
-            0,
-            Number(quest.xp) || 0
+        num(
+            available.xp
+        );
+
+
+    state.player.xp =
+        num(
+            state.player.xp
+        ) +
+        reward;
+
+
+    state.player.level =
+        levelFromXP(
+            state.player.xp
+        );
+
+
+    const category =
+        getCategory(
+            available.category
         );
 
 
     if (category) {
 
-        category.xp +=
+        category.xp =
+            num(category.xp) +
             reward;
 
 
@@ -1796,77 +3033,37 @@ function completeDailyQuest() {
     }
 
 
-    const playerReward =
-        playerXPFromCategoryXP(
-            reward
-        );
-
-
-    state.player.xp +=
-        playerReward;
-
-
-    state.player.level =
-        levelFromXP(
-            state.player.xp
-        );
-
-
-    quest.done =
-        true;
-
-
-    persist();
-
-
-    updateAllUI();
+    save();
 
 
     showToast(
-        `⚡ Квест выполнен! +${reward} XP`
+        '⚡ Квест выполнен! +' +
+        reward +
+        ' XP'
     );
 
 
-    const button =
-        document.getElementById(
-            'dailyQuest'
-        );
+    button.textContent =
+        '✅ QUEST COMPLETED';
 
 
-    if (button) {
-
-        button.textContent =
-            '✅ QUEST COMPLETED';
-
-        button.disabled =
-            true;
-
-        button.style.opacity =
-            '.5';
-
-    }
+    button.disabled =
+        true;
 
 
-    /*
-     * Daily reset for current session.
-     * The permanent quest state remains in storage.
-     */
+    button.style.opacity =
+        '0.5';
+
+
+    updateHomeUI();
+
+    updatePlayerUI();
+
 
     setTimeout(
-        () => {
+        function() {
 
-            if (!button) {
-                return;
-            }
-
-            button.textContent =
-                '⚡ DAILY QUEST';
-
-            button.disabled =
-                false;
-
-            button.style.opacity =
-                '1';
+            resetDailyQuestButton();
 
         },
         30000
@@ -1876,179 +3073,216 @@ function completeDailyQuest() {
 
 
 // =====================================================
-// GLOBAL EVENTS
+// QUEST RESET UI
 // =====================================================
 
-function setupGlobalEvents() {
+function resetDailyQuestButton() {
 
-    // -------------------------------------------------
-    // CLICK OUTSIDE PAGE
-    // -------------------------------------------------
-
-    document.addEventListener(
-        'click',
-        event => {
-
-            const page =
-                document.querySelector(
-                    '.page'
-                );
+    const button =
+        document.getElementById(
+            'dailyQuest'
+        );
 
 
-            if (
-                page &&
-                event.target === page
-            ) {
-
-                closePage();
-
-            }
-
-        }
-    );
+    if (!button) {
+        return;
+    }
 
 
-    // -------------------------------------------------
-    // ESC
-    // -------------------------------------------------
-
-    document.addEventListener(
-        'keydown',
-        event => {
-
-            if (
-                event.key === 'Escape'
-            ) {
-
-                closePage();
-
-            }
-
-        }
-    );
+    button.textContent =
+        '⚡ DAILY QUEST';
 
 
-    // -------------------------------------------------
-    // BACK SWIPE
-    // -------------------------------------------------
+    button.disabled =
+        false;
 
-    setupBackSwipe();
+
+    button.style.opacity =
+        '1';
 
 }
 
 
 // =====================================================
-// MOBILE BACK SWIPE
+// GLOBAL HANDLERS
 // =====================================================
 
-function setupBackSwipe() {
+function setupGlobalHandlers() {
 
-    let startX = 0;
-
-    let startY = 0;
-
-    let tracking = false;
-
+    // -----------------------------------------
+    // ESC
+    // -----------------------------------------
 
     document.addEventListener(
-        'touchstart',
-        event => {
+        'keydown',
+        function(event) {
 
             if (
-                !document.querySelector(
-                    '.page'
-                )
-            ) {
-                return;
-            }
-
-
-            const touch =
-                event.touches[0];
-
-
-            if (!touch) {
-                return;
-            }
-
-
-            /*
-             * iPhone-style edge swipe.
-             */
-
-            if (
-                touch.clientX > 35
+                event.key ===
+                'Escape'
             ) {
 
-                return;
+                const overlay =
+                    document.querySelector(
+                        '.overlay'
+                    );
+
+
+                if (overlay) {
+
+                    overlay.remove();
+
+                    return;
+
+                }
+
+
+                closePage();
 
             }
 
-
-            startX =
-                touch.clientX;
-
-            startY =
-                touch.clientY;
-
-            tracking =
-                true;
-
-        },
-        {
-            passive: true
         }
     );
 
 
+    // -----------------------------------------
+    // OUTSIDE PAGE
+    // -----------------------------------------
+
     document.addEventListener(
-        'touchend',
-        event => {
-
-            if (!tracking) {
-                return;
-            }
-
-
-            tracking =
-                false;
-
-
-            const touch =
-                event.changedTouches[0];
-
-
-            if (!touch) {
-                return;
-            }
-
-
-            const dx =
-                touch.clientX -
-                startX;
-
-
-            const dy =
-                Math.abs(
-                    touch.clientY -
-                    startY
-                );
-
+        'click',
+        function(event) {
 
             if (
-                dx > 80 &&
-                dy < 100
+                event.target.classList.contains(
+                    'page'
+                )
             ) {
 
                 closePage();
 
             }
 
-        },
-        {
-            passive: true
         }
     );
+
+}
+
+
+// =====================================================
+// REFRESH CURRENT PAGE
+// =====================================================
+
+function refreshCurrentPage() {
+
+    if (
+        currentPage ===
+        'home'
+    ) {
+
+        updateHomeUI();
+
+        updatePlayerUI();
+
+        return;
+
+    }
+
+
+    openPage(
+        currentPage
+    );
+
+}
+
+
+// =====================================================
+// CREATOR
+// =====================================================
+
+function creatorHTML() {
+
+    return `
+
+        <a
+            class="creator"
+            href="https://t.me/shkeltinsh"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Created by
+            <strong>
+                &nbsp;@shkeltinsh
+            </strong>
+        </a>
+
+    `;
+
+}
+
+
+// =====================================================
+// ESCAPE HTML
+// =====================================================
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value === undefined ||
+        value === null
+            ? ''
+            : value
+    ).replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                '&':
+                    '&amp;',
+
+                '<':
+                    '&lt;',
+
+                '>':
+                    '&gt;',
+
+                '"':
+                    '&quot;',
+
+                "'":
+                    '&#039;'
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// MODULE UNAVAILABLE
+// =====================================================
+
+function moduleUnavailable(
+    message
+) {
+
+    return `
+
+        <div class="notice">
+
+            ⚠️
+            ${escapeHTML(
+                message
+            )}
+
+        </div>
+
+    `;
 
 }
 
@@ -2060,10 +3294,6 @@ function setupBackSwipe() {
 function showToast(
     message
 ) {
-
-    /*
-     * Reuse existing toast if available.
-     */
 
     let toast =
         document.querySelector(
@@ -2089,7 +3319,7 @@ function showToast(
 
 
     toast.textContent =
-        String(message);
+        message;
 
 
     toast.classList.add(
@@ -2098,13 +3328,13 @@ function showToast(
 
 
     clearTimeout(
-        toast._lifeGameTimer
+        toast._timer
     );
 
 
-    toast._lifeGameTimer =
+    toast._timer =
         setTimeout(
-            () => {
+            function() {
 
                 toast.classList.remove(
                     'show'
@@ -2118,238 +3348,57 @@ function showToast(
 
 
 // =====================================================
-// ADD PLAYER XP
-// =====================================================
-
-function addXP(
-    amount
-) {
-
-    if (!state) {
-        return;
-    }
-
-
-    const value =
-        Math.max(
-            0,
-            Number(amount) || 0
-        );
-
-
-    if (value <= 0) {
-        return;
-    }
-
-
-    state.player.xp +=
-        value;
-
-
-    const oldLevel =
-        state.player.level;
-
-
-    state.player.level =
-        levelFromXP(
-            state.player.xp
-        );
-
-
-    persist();
-
-
-    updateAllUI();
-
-
-    if (
-        state.player.level >
-        oldLevel
-    ) {
-
-        showToast(
-            `🎉 УРОВЕНЬ ПОВЫШЕН! LVL ${state.player.level}`
-        );
-
-    }
-
-}
-
-
-// =====================================================
-// CATEGORY XP
-// =====================================================
-
-function addCategoryXP(
-    categoryName,
-    amount
-) {
-
-    if (!state) {
-        return;
-    }
-
-
-    const category =
-        state.categories[
-            categoryName
-        ];
-
-
-    if (!category) {
-        return;
-    }
-
-
-    const value =
-        Math.max(
-            0,
-            Number(amount) || 0
-        );
-
-
-    category.xp +=
-        value;
-
-
-    category.level =
-        levelFromXP(
-            category.xp
-        );
-
-
-    /*
-     * Category XP also contributes
-     * to player XP.
-     */
-
-    addXP(
-        playerXPFromCategoryXP(
-            value
-        )
-    );
-
-
-    persist();
-
-
-    updateAllUI();
-
-}
-
-
-// =====================================================
-// UPDATE CURRENT PAGE
-// =====================================================
-
-function refreshCurrentPage() {
-
-    if (
-        currentPage === 'home'
-    ) {
-
-        return;
-
-    }
-
-
-    const page =
-        document.querySelector(
-            '.page'
-        );
-
-
-    if (!page) {
-        return;
-    }
-
-
-    openPage(
-        currentPage
-    );
-
-}
-
-
-// =====================================================
 // GLOBAL API
 // =====================================================
 
-function exposeGlobalAPI() {
+window.LifeGameApp = {
 
-    window.openPage =
-        openPage;
+    getState:
+        function() {
+            return state;
+        },
 
+    getExpenses:
+        function() {
+            return expenses;
+        },
 
-    window.closePage =
-        closePage;
+    getUI:
+        function() {
+            return ui;
+        },
 
+    save:
+        save,
 
-    window.showToast =
-        showToast;
+    openPage:
+        openPage,
 
+    closePage:
+        closePage,
 
-    window.updateAllUI =
-        updateAllUI;
+    refresh:
+        refreshCurrentPage,
 
+    updateHomeUI:
+        updateHomeUI,
 
-    window.addXP =
-        addXP;
+    updatePlayerUI:
+        updatePlayerUI
 
-
-    window.addCategoryXP =
-        addCategoryXP;
-
-
-    window.persistLifeGame =
-        persist;
-
-
-    window.refreshCurrentPage =
-        refreshCurrentPage;
-
-
-    /*
-     * Expose state.
-     */
-
-    window.getLifeGameState =
-        () => state;
+};
 
 
-    /*
-     * Compatibility.
-     */
+window.openPage =
+    openPage;
 
-    window.lifeGame =
-        {
 
-            get state() {
+window.closePage =
+    closePage;
 
-                return state;
 
-            },
-
-            save:
-                persist,
-
-            update:
-                updateAllUI,
-
-            openPage,
-
-            closePage,
-
-            toast:
-                showToast,
-
-            addXP,
-
-            addCategoryXP
-
-        };
-
-}
+window.showToast =
+    showToast;
 
 
 // =====================================================
@@ -2363,15 +3412,15 @@ if (
 
     document.addEventListener(
         'DOMContentLoaded',
-        initApp,
+        init,
         {
             once: true
         }
     );
 
-} else {
+}
+else {
 
-    initApp();
+    init();
 
 }
-```
