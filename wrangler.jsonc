@@ -1,8 +1,11 @@
+```json
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "life-game-1-1",
-  "compatibility_date": "2026-08-28",
+  "compatibility_date": "2026-08-30",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
   }
 }
+```
