@@ -7,12 +7,22 @@
 
     'use strict';
 
+
+    // =================================================
+    // HELPERS
+    // =================================================
+
     function num(value) {
-        const n = Number(value);
-        return Number.isFinite(n) ? n : 0;
+
+        return Number.isFinite(Number(value))
+            ? Number(value)
+            : 0;
+
     }
 
+
     function clamp(value, min, max) {
+
         return Math.min(
             max,
             Math.max(
@@ -20,85 +30,126 @@
                 num(value)
             )
         );
+
     }
 
+
     function fmt(value) {
+
         return new Intl.NumberFormat(
             'ru-RU'
         ).format(
             num(value)
         );
+
     }
 
+
     function esc(value) {
+
         return String(value).replace(
             /[&<>"']/g,
             function (character) {
+
                 return {
+
                     '&': '&amp;',
                     '<': '&lt;',
                     '>': '&gt;',
                     '"': '&quot;',
                     "'": '&#039;'
+
                 }[character];
+
             }
         );
+
     }
 
 
     // =================================================
     // HEALTH PROGRESS
+    // Сохраняем текущую рабочую механику
     // =================================================
 
     function progress(state) {
 
         if (
             !state ||
-            !state.categories ||
-            !state.categories.health
+            !state.categories
         ) {
+
             return 0;
+
         }
+
 
         const health =
             state.categories.health;
 
-        const sleep =
-            clamp(
-                num(health.sleep),
-                0,
-                100
-            );
+        const training =
+            state.categories.training;
 
-        const sport =
-            clamp(
-                num(health.sport),
-                0,
-                100
-            );
 
-        const nutrition =
-            clamp(
-                num(health.nutrition),
-                0,
-                100
-            );
+        if (
+            !health ||
+            !training
+        ) {
 
-        const water =
-            clamp(
-                num(health.water),
-                0,
-                100
-            );
+            return 0;
+
+        }
+
+
+        const healthPart =
+            (
+                clamp(
+                    num(health.routine),
+                    0,
+                    100
+                ) +
+
+                clamp(
+                    num(health.nutrition),
+                    0,
+                    100
+                ) +
+
+                clamp(
+                    Math.round(
+                        num(health.steps) /
+                        10000 *
+                        100
+                    ),
+                    0,
+                    100
+                )
+            ) / 3;
+
+
+        const trainingPart =
+            num(training.monthlyTarget) > 0
+
+                ? clamp(
+                    Math.round(
+                        num(training.workouts) /
+                        num(training.monthlyTarget) *
+                        100
+                    ),
+                    0,
+                    100
+                )
+
+                : 0;
+
 
         return Math.round(
             (
-                sleep +
-                sport +
-                nutrition +
-                water
-            ) / 4
+                healthPart +
+                trainingPart
+            ) / 2
         );
+
     }
 
 
@@ -109,7 +160,8 @@
     function metric(
         icon,
         title,
-        value,
+        current,
+        target,
         percent,
         edit
     ) {
@@ -133,7 +185,9 @@
                             </strong>
 
                             <span>
-                                ${esc(value)}
+                                ${esc(current)}
+                                /
+                                ${esc(target)}
                             </span>
 
                         </div>
@@ -150,6 +204,7 @@
 
                 </div>
 
+
                 <div class="metric-bar">
 
                     <i
@@ -164,21 +219,26 @@
 
                 </div>
 
+
                 ${
                     edit
                         ? `
+
                             <button
                                 class="edit"
                                 data-edit="${esc(edit)}"
                             >
                                 ✎ ИЗМЕНИТЬ
                             </button>
+
                         `
                         : ''
                 }
 
             </div>
+
         `;
+
     }
 
 
@@ -186,47 +246,47 @@
     // HEALTH PAGE
     // =================================================
 
-    function page(
-        state,
-        ui
-    ) {
+    function page(state) {
 
         if (
             !state ||
             !state.categories ||
-            !state.categories.health
+            !state.categories.health ||
+            !state.categories.training
         ) {
 
             return `
 
                 <div class="notice">
+
                     Данные здоровья
                     недоступны.
+
                 </div>
 
             `;
+
         }
+
 
         const health =
             state.categories.health;
+
+        const training =
+            state.categories.training;
+
 
         const totalProgress =
             progress(state);
 
 
-        const sleep =
+        const routine =
             clamp(
-                num(health.sleep),
+                num(health.routine),
                 0,
                 100
             );
 
-        const sport =
-            clamp(
-                num(health.sport),
-                0,
-                100
-            );
 
         const nutrition =
             clamp(
@@ -235,11 +295,53 @@
                 100
             );
 
-        const water =
+
+        const steps =
+            Math.max(
+                0,
+                num(health.steps)
+            );
+
+
+        const workouts =
+            Math.max(
+                0,
+                num(training.workouts)
+            );
+
+
+        const monthlyTarget =
+            Math.max(
+                1,
+                num(training.monthlyTarget)
+            );
+
+
+        const workoutProgress =
             clamp(
-                num(health.water),
+                Math.round(
+                    workouts /
+                    monthlyTarget *
+                    100
+                ),
                 0,
                 100
+            );
+
+
+        const workoutXP =
+            Math.max(
+                5,
+                Math.round(
+                    80 /
+                    Math.pow(
+                        Math.max(
+                            1,
+                            num(training.level)
+                        ),
+                        .58
+                    )
+                )
             );
 
 
@@ -252,14 +354,20 @@
             <div class="summary">
 
                 <div class="section-label">
+
                     HEALTH LEVEL ${num(
                         health.level
                     )}
+
                 </div>
 
+
                 <div class="summary-number">
+
                     ${totalProgress}%
+
                 </div>
+
 
                 <div class="progress">
 
@@ -288,6 +396,7 @@
 
                     </div>
 
+
                     <div class="finance-line">
 
                         <span>
@@ -308,50 +417,123 @@
 
 
             <!-- =========================================
-                 HEALTH METRICS
+                 TRAINING
             ========================================== -->
 
             <div class="cards">
 
-                ${metric(
-                    '😴',
-                    'Сон',
-                    `${sleep}%`,
-                    sleep,
-                    'sleep'
-                )}
+                <div class="training-divider">
+                    TRAINING
+                </div>
+
 
                 ${metric(
-                    '🏃',
-                    'Физическая активность',
-                    `${sport}%`,
-                    sport,
-                    'sport'
+                    '🏋️',
+                    'Тренировки',
+                    fmt(workouts),
+                    fmt(monthlyTarget),
+                    workoutProgress,
+                    'workouts'
                 )}
 
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                ⚡
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    XP за тренировку
+                                </strong>
+
+                                <span>
+                                    Чем выше уровень,
+                                    тем сложнее прокачка
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric-percent">
+                            +${workoutXP}
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        class="edit"
+                        id="completeWorkout"
+                    >
+                        ВЫПОЛНИТЬ ТРЕНИРОВКУ
+                    </button>
+
+                </div>
+
+
+                <!-- =====================================
+                     HEALTH
+                ====================================== -->
+
+                <div class="training-divider">
+                    HEALTH
+                </div>
+
+
                 ${metric(
-                    '🥗',
+                    '⏰',
+                    'Режим дня',
+                    fmt(routine) + '%',
+                    '100%',
+                    routine,
+                    'routine'
+                )}
+
+
+                ${metric(
+                    '🍎',
                     'Питание',
-                    `${nutrition}%`,
+                    fmt(nutrition) + '%',
+                    '100%',
                     nutrition,
                     'nutrition'
                 )}
 
+
                 ${metric(
-                    '💧',
-                    'Вода',
-                    `${water}%`,
-                    water,
-                    'water'
+                    '🚶',
+                    'Шаги',
+                    fmt(steps),
+                    '10 000',
+                    clamp(
+                        Math.round(
+                            steps /
+                            10000 *
+                            100
+                        ),
+                        0,
+                        100
+                    ),
+                    'steps'
                 )}
 
 
                 <div class="notice">
 
-                    Поддерживай показатели
-                    здоровья каждый день,
-                    чтобы увеличивать
-                    свой прогресс.
+                    Прогресс тренировок входит
+                    в общий показатель здоровья.
+
+                    Все ранее сохранённые
+                    тренировки сохраняются.
 
                 </div>
 
@@ -364,13 +546,14 @@
                 >
                     Created by
                     <strong>
-                        @shkeltinsh
+                        &nbsp;@shkeltinsh
                     </strong>
                 </a>
 
             </div>
 
         `;
+
     }
 
 
