@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1336,30 +1335,67 @@ button:active{
         class="active"
         data-nav="home"
     >
-        <span class="nav-icon">⌂</span>
-        <span class="nav-label">Главная</span>
+
+        <span class="nav-icon">
+            ⌂
+        </span>
+
+        <span class="nav-label">
+            Главная
+        </span>
+
     </button>
 
-    <button data-nav="finance">
-        <span class="nav-icon">💰</span>
-        <span class="nav-label">Финансы</span>
+
+    <button
+        data-nav="finance"
+    >
+
+        <span class="nav-icon">
+            💰
+        </span>
+
+        <span class="nav-label">
+            Финансы
+        </span>
+
     </button>
 
-    <button data-nav="health">
-        <span class="nav-icon">❤️</span>
-        <span class="nav-label">Здоровье</span>
+
+    <button
+        data-nav="health"
+    >
+
+        <span class="nav-icon">
+            ❤️
+        </span>
+
+        <span class="nav-label">
+            Здоровье
+        </span>
+
     </button>
 
-    <button data-nav="development">
-        <span class="nav-icon">🧠</span>
-        <span class="nav-label">Развитие</span>
+
+    <button
+        data-nav="development"
+    >
+
+        <span class="nav-icon">
+            🧠
+        </span>
+
+        <span class="nav-label">
+            Развитие
+        </span>
+
     </button>
 
 </nav>
 
 
 <!-- =====================================================
-     CORE
+     CORE MODULES
      ===================================================== -->
 
 <script src="js/core/state.js"></script>
@@ -1369,7 +1405,7 @@ button:active{
 
 
 <!-- =====================================================
-     SECTIONS
+     SECTION MODULES
      ===================================================== -->
 
 <script src="js/sections/finance.js"></script>
@@ -1384,7 +1420,7 @@ button:active{
 
 
 /* =====================================================
-   FALLBACK CORE / COMPATIBILITY
+   FALLBACK CORE
    ===================================================== */
 
 const SK='life_game_core_v3';
@@ -1522,18 +1558,25 @@ const DEFAULT={
 
 
 const clone=function(o){
-    return JSON.parse(JSON.stringify(o));
+
+    return JSON.parse(
+        JSON.stringify(o)
+    );
+
 };
 
 
 const num=function(v){
+
     return Number.isFinite(Number(v))
         ? Number(v)
         : 0;
+
 };
 
 
 const clamp=function(v,a,b){
+
     return Math.min(
         b,
         Math.max(
@@ -1541,15 +1584,18 @@ const clamp=function(v,a,b){
             v
         )
     );
+
 };
 
 
 const fmt=function(v){
+
     return new Intl.NumberFormat(
         'ru-RU'
     ).format(
         num(v)
     );
+
 };
 
 
@@ -1560,11 +1606,13 @@ const esc=function(v){
         function(m){
 
             return {
+
                 '&':'&amp;',
                 '<':'&lt;',
                 '>':'&gt;',
                 '"':'&quot;',
                 "'":'&#039;'
+
             }[m];
 
         }
@@ -1581,19 +1629,31 @@ function normalize(s){
 
     let r=clone(DEFAULT);
 
-    if(!s || typeof s!=='object'){
+    if(
+        !s ||
+        typeof s!=='object'
+    ){
+
         return r;
+
     }
+
 
     if(s.player){
 
-        Object.keys(r.player).forEach(function(k){
+        Object.keys(
+            r.player
+        ).forEach(function(k){
 
-            if(s.player[k]!==undefined){
+            if(
+                s.player[k]!==undefined
+            ){
 
                 r.player[k]=Math.max(
                     0,
-                    num(s.player[k])
+                    num(
+                        s.player[k]
+                    )
                 );
 
             }
@@ -1603,7 +1663,9 @@ function normalize(s){
     }
 
 
-    Object.keys(r.categories).forEach(function(c){
+    Object.keys(
+        r.categories
+    ).forEach(function(c){
 
         if(
             s.categories &&
@@ -1630,32 +1692,40 @@ function normalize(s){
     });
 
 
-    if(Array.isArray(s.quests)){
+    if(
+        Array.isArray(s.quests)
+    ){
 
-        r.quests=s.quests.map(function(q){
+        r.quests=s.quests.map(
+            function(q){
 
-            return {
+                return {
 
-                id:String(q.id||''),
+                    id:String(
+                        q.id||''
+                    ),
 
-                category:String(
-                    q.category||'health'
-                ),
+                    category:String(
+                        q.category||'health'
+                    ),
 
-                title:String(
-                    q.title||'Quest'
-                ),
+                    title:String(
+                        q.title||'Quest'
+                    ),
 
-                xp:Math.max(
-                    0,
-                    num(q.xp)
-                ),
+                    xp:Math.max(
+                        0,
+                        num(q.xp)
+                    ),
 
-                done:Boolean(q.done)
+                    done:Boolean(
+                        q.done
+                    )
 
-            };
+                };
 
-        });
+            }
+        );
 
     }
 
@@ -1670,10 +1740,14 @@ function loadState(){
     try{
 
         const r=
-            localStorage.getItem(SK);
+            localStorage.getItem(
+                SK
+            );
 
         return r
-            ? normalize(JSON.parse(r))
+            ? normalize(
+                JSON.parse(r)
+            )
             : clone(DEFAULT);
 
     }catch(e){
@@ -1753,7 +1827,9 @@ function loadUI(){
     }catch(e){
 
         return {
+
             expensesCollapsed:false
+
         };
 
     }
@@ -1861,8 +1937,12 @@ function addPlayerXP(a){
     state.player.xp=
         Math.max(
             0,
-            num(state.player.xp)+
-            Math.round(num(a))
+            num(
+                state.player.xp
+            )+
+            Math.round(
+                num(a)
+            )
         );
 
     state.player.level=
@@ -1877,12 +1957,18 @@ function addCatXP(c,a){
 
     const v=Math.max(
         0,
-        Math.round(num(a))
+        Math.round(
+            num(a)
+        )
     );
 
 
-    if(!state.categories[c]){
+    if(
+        !state.categories[c]
+    ){
+
         return;
+
     }
 
 
@@ -1903,7 +1989,9 @@ function addCatXP(c,a){
 
 
     addPlayerXP(
-        Math.round(v*.65)
+        Math.round(
+            v*.65
+        )
     );
 
 
@@ -1937,7 +2025,10 @@ function incomeXP(v){
 }
 
 
-function applyIncome(oldV,newV){
+function applyIncome(
+    oldV,
+    newV
+){
 
     const d=Math.max(
         0,
@@ -1963,7 +2054,7 @@ function applyIncome(oldV,newV){
 
 
 /* =====================================================
-   DEVELOPMENT MODULE
+   DEVELOPMENT
    ===================================================== */
 
 function developmentProgress(){
@@ -1981,56 +2072,44 @@ function developmentProgress(){
 
     }
 
-    return 0;
 
-}
-
-
-/* =====================================================
-   HEALTH MODULE
-   ===================================================== */
-
-function healthProgress(){
-
-    if(
-        window.LifeGameHealth &&
-        typeof
-        window.LifeGameHealth.progress===
-        'function'
-    ){
-
-        return window.LifeGameHealth.progress(
-            state
-        );
-
-    }
+    const x=
+        state.categories.development;
 
 
-    const h=
-        state.categories.health;
+    const books=
+        x.books>=2
+            ? 100
+            : Math.round(
+                x.books/2*100
+            );
+
+
+    const language=
+        x.languageMinutes>=30
+            ? 100
+            : Math.round(
+                x.languageMinutes/
+                30*
+                100
+            );
+
+
+    const meditation=
+        x.meditationMinutes>=15
+            ? 100
+            : Math.round(
+                x.meditationMinutes/
+                15*
+                100
+            );
 
 
     return Math.round(
         (
-            clamp(
-                num(h.routine),
-                0,
-                100
-            )+
-            clamp(
-                num(h.nutrition),
-                0,
-                100
-            )+
-            clamp(
-                Math.round(
-                    num(h.steps)/
-                    10000*
-                    100
-                ),
-                0,
-                100
-            )
+            books+
+            language+
+            meditation
         )/3
     );
 
@@ -2038,7 +2117,7 @@ function healthProgress(){
 
 
 /* =====================================================
-   PROGRESS
+   GENERIC HELPERS
    ===================================================== */
 
 function progress(c){
@@ -2073,7 +2152,20 @@ function progress(c){
 
     if(c==='health'){
 
-        return healthProgress();
+        if(
+            window.LifeGameHealth &&
+            typeof
+            window.LifeGameHealth.progress===
+            'function'
+        ){
+
+            return window.LifeGameHealth.progress(
+                state
+            );
+
+        }
+
+        return 0;
 
     }
 
@@ -2212,212 +2304,7 @@ function metric(
 
 
 /* =====================================================
-   HEALTH PAGE
-   ===================================================== */
-
-function healthPage(){
-
-    if(
-        window.LifeGameHealth &&
-        typeof
-        window.LifeGameHealth.page===
-        'function'
-    ){
-
-        return window.LifeGameHealth.page(
-            state,
-            ui
-        );
-
-    }
-
-
-    const h=
-        state.categories.health;
-
-    const p=
-        healthProgress();
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                HEALTH LEVEL ${h.level}
-            </div>
-
-            <div class="summary-number">
-                ${p}%
-            </div>
-
-            <div class="progress">
-                <i
-                    style="width:${clamp(
-                        p,
-                        0,
-                        100
-                    )}%"
-                ></i>
-            </div>
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-
-                    <span>
-                        HEALTH XP
-                    </span>
-
-                    <strong>
-                        ${fmt(h.xp)} XP
-                    </strong>
-
-                </div>
-
-                <div class="finance-line">
-
-                    <span>
-                        STREAK
-                    </span>
-
-                    <strong>
-                        🔥 ${h.streak}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   CATEGORY PAGE
-   ===================================================== */
-
-function genericPage(c){
-
-    /*
-     * DEVELOPMENT полностью вынесен
-     * в js/sections/development.js
-     */
-
-    if(c==='development'){
-
-        if(
-            window.LifeGameDevelopment &&
-            typeof
-            window.LifeGameDevelopment.page===
-            'function'
-        ){
-
-            return window.LifeGameDevelopment.page(
-                state,
-                {
-                    metric:metric,
-                    fmt:fmt,
-                    clamp:clamp,
-                    esc:esc,
-                    creatorHTML:creatorHTML
-                }
-            );
-
-        }
-
-
-        return `
-            <div class="notice">
-                Модуль развития не загружен.
-            </div>
-        `;
-
-    }
-
-
-    const x=
-        state.categories[c];
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                ${c.toUpperCase()}
-                LEVEL
-                ${x.level}
-            </div>
-
-            <div class="summary-number">
-                ${progress(c)}%
-            </div>
-
-            <div class="progress">
-
-                <i
-                    style="width:${clamp(
-                        progress(c),
-                        0,
-                        100
-                    )}%"
-                ></i>
-
-            </div>
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-
-                    <span>
-                        ${c.toUpperCase()} XP
-                    </span>
-
-                    <strong>
-                        ${fmt(x.xp)} XP
-                    </strong>
-
-                </div>
-
-                <div class="finance-line">
-
-                    <span>
-                        STREAK
-                    </span>
-
-                    <strong>
-                        🔥 ${x.streak}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-            <div class="notice">
-                Раздел готовится к дальнейшему
-                расширению.
-            </div>
-
-            ${creatorHTML()}
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   OPEN CATEGORY
+   PAGE OPEN
    ===================================================== */
 
 function openCategory(c){
@@ -2459,22 +2346,46 @@ function openCategory(c){
                     </div>
                 `;
 
-    }else if(c==='health'){
+    }
+
+
+    else if(c==='health'){
 
         pageContent=
-            healthPage();
+            window.LifeGameHealth &&
+            typeof
+            window.LifeGameHealth.page===
+            'function'
 
-    }else if(c==='development'){
+                ? window.LifeGameHealth.page(
+                    state,
+                    ui
+                )
+
+                : `
+                    <div class="notice">
+                        Модуль здоровья
+                        не загружен.
+                    </div>
+                `;
+
+    }
+
+
+    else{
 
         pageContent=
-            genericPage(
-                'development'
-            );
+            window.LifeGameDevelopment &&
+            typeof
+            window.LifeGameDevelopment.page===
+            'function'
 
-    }else{
+                ? window.LifeGameDevelopment.page(
+                    state,
+                    ui
+                )
 
-        pageContent=
-            genericPage(c);
+                : genericPage(c);
 
     }
 
@@ -2538,6 +2449,167 @@ function openCategory(c){
 
 
 /* =====================================================
+   DEVELOPMENT FALLBACK PAGE
+   ===================================================== */
+
+function genericPage(c){
+
+    const x=
+        state.categories[c];
+
+    const p=
+        progress(c);
+
+    let body='';
+
+
+    if(c==='development'){
+
+        body=
+
+            metric(
+                '📚',
+                'Чтение книг',
+                fmt(x.books),
+                '2',
+                clamp(
+                    Math.round(
+                        x.books/
+                        2*
+                        100
+                    ),
+                    0,
+                    100
+                ),
+                'books'
+            )+
+
+            metric(
+                '🌐',
+                'Изучение языка',
+                fmt(
+                    x.languageMinutes
+                )+
+                ' мин',
+                '30 мин',
+                clamp(
+                    Math.round(
+                        x.languageMinutes/
+                        30*
+                        100
+                    ),
+                    0,
+                    100
+                ),
+                'languageMinutes'
+            )+
+
+            metric(
+                '🧘',
+                'Медитация',
+                fmt(
+                    x.meditationMinutes
+                )+
+                ' мин',
+                '15 мин',
+                clamp(
+                    Math.round(
+                        x.meditationMinutes/
+                        15*
+                        100
+                    ),
+                    0,
+                    100
+                ),
+                'meditationMinutes'
+            );
+
+    }
+
+
+    return `
+
+        <div class="summary">
+
+            <div class="section-label">
+                ${c.toUpperCase()}
+                LEVEL
+                ${x.level}
+            </div>
+
+            <div class="summary-number">
+                ${p}%
+            </div>
+
+            <div class="progress">
+
+                <i
+                    style="width:${clamp(
+                        p,
+                        0,
+                        100
+                    )}%"
+                ></i>
+
+            </div>
+
+            <div class="finance-box">
+
+                <div class="finance-line">
+
+                    <span>
+                        ${c.toUpperCase()} XP
+                    </span>
+
+                    <strong>
+                        ${fmt(x.xp)} XP
+                    </strong>
+
+                </div>
+
+                <div class="finance-line">
+
+                    <span>
+                        STREAK
+                    </span>
+
+                    <strong>
+                        🔥 ${x.streak}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="cards">
+
+            ${body}
+
+            <div class="notice">
+
+                Прогресс сохраняется
+                автоматически.
+
+                Повышение уровня XP
+                происходит сразу после
+                изменения показателя
+                или выполнения действия.
+
+            </div>
+
+            ${creatorHTML()}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
    PAGE EVENTS
    ===================================================== */
 
@@ -2559,7 +2631,9 @@ function bindPage(p,c){
     });
 
 
-    /* FINANCE */
+    /* =================================================
+       FINANCE EVENTS
+       ================================================= */
 
     if(c==='finance'){
 
@@ -2632,7 +2706,9 @@ function bindPage(p,c){
     }
 
 
-    /* HEALTH */
+    /* =================================================
+       HEALTH / TRAINING EVENTS
+       ================================================= */
 
     if(c==='health'){
 
@@ -3002,8 +3078,6 @@ function swipes(p){
 
 function openEditor(c,id){
 
-    /* FINANCE */
-
     if(
         c==='finance' &&
         id==='income'
@@ -3107,7 +3181,9 @@ function openEditor(c,id){
             const goal=
                 Math.max(
                     1,
-                    num(g.value)
+                    num(
+                        g.value
+                    )
                 );
 
 
@@ -3141,14 +3217,18 @@ function openEditor(c,id){
             x.monthlyIncome=
                 Math.max(
                     0,
-                    num(i.value)
+                    num(
+                        i.value
+                    )
                 );
 
 
             x.monthlyGoal=
                 Math.max(
                     1,
-                    num(g.value)
+                    num(
+                        g.value
+                    )
                 );
 
 
@@ -3179,111 +3259,6 @@ function openEditor(c,id){
 
     }
 
-
-    /* DEVELOPMENT */
-
-    if(
-        c==='development' &&
-        window.LifeGameDevelopment &&
-        typeof
-        window.LifeGameDevelopment.canEdit===
-        'function' &&
-        window.LifeGameDevelopment.canEdit(id)
-    ){
-
-        const x=
-            state.categories.development;
-
-
-        const labels=
-            window.LifeGameDevelopment.labels ||
-            {};
-
-
-        modal(`
-
-            <div class="modal-icon">
-                🧠
-            </div>
-
-            <div class="modal-label">
-                DEVELOPMENT
-            </div>
-
-            <h3>
-                ${esc(
-                    labels[id] || id
-                )}
-            </h3>
-
-            <label>
-                Текущее значение
-            </label>
-
-            <input
-                id="v"
-                type="number"
-                inputmode="decimal"
-                min="0"
-                value="${num(
-                    x[id]
-                )}"
-            >
-
-            <button
-                class="primary"
-                id="save"
-            >
-                СОХРАНИТЬ
-            </button>
-
-        `);
-
-
-        const o=
-            document.querySelector(
-                '.overlay'
-            );
-
-
-        o.querySelector(
-            '#save'
-        ).onclick=function(){
-
-            x[id]=
-                Math.max(
-                    0,
-                    num(
-                        o.querySelector(
-                            '#v'
-                        ).value
-                    )
-                );
-
-
-            save();
-
-            closeModal();
-
-            renderHome();
-
-            openCategory(
-                'development'
-            );
-
-            toast(
-                'Изменения сохранены'
-            );
-
-        };
-
-
-        return;
-
-    }
-
-
-    /* HEALTH */
 
     if(
         c==='health' &&
@@ -3375,243 +3350,129 @@ function openEditor(c,id){
     }
 
 
-    /*
-     * Если это поле здоровья,
-     * которое находится в health.js,
-     * используем обычный редактор.
-     */
+    const x=
+        state.categories[c];
 
-    if(c==='health'){
 
-        const x=
-            state.categories.health;
+    const labels={
 
+        yearlyGoal:
+            'Цель на год',
 
-        const labels={
+        books:
+            'Книги',
 
-            sleep:'Сон %',
-            sport:'Спорт %',
-            nutrition:'Питание %',
-            water:'Вода %',
-            routine:'Режим дня %',
-            steps:'Шаги'
+        languageMinutes:
+            'Минуты изучения языка',
 
-        };
+        meditationMinutes:
+            'Минуты медитации',
 
+        routine:
+            'Режим дня %',
 
-        if(
-            x[id]!==undefined
-        ){
+        nutrition:
+            'Питание %',
 
-            modal(`
+        steps:
+            'Шаги'
 
-                <div class="modal-icon">
-                    ❤️
-                </div>
+    };
 
-                <div class="modal-label">
-                    HEALTH
-                </div>
 
-                <h3>
-                    ${esc(
-                        labels[id]||id
-                    )}
-                </h3>
+    modal(`
 
-                <label>
-                    Текущее значение
-                </label>
+        <div class="modal-icon">
+            ${META[c].icon}
+        </div>
 
-                <input
-                    id="v"
-                    type="number"
-                    inputmode="decimal"
-                    min="0"
-                    value="${num(
-                        x[id]
-                    )}"
-                >
+        <div class="modal-label">
+            EDIT VALUE
+        </div>
 
-                <button
-                    class="primary"
-                    id="save"
-                >
-                    СОХРАНИТЬ
-                </button>
+        <h3>
+            ${esc(
+                labels[id]||id
+            )}
+        </h3>
 
-            `);
+        <label>
+            Текущее значение
+        </label>
 
+        <input
+            id="v"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            value="${num(
+                x[id]
+            )}"
+        >
 
-            const o=
-                document.querySelector(
-                    '.overlay'
-                );
+        <button
+            class="primary"
+            id="save"
+        >
+            СОХРАНИТЬ
+        </button>
 
+    `);
 
-            o.querySelector(
-                '#save'
-            ).onclick=function(){
 
-                x[id]=
-                    Math.max(
-                        0,
-                        num(
-                            o.querySelector(
-                                '#v'
-                            ).value
-                        )
-                    );
+    const o=
+        document.querySelector(
+            '.overlay'
+        );
 
 
-                save();
+    o.querySelector(
+        '#save'
+    ).onclick=function(){
 
-                closeModal();
+        x[id]=
+            Math.max(
+                0,
+                num(
+                    o.querySelector(
+                        '#v'
+                    ).value
+                )
+            );
 
-                renderHome();
 
-                openCategory(
-                    'health'
-                );
+        save();
 
-                toast(
-                    'Изменения сохранены'
-                );
+        closeModal();
 
-            };
+        renderHome();
 
+        openCategory(c);
 
-            return;
+        toast(
+            'Изменения сохранены'
+        );
 
-        }
-
-    }
-
-
-    /*
-     * DEVELOPMENT FALLBACK
-     */
-
-    if(c==='development'){
-
-        const x=
-            state.categories.development;
-
-
-        const labels={
-
-            books:'Книги',
-
-            languageMinutes:
-                'Минуты изучения языка',
-
-            meditationMinutes:
-                'Минуты медитации'
-
-        };
-
-
-        if(
-            x[id]!==undefined
-        ){
-
-            modal(`
-
-                <div class="modal-icon">
-                    🧠
-                </div>
-
-                <div class="modal-label">
-                    DEVELOPMENT
-                </div>
-
-                <h3>
-                    ${esc(
-                        labels[id]||id
-                    )}
-                </h3>
-
-                <label>
-                    Текущее значение
-                </label>
-
-                <input
-                    id="v"
-                    type="number"
-                    inputmode="decimal"
-                    min="0"
-                    value="${num(
-                        x[id]
-                    )}"
-                >
-
-                <button
-                    class="primary"
-                    id="save"
-                >
-                    СОХРАНИТЬ
-                </button>
-
-            `);
-
-
-            const o=
-                document.querySelector(
-                    '.overlay'
-                );
-
-
-            o.querySelector(
-                '#save'
-            ).onclick=function(){
-
-                x[id]=
-                    Math.max(
-                        0,
-                        num(
-                            o.querySelector(
-                                '#v'
-                            ).value
-                        )
-                    );
-
-
-                save();
-
-                closeModal();
-
-                renderHome();
-
-                openCategory(
-                    'development'
-                );
-
-                toast(
-                    'Изменения сохранены'
-                );
-
-            };
-
-        }
-
-    }
+    };
 
 }
 
 
 /* =====================================================
-   EXPENSE
+   EXPENSE MODAL
    ===================================================== */
 
 function openExpense(id){
 
     const e=
-        expenses.find(function(x){
+        expenses.find(
+            function(x){
 
-            return String(x.id)===
-                String(id);
+                return String(x.id)===
+                    String(id);
 
-        });
+            }
+        );
 
 
     modal(`
@@ -3775,12 +3636,14 @@ function openExpense(id){
 function deleteExpense(id){
 
     expenses=
-        expenses.filter(function(e){
+        expenses.filter(
+            function(e){
 
-            return String(e.id)!==
-                String(id);
+                return String(e.id)!==
+                    String(id);
 
-        });
+            }
+        );
 
 
     save();
@@ -3953,32 +3816,40 @@ function toast(m){
     document.body.appendChild(t);
 
 
-    requestAnimationFrame(function(){
+    requestAnimationFrame(
+        function(){
 
-        t.classList.add(
-            'show'
-        );
+            t.classList.add(
+                'show'
+            );
 
-    });
+        }
+    );
 
 
     clearTimeout(tt);
 
 
-    tt=setTimeout(function(){
+    tt=setTimeout(
+        function(){
 
-        t.classList.remove(
-            'show'
-        );
+            t.classList.remove(
+                'show'
+            );
 
 
-        setTimeout(function(){
+            setTimeout(
+                function(){
 
-            t.remove();
+                    t.remove();
 
-        },220);
+                },
+                220
+            );
 
-    },1800);
+        },
+        1800
+    );
 
 }
 
@@ -4035,55 +3906,59 @@ function quests(){
 
                 ${
                     state.quests
-                        .map(function(q,i){
+                        .map(
+                            function(q,i){
 
-                            return `
-
-                                <div
-                                    class="quest-item"
-                                >
+                                return `
 
                                     <div
-                                        class="quest-row"
+                                        class="quest-item"
                                     >
 
                                         <div
-                                            class="quest-title"
+                                            class="quest-row"
                                         >
-                                            ${esc(q.title)}
+
+                                            <div
+                                                class="quest-title"
+                                            >
+                                                ${esc(
+                                                    q.title
+                                                )}
+                                            </div>
+
+                                            <div
+                                                class="quest-xp"
+                                            >
+                                                +${q.xp} XP
+                                            </div>
+
                                         </div>
 
-                                        <div
-                                            class="quest-xp"
+
+                                        <button
+                                            class="complete ${
+                                                q.done
+                                                    ? 'done'
+                                                    : ''
+                                            }"
+                                            data-q="${i}"
                                         >
-                                            +${q.xp} XP
-                                        </div>
+
+                                            ${
+                                                q.done
+                                                    ? '✓ ВЫПОЛНЕНО'
+                                                    : 'ВЫПОЛНИТЬ'
+                                            }
+
+                                        </button>
 
                                     </div>
 
+                                `;
 
-                                    <button
-                                        class="complete ${
-                                            q.done
-                                                ? 'done'
-                                                : ''
-                                        }"
-                                        data-q="${i}"
-                                    >
-
-                                        ${
-                                            q.done
-                                                ? '✓ ВЫПОЛНЕНО'
-                                                : 'ВЫПОЛНИТЬ'
-                                        }
-
-                                    </button>
-
-                                </div>
-
-                            `;
-
-                        })
+                            }
+                        )
                         .join('')
                 }
 
@@ -4098,6 +3973,7 @@ function quests(){
 
 
     document.body.appendChild(p);
+
 
     document.body.classList.add(
         'locked'
@@ -4209,7 +4085,7 @@ function quests(){
 
 
 /* =====================================================
-   HOME
+   HOME RENDER
    ===================================================== */
 
 function renderHome(){
@@ -4374,7 +4250,9 @@ document.querySelectorAll(
         }
 
 
-        if(META[c]){
+        if(
+            META[c]
+        ){
 
             openCategory(c);
 
@@ -4386,7 +4264,7 @@ document.querySelectorAll(
 
 
 /* =====================================================
-   HOME CARDS
+   HOME CATEGORY CARDS
    ===================================================== */
 
 document.querySelectorAll(
@@ -4421,7 +4299,7 @@ document.querySelectorAll(
 
 
 /* =====================================================
-   DAILY QUEST
+   DAILY QUEST BUTTON
    ===================================================== */
 
 document.getElementById(
@@ -4456,4 +4334,3 @@ console.log(
 
 </body>
 </html>
-
