@@ -1,223 +1,510 @@
-// ==========================================
-// HEALTH.JS - Модуль управления здоровьем
-// ==========================================
+// =====================================================
+// LIFE GAME
+// HEALTH SECTION
+// =====================================================
+//
+// Модуль здоровья.
+//
+// Этот файл загружается отдельно от index.html.
+//
+// API:
+//
+// window.LifeGameHealth.progress(state)
+// window.LifeGameHealth.page(state)
+//
+// =====================================================
 
-// Состояние здоровья
-let healthState = {
-    health: 50,
-    healthRoutine: 50,
-    healthNutrition: 50,
-    healthSteps: 5000,
-    trainingWorkouts: 0,
-    trainingMonthlyTarget: 12,
-    trainingLevel: 1
-};
+(function () {
 
-// Инициализация
-function initHealth() {
-    loadHealthData();
-    updateHealthUI();
-}
+    'use strict';
 
-// Загрузка данных
-function loadHealthData() {
-    const saved = localStorage.getItem('healthData');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            Object.assign(healthState, data);
-        } catch (e) {
-            console.warn('Ошибка загрузки данных здоровья');
+
+    // =================================================
+    // HELPERS
+    // =================================================
+
+    function num(value) {
+
+        const n = Number(value);
+
+        return Number.isFinite(n)
+            ? n
+            : 0;
+
+    }
+
+
+    function clamp(value, min, max) {
+
+        return Math.min(
+            max,
+            Math.max(
+                min,
+                num(value)
+            )
+        );
+
+    }
+
+
+    function fmt(value) {
+
+        return new Intl.NumberFormat(
+            'ru-RU'
+        ).format(
+            num(value)
+        );
+
+    }
+
+
+    function esc(value) {
+
+        return String(value).replace(
+            /[&<>"']/g,
+            function (character) {
+
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+
+                }[character];
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // HEALTH PROGRESS
+    // =================================================
+
+    function progress(state) {
+
+        if (
+            !state ||
+            !state.categories ||
+            !state.categories.health
+        ) {
+
+            return 0;
+
         }
-    }
-}
 
-// Сохранение данных
-function saveHealthData() {
-    localStorage.setItem('healthData', JSON.stringify(healthState));
-}
 
-// --- Основные механики ---
-function increaseHealth() {
-    const oldHealth = healthState.health;
-    healthState.health = Math.min(100, healthState.health + 5);
-    if (healthState.health !== oldHealth) {
-        addXP(15);
-        showToast('❤️ +5 здоровья');
-        updateHealthUI();
-        updateLifeProgressUI();
-    } else {
-        showToast('⚠️ Здоровье уже максимальное');
-    }
-}
+        const health =
+            state.categories.health;
 
-function decreaseHealth() {
-    const oldHealth = healthState.health;
-    healthState.health = Math.max(0, healthState.health - 5);
-    if (healthState.health !== oldHealth) {
-        showToast('💔 -5 здоровья');
-        updateHealthUI();
-        updateLifeProgressUI();
-    } else {
-        showToast('⚠️ Здоровье уже минимальное');
-    }
-}
 
-function updateHealthRoutine(value) {
-    healthState.healthRoutine = Math.min(100, Math.max(0, value));
-    addXP(5);
-    updateHealthUI();
-    showToast('⏰ Режим дня обновлен');
-}
-
-function updateHealthNutrition(value) {
-    healthState.healthNutrition = Math.min(100, Math.max(0, value));
-    addXP(5);
-    updateHealthUI();
-    showToast('🍎 Питание обновлено');
-}
-
-function updateHealthSteps(value) {
-    healthState.healthSteps = Math.min(100000, Math.max(0, value));
-    addXP(3);
-    updateHealthUI();
-    showToast('🚶 Шаги обновлены');
-}
-
-function completeWorkout() {
-    healthState.trainingWorkouts++;
-    const xpGain = Math.round(80 / Math.pow(Math.max(1, healthState.trainingLevel), 0.58));
-    addXP(xpGain);
-    updateHealthUI();
-    showToast(`🏋️ Тренировка выполнена! +${xpGain} XP`);
-}
-
-// --- Обновление UI ---
-function updateHealthUI() {
-    const healthPercent = Math.min(100, Math.max(0, healthState.health));
-    const routinePercent = Math.round(healthState.healthRoutine);
-    const nutritionPercent = Math.round(healthState.healthNutrition);
-    const stepsPercent = Math.round((healthState.healthSteps / 10000) * 100);
-    const workoutPercent = Math.round((healthState.trainingWorkouts / healthState.trainingMonthlyTarget) * 100);
-
-    // Обновляем главный экран
-    const healthFill = document.getElementById('healthFill');
-    const healthPercentEl = document.getElementById('healthPercent');
-    if (healthFill) healthFill.style.width = healthPercent + '%';
-    if (healthPercentEl) healthPercentEl.textContent = healthPercent + '%';
-
-    // Обновляем страницу здоровья, если она открыта
-    const page = document.getElementById('activePage');
-    if (page && page.querySelector('[data-category="health"]')) {
-        updateHealthPageUI(healthPercent, routinePercent, nutritionPercent, stepsPercent, workoutPercent);
-    }
-
-    saveHealthData();
-}
-
-function updateHealthPageUI(health, routine, nutrition, steps, workout) {
-    const page = document.getElementById('activePage');
-    if (!page) return;
-
-    // Обновляем summary
-    const summaryNumber = page.querySelector('.summary-number');
-    if (summaryNumber) {
-        summaryNumber.textContent = health + '%';
-        summaryNumber.style.color = health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b';
-    }
-
-    const progressBar = page.querySelector('.summary .progress i');
-    if (progressBar) {
-        progressBar.style.width = health + '%';
-        progressBar.style.background = health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b';
-    }
-
-    // Обновляем метрики
-    const metrics = page.querySelectorAll('.metric');
-    if (metrics.length >= 4) {
         // Режим дня
-        const routineMetric = metrics[0];
-        if (routineMetric) {
-            routineMetric.querySelector('.metric-percent').textContent = routine + '%';
-            routineMetric.querySelector('.metric-bar i').style.width = routine + '%';
-            routineMetric.querySelector('.metric-text span').textContent = routine + '% / 100%';
-        }
+        const routine =
+            clamp(
+                health.routine,
+                0,
+                100
+            );
+
 
         // Питание
-        const nutritionMetric = metrics[1];
-        if (nutritionMetric) {
-            nutritionMetric.querySelector('.metric-percent').textContent = nutrition + '%';
-            nutritionMetric.querySelector('.metric-bar i').style.width = nutrition + '%';
-            nutritionMetric.querySelector('.metric-text span').textContent = nutrition + '% / 100%';
-        }
+        const nutrition =
+            clamp(
+                health.nutrition,
+                0,
+                100
+            );
 
-        // Шаги
-        const stepsMetric = metrics[2];
-        if (stepsMetric) {
-            stepsMetric.querySelector('.metric-percent').textContent = steps + '%';
-            stepsMetric.querySelector('.metric-bar i').style.width = steps + '%';
-            stepsMetric.querySelector('.metric-text span').textContent = healthState.healthSteps + ' шагов / 10 000 шагов';
-        }
 
-        // Тренировки
-        const workoutMetric = metrics[3];
-        if (workoutMetric) {
-            workoutMetric.querySelector('.metric-percent').textContent = workout + '%';
-            workoutMetric.querySelector('.metric-bar i').style.width = workout + '%';
-            workoutMetric.querySelector('.metric-text span').textContent = 
-                healthState.trainingWorkouts + ' из ' + healthState.trainingMonthlyTarget + ' / ' + healthState.trainingMonthlyTarget + ' за месяц';
-        }
+        // Шаги.
+        // Цель — 10 000 шагов.
+
+        const steps =
+            clamp(
+                num(health.steps) /
+                10000 *
+                100,
+                0,
+                100
+            );
+
+
+        return Math.round(
+            (
+                routine +
+                nutrition +
+                steps
+            ) / 3
+        );
+
     }
-}
 
-// --- Глобальные обработчики для страницы ---
-window.handleWorkout = function() {
-    completeWorkout();
-    if (typeof openCategoryPage === 'function') {
-        openCategoryPage('health');
+
+    // =================================================
+    // METRIC
+    // =================================================
+
+    function metric(
+        icon,
+        title,
+        current,
+        target,
+        percent,
+        edit
+    ) {
+
+        return `
+
+            <div class="metric">
+
+                <div class="metric-head">
+
+                    <div class="metric-left">
+
+                        <div class="metric-icon">
+                            ${icon}
+                        </div>
+
+                        <div class="metric-text">
+
+                            <strong>
+                                ${esc(title)}
+                            </strong>
+
+                            <span>
+                                ${esc(current)}
+                                /
+                                ${esc(target)}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-percent">
+
+                        ${clamp(
+                            percent,
+                            0,
+                            100
+                        )}%
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric-bar">
+
+                    <i
+                        style="
+                            width:${clamp(
+                                percent,
+                                0,
+                                100
+                            )}%;
+                        "
+                    ></i>
+
+                </div>
+
+
+                ${
+                    edit
+                        ? `
+                            <button
+                                class="edit"
+                                data-edit="${esc(
+                                    edit
+                                )}"
+                            >
+                                ✎ ИЗМЕНИТЬ
+                            </button>
+                        `
+                        : ''
+                }
+
+            </div>
+
+        `;
+
     }
-};
 
-window.handleHealthEdit = function(type) {
+
+    // =================================================
+    // HEALTH PAGE
+    // =================================================
+
+    function page(
+        state
+    ) {
+
+        if (
+            !state ||
+            !state.categories ||
+            !state.categories.health
+        ) {
+
+            return `
+
+                <div class="notice">
+
+                    Данные здоровья
+                    недоступны.
+
+                </div>
+
+            `;
+
+        }
+
+
+        const health =
+            state.categories.health;
+
+
+        const p =
+            progress(state);
+
+
+        const routine =
+            clamp(
+                health.routine,
+                0,
+                100
+            );
+
+
+        const nutrition =
+            clamp(
+                health.nutrition,
+                0,
+                100
+            );
+
+
+        const steps =
+            Math.max(
+                0,
+                num(
+                    health.steps
+                )
+            );
+
+
+        const stepsPercent =
+            clamp(
+                steps /
+                10000 *
+                100,
+                0,
+                100
+            );
+
+
+        return `
+
+            <!-- =========================================
+                 SUMMARY
+            ========================================== -->
+
+            <div class="summary">
+
+                <div class="section-label">
+
+                    HEALTH LEVEL ${num(
+                        health.level
+                    )}
+
+                </div>
+
+
+                <div class="summary-number">
+
+                    ${p}%
+
+                </div>
+
+
+                <div class="progress">
+
+                    <i
+                        style="
+                            width:${clamp(
+                                p,
+                                0,
+                                100
+                            )}%;
+                        "
+                    ></i>
+
+                </div>
+
+
+                <div class="finance-box">
+
+                    <div class="finance-line">
+
+                        <span>
+                            HEALTH XP
+                        </span>
+
+                        <strong>
+                            ${fmt(
+                                health.xp
+                            )} XP
+                        </strong>
+
+                    </div>
+
+
+                    <div class="finance-line">
+
+                        <span>
+                            STREAK
+                        </span>
+
+                        <strong>
+                            🔥 ${num(
+                                health.streak
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 METRICS
+            ========================================== -->
+
+            <div class="cards">
+
+
+                ${metric(
+                    '⏰',
+                    'Режим дня',
+                    fmt(routine) + '%',
+                    '100%',
+                    routine,
+                    'routine'
+                )}
+
+
+                ${metric(
+                    '🍎',
+                    'Питание',
+                    fmt(nutrition) + '%',
+                    '100%',
+                    nutrition,
+                    'nutrition'
+                )}
+
+
+                ${metric(
+                    '🚶',
+                    'Шаги',
+                    fmt(steps),
+                    '10 000',
+                    stepsPercent,
+                    'steps'
+                )}
+
+
+                <div class="notice">
+
+                    Прогресс здоровья
+                    рассчитывается автоматически.
+
+                    Изменения сохраняются
+                    автоматически.
+
+                </div>
+
+
+                <a
+                    class="creator"
+                    href="https://t.me/shkeltinsh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Created by
+                    <strong>
+                        &nbsp;@shkeltinsh
+                    </strong>
+                </a>
+
+
+            </div>
+
+        `;
+
+    }
+
+
+    // =================================================
+    // EDITOR LABELS
+    // =================================================
+
     const labels = {
-        routine: 'Введите новый процент режима дня (0-100):',
-        nutrition: 'Введите новый процент питания (0-100):',
-        steps: 'Введите количество шагов:'
+
+        routine:
+            'Режим дня (%)',
+
+        nutrition:
+            'Питание (%)',
+
+        steps:
+            'Шаги'
+
+
     };
-    
-    const current = {
-        routine: healthState.healthRoutine,
-        nutrition: healthState.healthNutrition,
-        steps: healthState.healthSteps
-    };
-    
-    const value = prompt(labels[type] || 'Введите значение:', current[type].toString());
-    if (value && !isNaN(value) && Number(value) >= 0) {
-        switch(type) {
-            case 'routine':
-                updateHealthRoutine(Number(value));
-                break;
-            case 'nutrition':
-                updateHealthNutrition(Number(value));
-                break;
-            case 'steps':
-                updateHealthSteps(Number(value));
-                break;
-        }
-        if (typeof openCategoryPage === 'function') {
-            openCategoryPage('health');
-        }
+
+
+    // =================================================
+    // CAN EDIT
+    // =================================================
+
+    function canEdit(id) {
+
+        return Object.prototype.hasOwnProperty.call(
+            labels,
+            id
+        );
+
     }
-};
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', function() {
-    initHealth();
-});
 
-// Экспорт для использования в других модулях
-window.healthState = healthState;
-window.increaseHealth = increaseHealth;
-window.decreaseHealth = decreaseHealth;
-window.completeWorkout = completeWorkout;
-window.updateHealthUI = updateHealthUI;
+    // =================================================
+    // PUBLIC API
+    // =================================================
+
+    window.LifeGameHealth = {
+
+        progress: progress,
+
+        page: page,
+
+        labels: labels,
+
+        canEdit: canEdit
+
+    };
+
+
+    // =================================================
+    // DEBUG
+    // =================================================
+
+    console.log(
+        'LIFE GAME: Health module loaded'
+    );
+
+
+})();
