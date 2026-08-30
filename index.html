@@ -1009,16 +1009,6 @@ button:active{
     transform:translate(-50%,0)
 }
 
-.training-divider{
-    margin:4px 0 2px;
-    padding:12px 2px 4px;
-    color:#606060;
-    font-size:8px;
-    font-weight:800;
-    letter-spacing:2px;
-    text-transform:uppercase
-}
-
 @media(max-width:360px){
 
     .app{
@@ -2000,7 +1990,9 @@ function addCatXP(c,a){
 }
 
 
-function incomeXP(v){
+function incomeXP(
+    v
+){
 
     const level=Math.max(
         1,
@@ -2054,70 +2046,7 @@ function applyIncome(
 
 
 /* =====================================================
-   DEVELOPMENT
-   ===================================================== */
-
-function developmentProgress(){
-
-    if(
-        window.LifeGameDevelopment &&
-        typeof
-        window.LifeGameDevelopment.progress===
-        'function'
-    ){
-
-        return window.LifeGameDevelopment.progress(
-            state
-        );
-
-    }
-
-
-    const x=
-        state.categories.development;
-
-
-    const books=
-        x.books>=2
-            ? 100
-            : Math.round(
-                x.books/2*100
-            );
-
-
-    const language=
-        x.languageMinutes>=30
-            ? 100
-            : Math.round(
-                x.languageMinutes/
-                30*
-                100
-            );
-
-
-    const meditation=
-        x.meditationMinutes>=15
-            ? 100
-            : Math.round(
-                x.meditationMinutes/
-                15*
-                100
-            );
-
-
-    return Math.round(
-        (
-            books+
-            language+
-            meditation
-        )/3
-    );
-
-}
-
-
-/* =====================================================
-   GENERIC HELPERS
+   PROGRESS
    ===================================================== */
 
 function progress(c){
@@ -2145,7 +2074,20 @@ function progress(c){
 
     if(c==='development'){
 
-        return developmentProgress();
+        if(
+            window.LifeGameDevelopment &&
+            typeof
+            window.LifeGameDevelopment.progress===
+            'function'
+        ){
+
+            return window.LifeGameDevelopment.progress(
+                state
+            );
+
+        }
+
+        return 0;
 
     }
 
@@ -2208,7 +2150,7 @@ function rank(l){
 
 
 /* =====================================================
-   SHARED HTML
+   SHARED HTML HELPERS
    ===================================================== */
 
 function creatorHTML(){
@@ -2304,6 +2246,25 @@ function metric(
 
 
 /* =====================================================
+   MODULE HELPERS
+   ===================================================== */
+
+const MODULE_HELPERS={
+
+    metric:metric,
+
+    fmt:fmt,
+
+    clamp:clamp,
+
+    esc:esc,
+
+    creatorHTML:creatorHTML
+
+};
+
+
+/* =====================================================
    PAGE OPEN
    ===================================================== */
 
@@ -2327,65 +2288,107 @@ function openCategory(c){
 
     if(c==='finance'){
 
-        pageContent=
+        if(
             window.LifeGameFinance &&
             typeof
             window.LifeGameFinance.page===
             'function'
+        ){
 
-                ? window.LifeGameFinance.page(
+            pageContent=
+                window.LifeGameFinance.page(
                     state,
                     expenses,
                     ui
-                )
+                );
 
-                : `
-                    <div class="notice">
-                        Финансовый модуль
-                        не загружен.
-                    </div>
-                `;
+        }else{
+
+            pageContent=`
+
+                <div class="notice">
+                    Финансовый модуль
+                    не загружен.
+                </div>
+
+            `;
+
+        }
 
     }
 
 
     else if(c==='health'){
 
-        pageContent=
+        if(
             window.LifeGameHealth &&
             typeof
             window.LifeGameHealth.page===
             'function'
+        ){
 
-                ? window.LifeGameHealth.page(
+            pageContent=
+                window.LifeGameHealth.page(
                     state,
                     ui
-                )
+                );
 
-                : `
-                    <div class="notice">
-                        Модуль здоровья
-                        не загружен.
-                    </div>
-                `;
+        }else{
+
+            pageContent=`
+
+                <div class="notice">
+                    Модуль здоровья
+                    не загружен.
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    else if(c==='development'){
+
+        if(
+            window.LifeGameDevelopment &&
+            typeof
+            window.LifeGameDevelopment.page===
+            'function'
+        ){
+
+            pageContent=
+                window.LifeGameDevelopment.page(
+                    state,
+                    MODULE_HELPERS
+                );
+
+        }else{
+
+            pageContent=`
+
+                <div class="notice">
+                    Модуль развития
+                    не загружен.
+                </div>
+
+            `;
+
+        }
 
     }
 
 
     else{
 
-        pageContent=
-            window.LifeGameDevelopment &&
-            typeof
-            window.LifeGameDevelopment.page===
-            'function'
+        pageContent=`
 
-                ? window.LifeGameDevelopment.page(
-                    state,
-                    ui
-                )
+            <div class="notice">
+                Раздел не найден.
+            </div>
 
-                : genericPage(c);
+        `;
 
     }
 
@@ -2444,167 +2447,6 @@ function openCategory(c){
         p,
         c
     );
-
-}
-
-
-/* =====================================================
-   DEVELOPMENT FALLBACK PAGE
-   ===================================================== */
-
-function genericPage(c){
-
-    const x=
-        state.categories[c];
-
-    const p=
-        progress(c);
-
-    let body='';
-
-
-    if(c==='development'){
-
-        body=
-
-            metric(
-                '📚',
-                'Чтение книг',
-                fmt(x.books),
-                '2',
-                clamp(
-                    Math.round(
-                        x.books/
-                        2*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'books'
-            )+
-
-            metric(
-                '🌐',
-                'Изучение языка',
-                fmt(
-                    x.languageMinutes
-                )+
-                ' мин',
-                '30 мин',
-                clamp(
-                    Math.round(
-                        x.languageMinutes/
-                        30*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'languageMinutes'
-            )+
-
-            metric(
-                '🧘',
-                'Медитация',
-                fmt(
-                    x.meditationMinutes
-                )+
-                ' мин',
-                '15 мин',
-                clamp(
-                    Math.round(
-                        x.meditationMinutes/
-                        15*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'meditationMinutes'
-            );
-
-    }
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                ${c.toUpperCase()}
-                LEVEL
-                ${x.level}
-            </div>
-
-            <div class="summary-number">
-                ${p}%
-            </div>
-
-            <div class="progress">
-
-                <i
-                    style="width:${clamp(
-                        p,
-                        0,
-                        100
-                    )}%"
-                ></i>
-
-            </div>
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-
-                    <span>
-                        ${c.toUpperCase()} XP
-                    </span>
-
-                    <strong>
-                        ${fmt(x.xp)} XP
-                    </strong>
-
-                </div>
-
-                <div class="finance-line">
-
-                    <span>
-                        STREAK
-                    </span>
-
-                    <strong>
-                        🔥 ${x.streak}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-            ${body}
-
-            <div class="notice">
-
-                Прогресс сохраняется
-                автоматически.
-
-                Повышение уровня XP
-                происходит сразу после
-                изменения показателя
-                или выполнения действия.
-
-            </div>
-
-            ${creatorHTML()}
-
-        </div>
-
-    `;
 
 }
 
@@ -3344,6 +3186,24 @@ function openEditor(c,id){
 
         };
 
+
+        return;
+
+    }
+
+
+    /* ================================================
+       DEVELOPMENT / GENERIC EDITOR
+       ================================================ */
+
+    if(
+        c==='development' &&
+        window.LifeGameDevelopment &&
+        typeof
+        window.LifeGameDevelopment.canEdit===
+        'function' &&
+        !window.LifeGameDevelopment.canEdit(id)
+    ){
 
         return;
 
