@@ -58,7 +58,7 @@ button:active{
     max-width:560px;
     min-height:100vh;
     margin:auto;
-    padding:24px 18px 155px
+    padding:24px 18px 175px
 }
 
 .header{
@@ -278,34 +278,62 @@ button:active{
     letter-spacing:2px
 }
 
-/* CREATOR */
+/* TELEGRAM CREATOR BUTTON */
 
 .creator{
+    position:relative;
+    z-index:20;
     display:flex;
     align-items:center;
     justify-content:center;
     width:100%;
-    min-height:42px;
-    margin-top:16px;
-    border:1px solid #202020;
-    border-radius:14px;
-    background:#0b0b0b;
-    color:#686868;
+    min-height:48px;
+    margin-top:18px;
+    padding:0 16px;
+    border:1px solid #2a2a2a;
+    border-radius:15px;
+    background:linear-gradient(145deg,#121212,#0a0a0a);
+    color:#777;
     text-decoration:none;
     font-size:9px;
     font-weight:700;
     letter-spacing:1px;
-    transition:.2s ease
+    -webkit-user-select:none;
+    user-select:none;
+    -webkit-touch-callout:none;
+    cursor:pointer;
+    pointer-events:auto;
+    touch-action:manipulation;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .15s ease
 }
 
 .creator strong{
-    color:#aaa;
+    color:#b5b5b5;
     font-weight:800
+}
+
+.creator:hover{
+    border-color:#383838;
+    background:linear-gradient(145deg,#181818,#0d0d0d);
+    color:#999
 }
 
 .creator:active{
     transform:scale(.985);
-    background:#111;
+    background:#161616;
+}
+
+.creator:focus{
+    outline:none
+}
+
+.creator:focus-visible{
+    outline:1px solid #555;
+    outline-offset:2px
 }
 
 /* NAV */
@@ -374,7 +402,7 @@ button:active{
     inset:0;
     z-index:200;
     overflow-y:auto;
-    padding:24px 18px 155px;
+    padding:24px 18px 175px;
     background:
         radial-gradient(circle at 50% -10%,#ffffff12,transparent 38%),
         linear-gradient(180deg,#080808,#050505 60%,#030303);
@@ -609,8 +637,6 @@ button:active{
     font-weight:800
 }
 
-/* стрелка больше не используется */
-
 .collapse-chevron{
     display:none!important
 }
@@ -703,8 +729,6 @@ button:active{
     font-size:10px;
     font-weight:700
 }
-
-/* старые кнопки удаления убраны */
 
 .expense-actions{
     display:flex;
@@ -994,9 +1018,11 @@ button:active{
 }
 
 @media(max-width:360px){
+
     .app{
         padding-left:14px;
-        padding-right:14px
+        padding-right:14px;
+        padding-bottom:175px
     }
 
     .header h1{
@@ -1014,9 +1040,16 @@ button:active{
     .nav-label{
         font-size:6px
     }
+
+    .creator{
+        min-height:46px;
+        font-size:8px
+    }
+
 }
 
 @media(min-width:700px){
+
     .app{
         padding-top:45px
     }
@@ -1024,6 +1057,7 @@ button:active{
     .page{
         padding-top:35px
     }
+
 }
 </style>
 </head>
@@ -1123,10 +1157,13 @@ button:active{
     ⚡ DAILY QUEST
 </button>
 
-<a class="creator"
-   href="https://t.me/shkeltinsh"
-   target="_blank"
-   rel="noopener noreferrer">
+<a
+    class="creator"
+    href="https://t.me/shkeltinsh"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Telegram @shkeltinsh"
+>
     Created by <strong>&nbsp;@shkeltinsh</strong>
 </a>
 
@@ -1212,11 +1249,6 @@ const DEFAULT={
             savings:0
         },
 
-        /*
-         * TRAINING DATA INTENTIONALLY REMAINS IN STORAGE.
-         * This prevents loss of previous training progress.
-         * Training is now displayed inside HEALTH.
-         */
         training:{
             xp:0,
             level:1,
@@ -1246,11 +1278,6 @@ const DEFAULT={
             steps:0
         },
 
-        /*
-         * Old discipline data is deliberately preserved
-         * for backward compatibility with existing storage,
-         * but it is no longer displayed or calculated.
-         */
         discipline:{
             xp:0,
             level:1,
@@ -1720,10 +1747,6 @@ function mp(a,b,over100=false){
 }
 
 
-/*
- * Finance can exceed 100%.
- * This is intentional.
- */
 function financeProgress(){
 
     let c=state.categories.finance;
@@ -1787,10 +1810,6 @@ function healthProgress(){
             training.monthlyTarget
         );
 
-    /*
-     * Training and health are now
-     * one combined category.
-     */
     return Math.round(
         (healthPart+trainingPart)/2
     );
@@ -1828,10 +1847,6 @@ function progress(c){
 
 function totalProgress(){
 
-    /*
-     * Only 3 active categories remain:
-     * Finance + Development + Health.
-     */
     return Math.round(
         (
             progress('finance')+
@@ -1862,6 +1877,12 @@ function rank(l){
 }
 
 
+/*
+ * TELEGRAM CREATOR
+ *
+ * Один и тот же рабочий Telegram-link
+ * используется на всех экранах.
+ */
 function creatorHTML(){
 
     return `
@@ -1870,6 +1891,7 @@ function creatorHTML(){
             href="https://t.me/shkeltinsh"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Telegram @shkeltinsh"
         >
             Created by <strong>&nbsp;@shkeltinsh</strong>
         </a>
@@ -2068,9 +2090,6 @@ function expenseHTML(e){
                     >
                         ✎
                     </button>
-
-                    <!-- Delete button intentionally removed.
-                         Deletion is performed by swipe. -->
 
                 </div>
 
@@ -2768,19 +2787,11 @@ function bindPage(p,c){
                         )
                     );
 
-                /*
-                 * Training XP is stored in
-                 * the original training category.
-                 * Player XP also increases.
-                 */
                 addCatXP(
                     'training',
                     q
                 );
 
-                /*
-                 * Keep health streak active too.
-                 */
                 let h=
                     state.categories.health;
 
@@ -3820,11 +3831,6 @@ function quests(){
 
             q.done=true;
 
-
-            /*
-             * Training quest continues
-             * to award XP to training storage.
-             */
             let category=
                 q.category;
 
@@ -3962,6 +3968,29 @@ document.querySelectorAll(
     };
 
 });
+
+
+/* DAILY QUEST */
+
+document.getElementById(
+    'dailyQuest'
+)?.addEventListener(
+    'click',
+    ()=>{
+
+        quests();
+
+    }
+);
+
+
+/* TELEGRAM LINK SAFETY
+ *
+ * Ничего не перехватываем.
+ * Обычный <a> позволяет iOS,
+ * Telegram WebView и Safari
+ * самостоятельно открыть Telegram.
+ */
 
 
 /* INITIALIZATION */
