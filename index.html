@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -9,1249 +9,2185 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <meta
-        name="theme-color"
-        content="#050505"
-    >
+    <meta name="theme-color" content="#050505">
 
     <title>Life Game</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <style>
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #050505;
+            color: #ffffff;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 720px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 24px 18px 120px;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 26px;
+        }
+
+        .eyebrow,
+        .section-label,
+        .label,
+        .page-eyebrow,
+        .editor-eyebrow {
+            color: #777777;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 5px 0 0;
+            font-size: 25px;
+            line-height: 1;
+            letter-spacing: 2px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border: 1px solid #2c2c2c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: #111111;
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           LEVEL
+        ========================= */
+
+        .level-card {
+            padding: 20px;
+            border: 1px solid #242424;
+            border-radius: 18px;
+            background:
+                linear-gradient(
+                    145deg,
+                    #121212,
+                    #090909
+                );
+            box-shadow:
+                0 15px 40px rgba(0,0,0,.35);
+            margin-bottom: 30px;
+        }
+
+        .level-top {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .level-number {
+            margin-top: 5px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .xp-value {
+            color: #888888;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .xp-bar,
+        .overall-bar,
+        .progress-bar,
+        .summary-bar,
+        .metric-progress {
+            height: 5px;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #202020;
+        }
+
+        .xp-fill,
+        .overall-fill,
+        .progress-fill,
+        .summary-fill,
+        .metric-progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: #ffffff;
+            transition: width .35s ease;
+        }
+
+
+        /* =========================
+           OVERALL
+        ========================= */
+
+        .overall-section {
+            margin-bottom: 30px;
+        }
+
+        .overall-value {
+            margin: 7px 0 13px;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+
+        .overall-value span {
+            color: #666666;
+            font-size: 20px;
+            margin-left: 3px;
+        }
+
+
+        /* =========================
+           CATEGORIES
+        ========================= */
+
+        .categories {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-card {
+            padding: 18px;
+            border: 1px solid #242424;
+            border-radius: 18px;
+            background: #0d0d0d;
+            transition:
+                transform .15s ease,
+                background .15s ease,
+                border-color .15s ease;
+        }
+
+        .category-card:active {
+            transform: scale(.985);
+            background: #151515;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #181818;
+            font-size: 20px;
+        }
+
+        .category-name {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .category-name strong {
+            font-size: 13px;
+            letter-spacing: .8px;
+        }
+
+        .category-name span {
+            color: #777777;
+            font-size: 11px;
+        }
+
+        .category-percent {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+
+        /* =========================
+           DAILY QUEST
+        ========================= */
+
+        .quest-button {
+            width: 100%;
+            height: 54px;
+            margin-top: 22px;
+            border: 1px solid #292929;
+            border-radius: 15px;
+            color: #050505;
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            transition: transform .15s ease;
+        }
+
+        .quest-button:active {
+            transform: scale(.98);
+        }
+
+        .quest-icon {
+            margin-right: 8px;
+            font-size: 17px;
+        }
+
+
+        /* =========================
+           BOTTOM NAV
+        ========================= */
+
+        .bottom-nav {
+            position: fixed;
+            left: 50%;
+            bottom: 12px;
+            z-index: 50;
+            width: calc(100% - 24px);
+            max-width: 680px;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns:
+                repeat(4, 1fr);
+            padding: 7px;
+            border: 1px solid #292929;
+            border-radius: 19px;
+            background: rgba(12,12,12,.96);
+            backdrop-filter: blur(18px);
+            box-shadow:
+                0 15px 50px rgba(0,0,0,.55);
+        }
+
+        .nav-item {
+            min-height: 58px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            border-radius: 14px;
+            color: #666666;
+            background: transparent;
+        }
+
+        .nav-item.active {
+            color: #ffffff;
+            background: #1a1a1a;
+        }
+
+        .nav-icon {
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           CATEGORY PAGE
+        ========================= */
+
+        .category-page {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            overflow-y: auto;
+            background: #050505;
+            padding:
+                24px
+                18px
+                110px;
+            animation: pageIn .2s ease;
+        }
+
+        @keyframes pageIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category-page-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            max-width: 680px;
+            margin: 0 auto 25px;
+        }
+
+        .back-button {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
+            border: 1px solid #292929;
+            border-radius: 13px;
+            color: #ffffff;
+            background: #111111;
+            font-size: 20px;
+        }
+
+        .category-page h2 {
+            margin: 4px 0 0;
+            font-size: 25px;
+        }
+
+        .category-summary,
+        .metrics-list {
+            width: 100%;
+            max-width: 680px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .category-summary {
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #242424;
+            border-radius: 18px;
+            background: #0d0d0d;
+        }
+
+        .summary-value {
+            margin: 5px 0 14px;
+            font-size: 38px;
+            font-weight: 800;
+        }
+
+        .metrics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .metric-card {
+            padding: 17px;
+            border: 1px solid #242424;
+            border-radius: 17px;
+            background: #0d0d0d;
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 13px;
+        }
+
+        .metric-title {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .metric-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            border-radius: 11px;
+            background: #181818;
+        }
+
+        .metric-title strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .metric-title span {
+            display: block;
+            color: #666666;
+            font-size: 10px;
+        }
+
+        .metric-percent {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .metric-edit {
+            margin-top: 13px;
+            padding: 8px 0;
+            color: #888888;
+            background: transparent;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+        }
+
+
+        /* =========================
+           EDITOR
+        ========================= */
+
+        .editor-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 15px;
+            background: rgba(0,0,0,.78);
+            backdrop-filter: blur(8px);
+        }
+
+        .editor {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            padding: 25px 20px 22px;
+            border: 1px solid #292929;
+            border-radius: 24px;
+            background: #101010;
+            box-shadow:
+                0 -10px 50px rgba(0,0,0,.5);
+            animation: editorIn .2s ease;
+        }
+
+        @keyframes editorIn {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .editor-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            color: #999999;
+            background: #1a1a1a;
+            font-size: 21px;
+        }
+
+        .editor-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            border-radius: 14px;
+            background: #1c1c1c;
+            font-size: 23px;
+        }
+
+        .editor h3 {
+            margin: 5px 0 22px;
+            padding-right: 40px;
+            font-size: 21px;
+        }
+
+        .editor label {
+            display: block;
+            margin: 15px 0 7px;
+            color: #777777;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .editor input {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px;
+            outline: none;
+            border: 1px solid #2a2a2a;
+            border-radius: 13px;
+            color: #ffffff;
+            background: #080808;
+            font-size: 16px;
+        }
+
+        .editor input:focus {
+            border-color: #555555;
+        }
+
+        .editor-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 13px;
+            background: #181818;
+        }
+
+        .editor-preview span {
+            color: #777777;
+            font-size: 11px;
+        }
+
+        .editor-preview strong {
+            font-size: 18px;
+        }
+
+        .save-button {
+            width: 100%;
+            height: 52px;
+            margin-top: 18px;
+            border-radius: 14px;
+            color: #050505;
+            background: #ffffff;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+        }
+
+
+        /* =========================
+           QUEST MODAL
+        ========================= */
+
+        .quest-message {
+            text-align: center;
+        }
+
+        .quest-message h3 {
+            margin: 10px 0;
+        }
+
+        .quest-message p {
+            color: #777777;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+
+        @media (min-width: 700px) {
+
+            .app {
+                padding-top: 35px;
+            }
+
+            .category-page {
+                padding-top: 35px;
+            }
+
+        }
+
+    </style>
 </head>
+
 
 <body>
 
-    <div class="app">
+<div class="app">
 
-        <!-- HEADER -->
-        <header class="header">
+    <!-- HEADER -->
 
-            <div class="header-title">
+    <header class="header">
 
-                <div class="eyebrow">
-                    YOUR LIFE
-                </div>
+        <div class="header-title">
 
-                <h1>
-                    LIFE GAME
-                </h1>
-
+            <div class="eyebrow">
+                YOUR LIFE
             </div>
 
-            <div class="avatar">
-                B
-            </div>
+            <h1>
+                LIFE GAME
+            </h1>
 
-        </header>
+        </div>
+
+        <div class="avatar">
+            B
+        </div>
+
+    </header>
 
 
-        <!-- LEVEL -->
-        <section class="level-card">
+    <!-- LEVEL -->
 
-            <div class="level-top">
+    <section class="level-card">
 
-                <div class="level-info">
+        <div class="level-top">
 
-                    <span class="label">
-                        CURRENT LEVEL
-                    </span>
+            <div class="level-info">
 
-                    <div class="level-number">
-                        LVL 1
-                    </div>
+                <span class="label">
+                    CURRENT LEVEL
+                </span>
 
-                </div>
-
-                <div class="xp-value">
-                    0 XP
+                <div class="level-number">
+                    LVL 1
                 </div>
 
             </div>
 
-            <div class="xp-bar">
-                <div
-                    class="xp-fill"
-                    style="width: 0%;"
-                ></div>
+            <div class="xp-value">
+                0 XP
             </div>
 
-        </section>
+        </div>
+
+        <div class="xp-bar">
+
+            <div
+                class="xp-fill"
+                style="width:0%"
+            ></div>
+
+        </div>
+
+    </section>
 
 
-        <!-- LIFE PROGRESS -->
-        <section class="overall-section">
+    <!-- LIFE PROGRESS -->
 
-            <div class="section-label">
-                LIFE PROGRESS
-            </div>
+    <section class="overall-section">
 
-            <div class="overall-value">
-                47<span>%</span>
-            </div>
+        <div class="section-label">
+            LIFE PROGRESS
+        </div>
 
-            <div class="overall-bar">
-                <div
-                    class="overall-fill"
-                    style="width: 47%;"
-                ></div>
-            </div>
+        <div class="overall-value">
+            0<span>%</span>
+        </div>
 
-        </section>
+        <div class="overall-bar">
 
+            <div
+                class="overall-fill"
+                style="width:0%"
+            ></div>
 
-        <!-- MAIN CATEGORIES -->
-        <main class="categories">
+        </div>
 
-
-            <!-- FINANCE -->
-            <article
-                class="category-card"
-                data-category="finance"
-            >
-
-                <div class="category-header">
-
-                    <div class="category-title">
-
-                        <div class="category-icon">
-                            💰
-                        </div>
-
-                        <div class="category-name">
-
-                            <strong>
-                                FINANCE
-                            </strong>
-
-                            <span>
-                                Финансы
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="category-percent">
-                        62%
-                    </div>
-
-                </div>
+    </section>
 
 
-                <div class="progress-bar">
+    <!-- CATEGORIES -->
 
-                    <div
-                        class="progress-fill"
-                        style="width: 62%;"
-                    ></div>
-
-                </div>
-
-            </article>
+    <main class="categories">
 
 
-            <!-- HEALTH -->
-            <article
-                class="category-card"
-                data-category="health"
-            >
+        <!-- FINANCE -->
 
-                <div class="category-header">
-
-                    <div class="category-title">
-
-                        <div class="category-icon">
-                            ❤️
-                        </div>
-
-                        <div class="category-name">
-
-                            <strong>
-                                HEALTH
-                            </strong>
-
-                            <span>
-                                Здоровье
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="category-percent">
-                        38%
-                    </div>
-
-                </div>
-
-
-                <div class="progress-bar">
-
-                    <div
-                        class="progress-fill"
-                        style="width: 38%;"
-                    ></div>
-
-                </div>
-
-            </article>
-
-
-            <!-- DEVELOPMENT -->
-            <article
-                class="category-card"
-                data-category="development"
-            >
-
-                <div class="category-header">
-
-                    <div class="category-title">
-
-                        <div class="category-icon">
-                            🧠
-                        </div>
-
-                        <div class="category-name">
-
-                            <strong>
-                                DEVELOPMENT
-                            </strong>
-
-                            <span>
-                                Развитие
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="category-percent">
-                        54%
-                    </div>
-
-                </div>
-
-
-                <div class="progress-bar">
-
-                    <div
-                        class="progress-fill"
-                        style="width: 54%;"
-                    ></div>
-
-                </div>
-
-            </article>
-
-
-        </main>
-
-
-        <!-- DAILY QUEST -->
-        <button
-            class="quest-button"
-            type="button"
+        <article
+            class="category-card"
+            data-category="finance"
         >
 
-            <span class="quest-icon">
-                +
+            <div class="category-header">
+
+                <div class="category-title">
+
+                    <div class="category-icon">
+                        💰
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            FINANCE
+                        </strong>
+
+                        <span>
+                            Финансы
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="category-percent">
+                    0%
+                </div>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
+
+            </div>
+
+        </article>
+
+
+        <!-- HEALTH -->
+
+        <article
+            class="category-card"
+            data-category="health"
+        >
+
+            <div class="category-header">
+
+                <div class="category-title">
+
+                    <div class="category-icon">
+                        ❤️
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            HEALTH
+                        </strong>
+
+                        <span>
+                            Здоровье
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="category-percent">
+                    0%
+                </div>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
+
+            </div>
+
+        </article>
+
+
+        <!-- DEVELOPMENT -->
+
+        <article
+            class="category-card"
+            data-category="development"
+        >
+
+            <div class="category-header">
+
+                <div class="category-title">
+
+                    <div class="category-icon">
+                        🧠
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            DEVELOPMENT
+                        </strong>
+
+                        <span>
+                            Развитие
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="category-percent">
+                    0%
+                </div>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
+
+            </div>
+
+        </article>
+
+    </main>
+
+
+    <!-- DAILY QUEST -->
+
+    <button
+        class="quest-button"
+        id="dailyQuest"
+        type="button"
+    >
+
+        <span class="quest-icon">
+            +
+        </span>
+
+        DAILY QUEST
+
+    </button>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="bottom-nav">
+
+        <button
+            class="nav-item active"
+            type="button"
+            data-section="home"
+        >
+
+            <span class="nav-icon">
+                ⌂
             </span>
 
-            DAILY QUEST
+            <span class="nav-label">
+                Главная
+            </span>
 
         </button>
 
 
-        <!-- BOTTOM NAVIGATION -->
-        <nav class="bottom-nav">
+        <button
+            class="nav-item"
+            type="button"
+            data-section="finance"
+        >
 
-            <button
-                class="nav-item active"
-                type="button"
-            >
+            <span class="nav-icon">
+                💰
+            </span>
 
-                <span class="nav-icon">
-                    ⌂
-                </span>
+            <span class="nav-label">
+                Финансы
+            </span>
 
-                <span class="nav-label">
-                    Главная
-                </span>
-
-            </button>
+        </button>
 
 
-            <button
-                class="nav-item"
-                type="button"
-                data-section="finance"
-            >
+        <button
+            class="nav-item"
+            type="button"
+            data-section="health"
+        >
 
-                <span class="nav-icon">
-                    💰
-                </span>
+            <span class="nav-icon">
+                ❤️
+            </span>
 
-                <span class="nav-label">
-                    Финансы
-                </span>
+            <span class="nav-label">
+                Здоровье
+            </span>
 
-            </button>
-
-
-            <button
-                class="nav-item"
-                type="button"
-                data-section="health"
-            >
-
-                <span class="nav-icon">
-                    ❤️
-                </span>
-
-                <span class="nav-label">
-                    Здоровье
-                </span>
-
-            </button>
+        </button>
 
 
-            <button
-                class="nav-item"
-                type="button"
-                data-section="development"
-            >
+        <button
+            class="nav-item"
+            type="button"
+            data-section="development"
+        >
 
-                <span class="nav-icon">
-                    🧠
-                </span>
+            <span class="nav-icon">
+                🧠
+            </span>
 
-                <span class="nav-label">
-                    Развитие
-                </span>
+            <span class="nav-label">
+                Развитие
+            </span>
 
-            </button>
+        </button>
 
-        </nav>
+    </nav>
 
-    </div>
-
-
-        <!-- JAVASCRIPT -->
-    <script>
-    alert("LIFE GAME WORKS");
-
-    document.addEventListener("DOMContentLoaded", function () {
-
-        console.log("LIFE GAME: started");
-
-        const navItems = document.querySelectorAll(".nav-item");
-
-        navItems.forEach(function (button) {
-
-            button.addEventListener("click", function () {
-
-                const section = this.dataset.section;
-
-                console.log("Clicked:", section);
-
-                navItems.forEach(function (item) {
-                    item.classList.remove("active");
-                });
-
-                this.classList.add("active");
-
-                if (!section) {
-                    alert("Главная");
-                    return;
-                }
-
-                alert("Открываем: " + section);
-            });
-
-        });
+</div>
 
 
-        const categoryCards =
-            document.querySelectorAll(".category-card");
-
-        categoryCards.forEach(function (card) {
-
-            card.addEventListener("click", function () {
-
-                const category =
-                    this.dataset.category;
-
-                alert("Категория: " + category);
-
-            });
-
-        });
-
-    });
-
-```html
 <script>
 
-const STORAGE_KEY = "life_game_data_v1";
-
-const DEFAULT_DATA = {
-
-    finance: [
-        {
-            id: "monthly_income",
-            icon: "💵",
-            name: "Заработано за месяц",
-            unit: "₽",
-            current: 10000,
-            target: 100000
-        },
-        {
-            id: "monthly_goal",
-            icon: "🎯",
-            name: "Цель на месяц",
-            unit: "₽",
-            current: 0,
-            target: 100000
-        },
-        {
-            id: "yearly_goal",
-            icon: "🏆",
-            name: "Цель на год",
-            unit: "₽",
-            current: 0,
-            target: 1200000
-        },
-        {
-            id: "mandatory_expenses",
-            icon: "📉",
-            name: "Обязательные расходы",
-            unit: "₽",
-            current: 0,
-            target: 50000
-        },
-        {
-            id: "safety_cushion",
-            icon: "🛡️",
-            name: "Подушка безопасности",
-            unit: "₽",
-            current: 0,
-            target: 300000
-        }
-    ],
-
-    health: [
-        {
-            id: "daily_routine",
-            icon: "⏰",
-            name: "Режим дня",
-            unit: "%",
-            current: 0,
-            target: 100
-        },
-        {
-            id: "nutrition",
-            icon: "🍎",
-            name: "Питание КБЖУ",
-            unit: "%",
-            current: 0,
-            target: 100
-        },
-        {
-            id: "workouts",
-            icon: "🏋️",
-            name: "Программа тренировок",
-            unit: "тренировок",
-            current: 0,
-            target: 12
-        },
-        {
-            id: "daily_steps",
-            icon: "🚶",
-            name: "Шаги в день",
-            unit: "шагов",
-            current: 0,
-            target: 10000
-        }
-    ],
-
-    development: [
-        {
-            id: "books",
-            icon: "📚",
-            name: "Чтение книг",
-            unit: "книг",
-            current: 0,
-            target: 2
-        },
-        {
-            id: "language",
-            icon: "🌐",
-            name: "Изучение языка",
-            unit: "минут",
-            current: 0,
-            target: 30
-        },
-        {
-            id: "meditation",
-            icon: "🧘",
-            name: "Медитация",
-            unit: "минут",
-            current: 0,
-            target: 15
-        }
-    ]
-
-};
-
-
-let data = loadData();
-
-
-function loadData() {
-
-    try {
-
-        const saved =
-            localStorage.getItem(STORAGE_KEY);
-
-        if (saved) {
-
-            return JSON.parse(saved);
-
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
-
-    return JSON.parse(
-        JSON.stringify(DEFAULT_DATA)
-    );
-
-}
-
-
-function saveData() {
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
-
-}
-
-
-function getProgress(current, target) {
-
-    current = Number(current) || 0;
-    target = Number(target) || 0;
-
-    if (target <= 0) {
-
-        return 0;
-
-    }
-
-    return Math.min(
-        100,
-        Math.round(
-            (current / target) * 100
-        )
-    );
-
-}
-
-
-function formatNumber(value) {
-
-    return new Intl.NumberFormat(
-        "ru-RU"
-    ).format(
-        Number(value) || 0
-    );
-
-}
-
-
-function categoryProgress(category) {
-
-    const items = data[category];
-
-    if (!items.length) {
-
-        return 0;
-
-    }
-
-    let total = 0;
-
-    items.forEach(function(item) {
-
-        total += getProgress(
-            item.current,
-            item.target
-        );
-
-    });
-
-    return Math.round(
-        total / items.length
-    );
-
-}
-
-
-function overallProgress() {
-
-    return Math.round(
-        (
-            categoryProgress("finance") +
-            categoryProgress("health") +
-            categoryProgress("development")
-        ) / 3
-    );
-
-}
-
-
-/* ==============================
-   HOME
-============================== */
-
-function updateHome() {
-
-    const overall =
-        overallProgress();
-
-
-    const overallValue =
-        document.querySelector(
-            ".overall-value"
-        );
-
-
-    const overallFill =
-        document.querySelector(
-            ".overall-fill"
-        );
-
-
-    if (overallValue) {
-
-        overallValue.innerHTML =
-            overall + "<span>%</span>";
-
-    }
-
-
-    if (overallFill) {
-
-        overallFill.style.width =
-            overall + "%";
-
-    }
-
-
-    document
-        .querySelectorAll(".category-card")
-        .forEach(function(card) {
-
-            const category =
-                card.dataset.category;
-
-            const percent =
-                categoryProgress(category);
-
-
-            const percentElement =
-                card.querySelector(
-                    ".category-percent"
-                );
-
-
-            const fill =
-                card.querySelector(
-                    ".progress-fill"
-                );
-
-
-            if (percentElement) {
-
-                percentElement.textContent =
-                    percent + "%";
-
+(function () {
+
+    "use strict";
+
+
+    /* =========================================
+       DATA
+    ========================================= */
+
+    const STORAGE_KEY =
+        "life_game_v2";
+
+
+    const defaultData = {
+
+        finance: [
+
+            {
+                id: "income",
+                icon: "💵",
+                name: "Заработано за месяц",
+                unit: "₽",
+                current: 0,
+                target: 100000
+            },
+
+            {
+                id: "monthlyGoal",
+                icon: "🎯",
+                name: "Цель на месяц",
+                unit: "₽",
+                current: 0,
+                target: 100000
+            },
+
+            {
+                id: "yearlyGoal",
+                icon: "🏆",
+                name: "Цель на год",
+                unit: "₽",
+                current: 0,
+                target: 1200000
+            },
+
+            {
+                id: "expenses",
+                icon: "📉",
+                name: "Обязательные расходы",
+                unit: "₽",
+                current: 0,
+                target: 50000
+            },
+
+            {
+                id: "safety",
+                icon: "🛡️",
+                name: "Подушка безопасности",
+                unit: "₽",
+                current: 0,
+                target: 300000
             }
 
+        ],
 
-            if (fill) {
 
-                fill.style.width =
-                    percent + "%";
+        health: [
 
+            {
+                id: "routine",
+                icon: "⏰",
+                name: "Режим дня",
+                unit: "%",
+                current: 0,
+                target: 100
+            },
+
+            {
+                id: "nutrition",
+                icon: "🍎",
+                name: "Питание с КБЖУ",
+                unit: "%",
+                current: 0,
+                target: 100
+            },
+
+            {
+                id: "workouts",
+                icon: "🏋️",
+                name: "Программа тренировок",
+                unit: "тренировок",
+                current: 0,
+                target: 12
+            },
+
+            {
+                id: "steps",
+                icon: "🚶",
+                name: "Шаги в день",
+                unit: "шагов",
+                current: 0,
+                target: 10000
             }
 
-        });
-
-}
+        ],
 
 
-/* ==============================
-   NAVIGATION
-============================== */
+        development: [
 
-function setupNavigation() {
+            {
+                id: "books",
+                icon: "📚",
+                name: "Чтение книг",
+                unit: "книг",
+                current: 0,
+                target: 2
+            },
 
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(function(button) {
+            {
+                id: "language",
+                icon: "🌐",
+                name: "Изучение языка",
+                unit: "минут",
+                current: 0,
+                target: 30
+            },
 
-            button.addEventListener(
-                "click",
-                function() {
+            {
+                id: "meditation",
+                icon: "🧘",
+                name: "Медитация",
+                unit: "минут",
+                current: 0,
+                target: 15
+            }
 
-                    const section =
-                        this.dataset.section;
-
-
-                    document
-                        .querySelectorAll(".nav-item")
-                        .forEach(function(item) {
-
-                            item.classList.remove(
-                                "active"
-                            );
-
-                        });
-
-
-                    this.classList.add("active");
-
-
-                    if (!section) {
-
-                        closeCategory();
-
-                        updateHome();
-
-                        return;
-
-                    }
-
-
-                    openCategory(section);
-
-                }
-            );
-
-        });
-
-
-    document
-        .querySelectorAll(".category-card")
-        .forEach(function(card) {
-
-            card.addEventListener(
-                "click",
-                function() {
-
-                    openCategory(
-                        this.dataset.category
-                    );
-
-                }
-            );
-
-        });
-
-}
-
-
-/* ==============================
-   CATEGORY PAGE
-============================== */
-
-function openCategory(category) {
-
-    closeCategory();
-
-
-    const names = {
-
-        finance: "💰 Финансы",
-        health: "❤️ Здоровье",
-        development: "🧠 Развитие"
+        ]
 
     };
 
 
-    const page =
-        document.createElement("div");
+    let data =
+        loadData();
 
 
-    page.className =
-        "category-page";
+    /* =========================================
+       STORAGE
+    ========================================= */
+
+    function loadData() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+                return mergeData(parsed);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Storage error:",
+                error
+            );
+
+        }
+
+        return clone(defaultData);
+
+    }
 
 
-    const percent =
-        categoryProgress(category);
+    function clone(object) {
+
+        return JSON.parse(
+            JSON.stringify(object)
+        );
+
+    }
 
 
-    page.innerHTML = `
+    function mergeData(saved) {
 
-        <div class="category-page-header">
-
-            <button
-                class="back-button"
-                type="button"
-            >
-                ←
-            </button>
-
-            <div>
-
-                <div class="page-eyebrow">
-                    LIFE GAME
-                </div>
-
-                <h2>
-                    ${names[category]}
-                </h2>
-
-            </div>
-
-        </div>
+        const result =
+            clone(defaultData);
 
 
-        <div class="category-summary">
+        Object.keys(result).forEach(
+            function (category) {
 
-            <div class="summary-label">
-                CATEGORY PROGRESS
-            </div>
+                if (
+                    Array.isArray(
+                        saved[category]
+                    )
+                ) {
 
-            <div class="summary-value">
-                ${percent}%
-            </div>
+                    saved[category].forEach(
+                        function(savedItem) {
 
-            <div class="summary-bar">
+                            const item =
+                                result[category].find(
+                                    function(element) {
 
-                <div
-                    class="summary-fill"
-                    style="width:${percent}%"
-                ></div>
+                                        return (
+                                            element.id ===
+                                            savedItem.id
+                                        );
 
-            </div>
-
-        </div>
-
-
-        <div class="metrics-list">
-
-            ${data[category]
-                .map(function(item) {
-
-                    const p =
-                        getProgress(
-                            item.current,
-                            item.target
-                        );
+                                    }
+                                );
 
 
-                    return `
+                            if (item) {
 
-                        <div class="metric-card">
+                                item.current =
+                                    Number(
+                                        savedItem.current
+                                    ) || 0;
 
-                            <div class="metric-top">
+                                item.target =
+                                    Number(
+                                        savedItem.target
+                                    ) || 0;
 
-                                <div class="metric-title">
+                            }
 
-                                    <div class="metric-icon">
-                                        ${item.icon}
-                                    </div>
+                        }
+                    );
 
-                                    <div>
-
-                                        <strong>
-                                            ${item.name}
-                                        </strong>
-
-                                        <span>
-                                            ${formatNumber(item.current)}
-                                            ${item.unit}
-                                            /
-                                            ${formatNumber(item.target)}
-                                            ${item.unit}
-                                        </span>
-
-                                    </div>
-
-                                </div>
-
-
-                                <div class="metric-percent">
-                                    ${p}%
-                                </div>
-
-                            </div>
-
-
-                            <div class="metric-progress">
-
-                                <div
-                                    class="metric-progress-fill"
-                                    style="width:${p}%"
-                                ></div>
-
-                            </div>
-
-
-                            <button
-                                class="metric-edit"
-                                type="button"
-                                data-id="${item.id}"
-                            >
-                                ✎ ИЗМЕНИТЬ
-                            </button>
-
-                        </div>
-
-                    `;
-
-                })
-                .join("")}
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(page);
-
-
-    page
-        .querySelector(".back-button")
-        .addEventListener(
-            "click",
-            function() {
-
-                closeCategory();
-
-                updateHome();
-
-                activateHome();
+                }
 
             }
         );
 
 
-    page
-        .querySelectorAll(".metric-edit")
-        .forEach(function(button) {
+        return result;
 
-            button.addEventListener(
-                "click",
-                function() {
+    }
 
-                    openEditor(
-                        category,
-                        this.dataset.id
+
+    function saveData() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(data)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Cannot save data:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       CALCULATIONS
+    ========================================= */
+
+    function progress(
+        current,
+        target
+    ) {
+
+        const c =
+            Number(current) || 0;
+
+        const t =
+            Number(target) || 0;
+
+
+        if (t <= 0) {
+
+            return 0;
+
+        }
+
+
+        return Math.min(
+            100,
+            Math.max(
+                0,
+                Math.round(
+                    c / t * 100
+                )
+            )
+        );
+
+    }
+
+
+    function categoryProgress(
+        category
+    ) {
+
+        const items =
+            data[category];
+
+
+        if (!items || !items.length) {
+
+            return 0;
+
+        }
+
+
+        const total =
+            items.reduce(
+                function(sum, item) {
+
+                    return (
+                        sum +
+                        progress(
+                            item.current,
+                            item.target
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        return Math.round(
+            total / items.length
+        );
+
+    }
+
+
+    function totalProgress() {
+
+        return Math.round(
+
+            (
+                categoryProgress(
+                    "finance"
+                ) +
+
+                categoryProgress(
+                    "health"
+                ) +
+
+                categoryProgress(
+                    "development"
+                )
+
+            ) / 3
+
+        );
+
+    }
+
+
+    function formatNumber(
+        value
+    ) {
+
+        return new Intl.NumberFormat(
+            "ru-RU"
+        ).format(
+            Number(value) || 0
+        );
+
+    }
+
+
+    /* =========================================
+       HOME
+    ========================================= */
+
+    function updateHome() {
+
+        const total =
+            totalProgress();
+
+
+        const overallValue =
+            document.querySelector(
+                ".overall-value"
+            );
+
+
+        const overallFill =
+            document.querySelector(
+                ".overall-fill"
+            );
+
+
+        if (overallValue) {
+
+            overallValue.innerHTML =
+                total +
+                "<span>%</span>";
+
+        }
+
+
+        if (overallFill) {
+
+            overallFill.style.width =
+                total + "%";
+
+        }
+
+
+        document
+            .querySelectorAll(
+                ".category-card"
+            )
+            .forEach(
+                function(card) {
+
+                    const category =
+                        card.dataset.category;
+
+
+                    const value =
+                        categoryProgress(
+                            category
+                        );
+
+
+                    const percent =
+                        card.querySelector(
+                            ".category-percent"
+                        );
+
+
+                    const fill =
+                        card.querySelector(
+                            ".progress-fill"
+                        );
+
+
+                    if (percent) {
+
+                        percent.textContent =
+                            value + "%";
+
+                    }
+
+
+                    if (fill) {
+
+                        fill.style.width =
+                            value + "%";
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    /* =========================================
+       NAVIGATION
+    ========================================= */
+
+    function setupNavigation() {
+
+        const buttons =
+            document.querySelectorAll(
+                ".nav-item"
+            );
+
+
+        buttons.forEach(
+            function(button) {
+
+                button.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+
+                        const section =
+                            this.dataset.section;
+
+
+                        setActiveNav(
+                            section
+                        );
+
+
+                        if (
+                            section ===
+                            "home"
+                        ) {
+
+                            closeCategory();
+
+                        } else {
+
+                            openCategory(
+                                section
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        document
+            .querySelectorAll(
+                ".category-card"
+            )
+            .forEach(
+                function(card) {
+
+                    card.addEventListener(
+                        "click",
+                        function() {
+
+                            openCategory(
+                                this.dataset.category
+                            );
+
+                        }
                     );
 
                 }
             );
 
-        });
-
-}
-
-
-function closeCategory() {
-
-    const page =
-        document.querySelector(
-            ".category-page"
-        );
-
-
-    if (page) {
-
-        page.remove();
-
     }
 
-}
 
+    function setActiveNav(
+        section
+    ) {
 
-function activateHome() {
+        document
+            .querySelectorAll(
+                ".nav-item"
+            )
+            .forEach(
+                function(button) {
 
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(function(item) {
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.section ===
+                        section
+                    );
 
-            item.classList.remove(
-                "active"
+                }
             );
 
-        });
-
-
-    const home =
-        document.querySelector(
-            ".nav-item:first-child"
-        );
-
-
-    if (home) {
-
-        home.classList.add("active");
-
-    }
-
-}
-
-
-/* ==============================
-   EDITOR
-============================== */
-
-function openEditor(
-    category,
-    id
-) {
-
-    const item =
-        data[category].find(
-            function(element) {
-
-                return element.id === id;
-
-            }
-        );
-
-
-    if (!item) {
-
-        return;
-
     }
 
 
-    const overlay =
-        document.createElement("div");
+    /* =========================================
+       CATEGORY
+    ========================================= */
+
+    function openCategory(
+        category
+    ) {
+
+        closeCategory();
 
 
-    overlay.className =
-        "editor-overlay";
+        const titles = {
+
+            finance:
+                "💰 Финансы",
+
+            health:
+                "❤️ Здоровье",
+
+            development:
+                "🧠 Развитие"
+
+        };
 
 
-    overlay.innerHTML = `
-
-        <div class="editor">
-
-            <button
-                class="editor-close"
-                type="button"
-            >
-                ×
-            </button>
+        const page =
+            document.createElement(
+                "div"
+            );
 
 
-            <div class="editor-icon">
-                ${item.icon}
-            </div>
+        page.className =
+            "category-page";
 
 
-            <div class="editor-eyebrow">
-                EDIT GOAL
-            </div>
+        const percent =
+            categoryProgress(
+                category
+            );
 
 
-            <h3>
-                ${item.name}
-            </h3>
+        page.innerHTML = `
 
+            <div class="category-page-header">
 
-            <label>
-                Текущее значение
-            </label>
+                <button
+                    class="back-button"
+                    type="button"
+                >
+                    ←
+                </button>
 
-            <input
-                class="current-input"
-                type="number"
-                value="${item.current}"
-            >
+                <div>
 
+                    <div class="page-eyebrow">
+                        LIFE GAME
+                    </div>
 
-            <label>
-                Цель
-            </label>
+                    <h2>
+                        ${titles[category]}
+                    </h2>
 
-            <input
-                class="target-input"
-                type="number"
-                value="${item.target}"
-            >
-
-
-            <div class="editor-preview">
-
-                <span>
-                    Прогресс
-                </span>
-
-                <strong class="editor-progress">
-                    ${getProgress(
-                        item.current,
-                        item.target
-                    )}%
-                </strong>
+                </div>
 
             </div>
 
 
-            <button
-                class="save-button"
-                type="button"
-            >
-                СОХРАНИТЬ
-            </button>
+            <div class="category-summary">
 
-        </div>
+                <div class="section-label">
+                    CATEGORY PROGRESS
+                </div>
 
-    `;
+                <div class="summary-value">
+                    ${percent}%
+                </div>
+
+                <div class="summary-bar">
+
+                    <div
+                        class="summary-fill"
+                        style="width:${percent}%"
+                    ></div>
+
+                </div>
+
+            </div>
 
 
-    document.body.appendChild(
+            <div class="metrics-list">
+
+                ${data[category]
+                    .map(
+                        function(item) {
+
+                            const p =
+                                progress(
+                                    item.current,
+                                    item.target
+                                );
+
+
+                            return `
+
+                                <div
+                                    class="metric-card"
+                                    data-id="${item.id}"
+                                >
+
+                                    <div class="metric-top">
+
+                                        <div class="metric-title">
+
+                                            <div class="metric-icon">
+                                                ${item.icon}
+                                            </div>
+
+                                            <div>
+
+                                                <strong>
+                                                    ${item.name}
+                                                </strong>
+
+                                                <span>
+                                                    ${formatNumber(
+                                                        item.current
+                                                    )}
+                                                    ${item.unit}
+                                                    /
+                                                    ${formatNumber(
+                                                        item.target
+                                                    )}
+                                                    ${item.unit}
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="metric-percent">
+                                            ${p}%
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="metric-progress">
+
+                                        <div
+                                            class="metric-progress-fill"
+                                            style="width:${p}%"
+                                        ></div>
+
+                                    </div>
+
+
+                                    <button
+                                        class="metric-edit"
+                                        type="button"
+                                        data-edit="${item.id}"
+                                    >
+                                        ✎ ИЗМЕНИТЬ
+                                    </button>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("")}
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            page
+        );
+
+
+        page
+            .querySelector(
+                ".back-button"
+            )
+            .addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    closeCategory();
+
+                    updateHome();
+
+                    setActiveNav(
+                        "home"
+                    );
+
+                }
+            );
+
+
+        page
+            .querySelectorAll(
+                ".metric-edit"
+            )
+            .forEach(
+                function(button) {
+
+                    button.addEventListener(
+                        "click",
+                        function(event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            openEditor(
+                                category,
+                                this.dataset.edit
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    function closeCategory() {
+
+        const page =
+            document.querySelector(
+                ".category-page"
+            );
+
+
+        if (page) {
+
+            page.remove();
+
+        }
+
+    }
+
+
+    /* =========================================
+       EDITOR
+    ========================================= */
+
+    function openEditor(
+        category,
+        id
+    ) {
+
+        const item =
+            data[category].find(
+                function(element) {
+
+                    return (
+                        element.id === id
+                    );
+
+                }
+            );
+
+
+        if (!item) {
+
+            return;
+
+        }
+
+
+        const overlay =
+            document.createElement(
+                "div"
+            );
+
+
+        overlay.className =
+            "editor-overlay";
+
+
+        overlay.innerHTML = `
+
+            <div class="editor">
+
+                <button
+                    class="editor-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+
+                <div class="editor-icon">
+                    ${item.icon}
+                </div>
+
+
+                <div class="editor-eyebrow">
+                    EDIT GOAL
+                </div>
+
+
+                <h3>
+                    ${item.name}
+                </h3>
+
+
+                <label>
+                    Текущее значение
+                </label>
+
+                <input
+                    class="current-input"
+                    type="number"
+                    inputmode="decimal"
+                    value="${item.current}"
+                >
+
+
+                <label>
+                    Цель
+                </label>
+
+                <input
+                    class="target-input"
+                    type="number"
+                    inputmode="decimal"
+                    value="${item.target}"
+                >
+
+
+                <div class="editor-preview">
+
+                    <span>
+                        ПРОГРЕСС
+                    </span>
+
+                    <strong
+                        class="editor-progress"
+                    >
+                        ${progress(
+                            item.current,
+                            item.target
+                        )}%
+                    </strong>
+
+                </div>
+
+
+                <button
+                    class="save-button"
+                    type="button"
+                >
+                    СОХРАНИТЬ
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        const currentInput =
+            overlay.querySelector(
+                ".current-input"
+            );
+
+
+        const targetInput =
+            overlay.querySelector(
+                ".target-input"
+            );
+
+
+        const preview =
+            overlay.querySelector(
+                ".editor-progress"
+            );
+
+
+        function updatePreview() {
+
+            preview.textContent =
+                progress(
+                    currentInput.value,
+                    targetInput.value
+                ) + "%";
+
+        }
+
+
+        currentInput.addEventListener(
+            "input",
+            updatePreview
+        );
+
+
+        targetInput.addEventListener(
+            "input",
+            updatePreview
+        );
+
+
         overlay
-    );
+            .querySelector(
+                ".editor-close"
+            )
+            .addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    overlay.remove();
+
+                }
+            );
 
 
-    const currentInput =
-        overlay.querySelector(
-            ".current-input"
-        );
+        overlay
+            .querySelector(
+                ".save-button"
+            )
+            .addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
 
 
-    const targetInput =
-        overlay.querySelector(
-            ".target-input"
-        );
+                    item.current =
+                        Number(
+                            currentInput.value
+                        ) || 0;
 
 
-    const progressElement =
-        overlay.querySelector(
-            ".editor-progress"
-        );
+                    item.target =
+                        Number(
+                            targetInput.value
+                        ) || 0;
 
 
-    function updatePreview() {
-
-        progressElement.textContent =
-            getProgress(
-                currentInput.value,
-                targetInput.value
-            ) + "%";
-
-    }
+                    saveData();
 
 
-    currentInput.addEventListener(
-        "input",
-        updatePreview
-    );
+                    overlay.remove();
 
 
-    targetInput.addEventListener(
-        "input",
-        updatePreview
-    );
+                    openCategory(
+                        category
+                    );
 
 
-    overlay
-        .querySelector(".editor-close")
-        .addEventListener(
+                    updateHome();
+
+                }
+            );
+
+
+        overlay.addEventListener(
             "click",
-            function() {
+            function(event) {
 
-                overlay.remove();
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    overlay.remove();
+
+                }
 
             }
         );
 
+    }
 
-    overlay
-        .querySelector(".save-button")
-        .addEventListener(
+
+    /* =========================================
+       DAILY QUEST
+    ========================================= */
+
+    function setupQuest() {
+
+        const button =
+            document.getElementById(
+                "dailyQuest"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        button.addEventListener(
             "click",
-            function() {
+            function(event) {
 
-                item.current =
-                    Number(
-                        currentInput.value
-                    ) || 0;
+                event.preventDefault();
+                event.stopPropagation();
 
 
-                item.target =
-                    Number(
-                        targetInput.value
-                    ) || 0;
+                const overlay =
+                    document.createElement(
+                        "div"
+                    );
 
 
-                saveData();
+                overlay.className =
+                    "editor-overlay";
 
 
-                overlay.remove();
+                overlay.innerHTML = `
+
+                    <div class="editor quest-message">
+
+                        <button
+                            class="editor-close"
+                            type="button"
+                        >
+                            ×
+                        </button>
+
+                        <div class="editor-icon">
+                            ⚡
+                        </div>
+
+                        <div class="editor-eyebrow">
+                            DAILY QUEST
+                        </div>
+
+                        <h3>
+                            Новый день
+                        </h3>
+
+                        <p>
+                            Здесь появятся ежедневные
+                            задания, которые будут
+                            приносить тебе XP.
+                        </p>
+
+                        <button
+                            class="save-button"
+                            type="button"
+                        >
+                            ПОНЯТНО
+                        </button>
+
+                    </div>
+
+                `;
 
 
-                openCategory(
-                    category
+                document.body.appendChild(
+                    overlay
                 );
 
 
-                updateHome();
+                overlay
+                    .querySelector(
+                        ".editor-close"
+                    )
+                    .addEventListener(
+                        "click",
+                        function() {
+
+                            overlay.remove();
+
+                        }
+                    );
+
+
+                overlay
+                    .querySelector(
+                        ".save-button"
+                    )
+                    .addEventListener(
+                        "click",
+                        function() {
+
+                            overlay.remove();
+
+                        }
+                    );
 
             }
         );
 
-
-    overlay.addEventListener(
-        "click",
-        function(event) {
-
-            if (
-                event.target === overlay
-            ) {
-
-                overlay.remove();
-
-            }
-
-        }
-    );
-
-}
+    }
 
 
-/* ==============================
-   START
-============================== */
+    /* =========================================
+       START APPLICATION
+    ========================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
+    function startApp() {
 
         setupNavigation();
+
+        setupQuest();
 
         updateHome();
 
     }
-);
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            startApp
+        );
+
+    } else {
+
+        startApp();
+
+    }
+
+})();
 
 </script>
+
+</body>
+</html>
 ```
-
-
