@@ -1,13 +1,21 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+>
+
 <meta name="theme-color" content="#050505">
 <meta name="apple-mobile-web-app-capable" content="yes">
+
 <title>LIFE GAME</title>
 
 <style>
+
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent
@@ -22,13 +30,22 @@
     --radius:22px
 }
 
-html,body{
+html,
+body{
     margin:0;
     padding:0;
     min-height:100%;
     background:#050505;
     color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        Inter,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
     -webkit-font-smoothing:antialiased
 }
 
@@ -40,7 +57,8 @@ body{
     overflow:hidden
 }
 
-button,input{
+button,
+input{
     font-family:inherit
 }
 
@@ -101,7 +119,9 @@ button:active{
     background:linear-gradient(145deg,#292929,#0b0b0b);
     font-size:14px;
     font-weight:800;
-    box-shadow:0 12px 30px #0007,inset 0 1px #ffffff14
+    box-shadow:
+        0 12px 30px #0007,
+        inset 0 1px #ffffff14
 }
 
 .hero{
@@ -110,7 +130,9 @@ button:active{
     border:1px solid var(--border);
     border-radius:var(--radius);
     background:linear-gradient(145deg,#161616,#0a0a0a);
-    box-shadow:0 25px 65px #0006,inset 0 1px #ffffff09
+    box-shadow:
+        0 25px 65px #0006,
+        inset 0 1px #ffffff09
 }
 
 .hero-top{
@@ -201,7 +223,9 @@ button:active{
     border:1px solid var(--border);
     border-radius:var(--radius);
     background:linear-gradient(145deg,#131313,#0a0a0a);
-    box-shadow:0 16px 40px #0004,inset 0 1px #ffffff06
+    box-shadow:
+        0 16px 40px #0004,
+        inset 0 1px #ffffff06
 }
 
 .category-head{
@@ -278,8 +302,6 @@ button:active{
     letter-spacing:2px
 }
 
-/* CREATOR */
-
 .creator{
     display:flex;
     align-items:center;
@@ -305,7 +327,7 @@ button:active{
 
 .creator:active{
     transform:scale(.985);
-    background:#111;
+    background:#111
 }
 
 /* NAV */
@@ -376,8 +398,17 @@ button:active{
     overflow-y:auto;
     padding:24px 18px 155px;
     background:
-        radial-gradient(circle at 50% -10%,#ffffff12,transparent 38%),
-        linear-gradient(180deg,#080808,#050505 60%,#030303);
+        radial-gradient(
+            circle at 50% -10%,
+            #ffffff12,
+            transparent 38%
+        ),
+        linear-gradient(
+            180deg,
+            #080808,
+            #050505 60%,
+            #030303
+        );
     animation:pageIn .22s ease
 }
 
@@ -609,8 +640,6 @@ button:active{
     font-weight:800
 }
 
-/* стрелка больше не используется */
-
 .collapse-chevron{
     display:none!important
 }
@@ -622,7 +651,9 @@ button:active{
 .expense-content{
     overflow:hidden;
     max-height:900px;
-    transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease
+    transition:
+        max-height .28s cubic-bezier(.2,.8,.2,1),
+        opacity .18s ease
 }
 
 .expenses.collapsed .expense-content{
@@ -979,8 +1010,6 @@ button:active{
     transform:translate(-50%,0)
 }
 
-/* TRAINING INSIDE HEALTH */
-
 .training-divider{
     margin:4px 0 2px;
     padding:12px 2px 4px;
@@ -992,6 +1021,7 @@ button:active{
 }
 
 @media(max-width:360px){
+
     .app{
         padding-left:14px;
         padding-right:14px
@@ -1012,9 +1042,11 @@ button:active{
     .nav-label{
         font-size:6px
     }
+
 }
 
 @media(min-width:700px){
+
     .app{
         padding-top:45px
     }
@@ -1022,7 +1054,9 @@ button:active{
     .page{
         padding-top:35px
     }
+
 }
+
 </style>
 </head>
 
@@ -1030,164 +1064,393 @@ button:active{
 
 <div class="app">
 
-<header class="header">
-    <div>
-        <div class="eyebrow">YOUR LIFE</div>
-        <h1>LIFE GAME</h1>
-    </div>
-    <div class="avatar">B</div>
-</header>
+    <header class="header">
 
-<section class="hero">
-    <div class="hero-top">
         <div>
-            <span class="label">PLAYER LEVEL</span>
-            <div class="level" id="playerLevel">LVL 1</div>
-        </div>
-        <div class="xp" id="playerXP">0 XP</div>
-    </div>
 
-    <div class="bar">
-        <div class="fill" id="playerXPFill"></div>
-    </div>
-
-    <div class="hero-bottom">
-        <span id="xpNext">100 XP TO NEXT LEVEL</span>
-        <span id="playerRank">BEGINNER</span>
-    </div>
-</section>
-
-<section class="life">
-    <div class="section-label">LIFE PROGRESS</div>
-    <div class="life-number" id="lifeProgress">0<span>%</span></div>
-    <div class="life-bar">
-        <div class="fill" id="lifeFill"></div>
-    </div>
-</section>
-
-<main class="categories">
-
-    <article class="category" data-category="finance">
-        <div class="category-head">
-            <div class="category-title">
-                <div class="icon">💰</div>
-                <div class="category-name">
-                    <strong>FINANCE</strong>
-                    <span>Финансы</span>
-                </div>
+            <div class="eyebrow">
+                YOUR LIFE
             </div>
-            <div class="percent" id="financePercent">0%</div>
-        </div>
-        <div class="progress">
-            <i id="financeFill"></i>
-        </div>
-    </article>
 
-    <article class="category" data-category="development">
-        <div class="category-head">
-            <div class="category-title">
-                <div class="icon">🧠</div>
-                <div class="category-name">
-                    <strong>DEVELOPMENT</strong>
-                    <span>Развитие</span>
+            <h1>
+                LIFE GAME
+            </h1>
+
+        </div>
+
+        <div class="avatar">
+            B
+        </div>
+
+    </header>
+
+
+    <section class="hero">
+
+        <div class="hero-top">
+
+            <div>
+
+                <span class="label">
+                    PLAYER LEVEL
+                </span>
+
+                <div
+                    class="level"
+                    id="playerLevel"
+                >
+                    LVL 1
                 </div>
-            </div>
-            <div class="percent" id="developmentPercent">0%</div>
-        </div>
-        <div class="progress">
-            <i id="developmentFill"></i>
-        </div>
-    </article>
 
-    <article class="category" data-category="health">
-        <div class="category-head">
-            <div class="category-title">
-                <div class="icon">❤️</div>
-                <div class="category-name">
-                    <strong>HEALTH</strong>
-                    <span>Здоровье · Тренировки</span>
+            </div>
+
+            <div
+                class="xp"
+                id="playerXP"
+            >
+                0 XP
+            </div>
+
+        </div>
+
+
+        <div class="bar">
+
+            <div
+                class="fill"
+                id="playerXPFill"
+            ></div>
+
+        </div>
+
+
+        <div class="hero-bottom">
+
+            <span id="xpNext">
+                100 XP TO NEXT LEVEL
+            </span>
+
+            <span id="playerRank">
+                BEGINNER
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <section class="life">
+
+        <div class="section-label">
+            LIFE PROGRESS
+        </div>
+
+        <div
+            class="life-number"
+            id="lifeProgress"
+        >
+            0<span>%</span>
+        </div>
+
+        <div class="life-bar">
+
+            <div
+                class="fill"
+                id="lifeFill"
+            ></div>
+
+        </div>
+
+    </section>
+
+
+    <main class="categories">
+
+        <article
+            class="category"
+            data-category="finance"
+        >
+
+            <div class="category-head">
+
+                <div class="category-title">
+
+                    <div class="icon">
+                        💰
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            FINANCE
+                        </strong>
+
+                        <span>
+                            Финансы
+                        </span>
+
+                    </div>
+
                 </div>
+
+                <div
+                    class="percent"
+                    id="financePercent"
+                >
+                    0%
+                </div>
+
             </div>
-            <div class="percent" id="healthPercent">0%</div>
-        </div>
-        <div class="progress">
-            <i id="healthFill"></i>
-        </div>
-    </article>
 
-</main>
+            <div class="progress">
 
-<button class="quest" id="dailyQuest">
-    ⚡ DAILY QUEST
-</button>
+                <i
+                    id="financeFill"
+                ></i>
 
-<a class="creator"
-   href="https://t.me/shkeltinsh"
-   target="_blank"
-   rel="noopener noreferrer">
-    Created by <strong>&nbsp;@shkeltinsh</strong>
-</a>
+            </div>
+
+        </article>
+
+
+        <article
+            class="category"
+            data-category="development"
+        >
+
+            <div class="category-head">
+
+                <div class="category-title">
+
+                    <div class="icon">
+                        🧠
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            DEVELOPMENT
+                        </strong>
+
+                        <span>
+                            Развитие
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="percent"
+                    id="developmentPercent"
+                >
+                    0%
+                </div>
+
+            </div>
+
+            <div class="progress">
+
+                <i
+                    id="developmentFill"
+                ></i>
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="category"
+            data-category="health"
+        >
+
+            <div class="category-head">
+
+                <div class="category-title">
+
+                    <div class="icon">
+                        ❤️
+                    </div>
+
+                    <div class="category-name">
+
+                        <strong>
+                            HEALTH
+                        </strong>
+
+                        <span>
+                            Здоровье · Тренировки
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div
+                    class="percent"
+                    id="healthPercent"
+                >
+                    0%
+                </div>
+
+            </div>
+
+            <div class="progress">
+
+                <i
+                    id="healthFill"
+                ></i>
+
+            </div>
+
+        </article>
+
+    </main>
+
+
+    <button
+        class="quest"
+        id="dailyQuest"
+    >
+        ⚡ DAILY QUEST
+    </button>
+
+
+    <a
+        class="creator"
+        href="https://t.me/shkeltinsh"
+        target="_blank"
+        rel="noopener noreferrer"
+    >
+        Created by
+        <strong>&nbsp;@shkeltinsh</strong>
+    </a>
 
 </div>
 
+
 <nav class="nav">
 
-    <button class="active" data-nav="home">
-        <span class="nav-icon">⌂</span>
-        <span class="nav-label">Главная</span>
+    <button
+        class="active"
+        data-nav="home"
+    >
+
+        <span class="nav-icon">
+            ⌂
+        </span>
+
+        <span class="nav-label">
+            Главная
+        </span>
+
     </button>
 
-    <button data-nav="finance">
-        <span class="nav-icon">💰</span>
-        <span class="nav-label">Финансы</span>
+
+    <button
+        data-nav="finance"
+    >
+
+        <span class="nav-icon">
+            💰
+        </span>
+
+        <span class="nav-label">
+            Финансы
+        </span>
+
     </button>
 
-    <button data-nav="health">
-        <span class="nav-icon">❤️</span>
-        <span class="nav-label">Здоровье</span>
+
+    <button
+        data-nav="health"
+    >
+
+        <span class="nav-icon">
+            ❤️
+        </span>
+
+        <span class="nav-label">
+            Здоровье
+        </span>
+
     </button>
 
-    <button data-nav="development">
-        <span class="nav-icon">🧠</span>
-        <span class="nav-label">Развитие</span>
+
+    <button
+        data-nav="development"
+    >
+
+        <span class="nav-icon">
+            🧠
+        </span>
+
+        <span class="nav-label">
+            Развитие
+        </span>
+
     </button>
 
 </nav>
 
+
+<!-- =====================================================
+     CORE MODULES
+     ===================================================== -->
+
+<script src="js/core/state.js"></script>
+<script src="js/core/storage.js"></script>
+<script src="js/core/xp.js"></script>
+<script src="js/core/utils.js"></script>
+
+
+<!-- =====================================================
+     SECTIONS
+     ===================================================== -->
+
+<script src="js/sections/finance.js"></script>
+
+
 <script>
-(()=>{
+(function(){
 
 'use strict';
+
+
+/* =====================================================
+   FALLBACK CORE
+   Нужен для совместимости с текущей структурой.
+   ===================================================== */
+
 
 const SK='life_game_core_v3';
 const EK='life_game_expenses_v3';
 const UK='life_game_ui_v1';
 
+
 const META={
+
     finance:{
         icon:'💰',
         title:'Финансы'
     },
+
     development:{
         icon:'🧠',
         title:'Развитие'
     },
+
     health:{
         icon:'❤️',
         title:'Здоровье'
     }
+
 };
 
-const XP={
-    financeBase:100,
-    trainingBase:80,
-    developmentAction:25,
-    healthAction:20,
-    streakMultiplier:.08,
-    penaltyMultiplier:.25
-};
 
 const DEFAULT={
+
     version:3,
 
     player:{
@@ -1247,6 +1510,7 @@ const DEFAULT={
             completed:0,
             failed:0
         }
+
     },
 
     simulator:{
@@ -1256,6 +1520,7 @@ const DEFAULT={
     },
 
     quests:[
+
         {
             id:'finance_income',
             category:'finance',
@@ -1263,6 +1528,7 @@ const DEFAULT={
             xp:35,
             done:false
         },
+
         {
             id:'training',
             category:'training',
@@ -1270,6 +1536,7 @@ const DEFAULT={
             xp:30,
             done:false
         },
+
         {
             id:'development',
             category:'development',
@@ -1277,6 +1544,7 @@ const DEFAULT={
             xp:25,
             done:false
         },
+
         {
             id:'health',
             category:'health',
@@ -1284,43 +1552,203 @@ const DEFAULT={
             xp:20,
             done:false
         }
+
     ]
+
 };
 
-const clone=o=>JSON.parse(JSON.stringify(o));
 
-const num=v=>
-    Number.isFinite(Number(v))
+const clone=function(o){
+
+    return JSON.parse(
+        JSON.stringify(o)
+    );
+
+};
+
+
+const num=function(v){
+
+    return Number.isFinite(Number(v))
         ? Number(v)
         : 0;
 
-const clamp=(v,a,b)=>
-    Math.min(b,Math.max(a,v));
+};
 
-const fmt=v=>
-    new Intl.NumberFormat('ru-RU').format(num(v));
 
-const esc=v=>
-    String(v).replace(
-        /[&<>"']/g,
-        m=>({
-            '&':'&amp;',
-            '<':'&lt;',
-            '>':'&gt;',
-            '"':'&quot;',
-            "'":'&#039;'
-        }[m])
+const clamp=function(v,a,b){
+
+    return Math.min(
+        b,
+        Math.max(
+            a,
+            v
+        )
     );
+
+};
+
+
+const fmt=function(v){
+
+    return new Intl.NumberFormat(
+        'ru-RU'
+    ).format(
+        num(v)
+    );
+
+};
+
+
+const esc=function(v){
+
+    return String(v).replace(
+        /[&<>"']/g,
+        function(m){
+
+            return {
+
+                '&':'&amp;',
+                '<':'&lt;',
+                '>':'&gt;',
+                '"':'&quot;',
+                "'":'&#039;'
+
+            }[m];
+
+        }
+    );
+
+};
+
+
+/* =====================================================
+   STATE
+   ===================================================== */
+
+function normalize(s){
+
+    let r=clone(DEFAULT);
+
+    if(
+        !s ||
+        typeof s!=='object'
+    ){
+
+        return r;
+
+    }
+
+
+    if(s.player){
+
+        Object.keys(
+            r.player
+        ).forEach(function(k){
+
+            if(
+                s.player[k]!==undefined
+            ){
+
+                r.player[k]=Math.max(
+                    0,
+                    num(
+                        s.player[k]
+                    )
+                );
+
+            }
+
+        });
+
+    }
+
+
+    Object.keys(
+        r.categories
+    ).forEach(function(c){
+
+        if(
+            s.categories &&
+            s.categories[c]
+        ){
+
+            Object.keys(
+                r.categories[c]
+            ).forEach(function(k){
+
+                if(
+                    s.categories[c][k]!==undefined
+                ){
+
+                    r.categories[c][k]=
+                        s.categories[c][k];
+
+                }
+
+            });
+
+        }
+
+    });
+
+
+    if(
+        Array.isArray(s.quests)
+    ){
+
+        r.quests=s.quests.map(
+            function(q){
+
+                return {
+
+                    id:String(
+                        q.id||''
+                    ),
+
+                    category:String(
+                        q.category||'health'
+                    ),
+
+                    title:String(
+                        q.title||'Quest'
+                    ),
+
+                    xp:Math.max(
+                        0,
+                        num(q.xp)
+                    ),
+
+                    done:Boolean(
+                        q.done
+                    )
+
+                };
+
+            }
+        );
+
+    }
+
+
+    return r;
+
+}
 
 
 function loadState(){
 
     try{
 
-        let r=localStorage.getItem(SK);
+        const r=
+            localStorage.getItem(
+                SK
+            );
 
         return r
-            ? normalize(JSON.parse(r))
+            ? normalize(
+                JSON.parse(r)
+            )
             : clone(DEFAULT);
 
     }catch(e){
@@ -1332,97 +1760,40 @@ function loadState(){
 }
 
 
-function normalize(s){
-
-    let r=clone(DEFAULT);
-
-    if(!s || typeof s!=='object')
-        return r;
-
-    if(s.player){
-
-        Object.keys(r.player).forEach(k=>{
-
-            if(s.player[k]!==undefined){
-
-                r.player[k]=Math.max(
-                    0,
-                    num(s.player[k])
-                );
-
-            }
-
-        });
-
-    }
-
-    Object.keys(r.categories).forEach(c=>{
-
-        if(s.categories?.[c]){
-
-            Object.keys(r.categories[c]).forEach(k=>{
-
-                if(s.categories[c][k]!==undefined){
-
-                    r.categories[c][k]=s.categories[c][k];
-
-                }
-
-            });
-
-        }
-
-    });
-
-    if(Array.isArray(s.quests)){
-
-        r.quests=s.quests.map(q=>({
-
-            id:String(q.id||''),
-
-            category:String(
-                q.category||'health'
-            ),
-
-            title:String(
-                q.title||'Quest'
-            ),
-
-            xp:Math.max(
-                0,
-                num(q.xp)
-            ),
-
-            done:Boolean(q.done)
-
-        }));
-
-    }
-
-    return r;
-
-}
-
-
 function loadExpenses(){
 
     try{
 
-        let r=JSON.parse(
-            localStorage.getItem(EK)||'[]'
-        );
+        const r=
+            JSON.parse(
+                localStorage.getItem(
+                    EK
+                )||'[]'
+            );
 
         return Array.isArray(r)
-            ? r.map(e=>({
-                id:String(
-                    e.id||Date.now()+Math.random()
-                ),
-                name:String(e.name||''),
-                amount:Math.max(
-                    0,
-                    num(e.amount)
-                )
-            }))
+            ? r.map(function(e){
+
+                return {
+
+                    id:String(
+                        e.id ||
+                        Date.now()+
+                        Math.random()
+                    ),
+
+                    name:String(
+                        e.name||''
+                    ),
+
+                    amount:Math.max(
+                        0,
+                        num(e.amount)
+                    )
+
+                };
+
+            })
             : [];
 
     }catch(e){
@@ -1438,20 +1809,28 @@ function loadUI(){
 
     try{
 
-        let r=JSON.parse(
-            localStorage.getItem(UK)||'{}'
-        );
+        const r=
+            JSON.parse(
+                localStorage.getItem(
+                    UK
+                )||'{}'
+            );
 
-        return{
-            expensesCollapsed:Boolean(
-                r.expensesCollapsed
-            )
+        return {
+
+            expensesCollapsed:
+                Boolean(
+                    r.expensesCollapsed
+                )
+
         };
 
     }catch(e){
 
-        return{
+        return {
+
             expensesCollapsed:false
+
         };
 
     }
@@ -1484,11 +1863,19 @@ function save(){
 }
 
 
+/* =====================================================
+   XP
+   ===================================================== */
+
 function xpForLevel(l){
 
     return Math.round(
-        100*Math.pow(
-            Math.max(1,num(l)),
+        100*
+        Math.pow(
+            Math.max(
+                1,
+                num(l)
+            ),
             1.42
         )
     );
@@ -1516,23 +1903,30 @@ function levelFromXP(x){
 
 function updateLevels(){
 
-    Object.keys(state.categories).forEach(c=>{
+    Object.keys(
+        state.categories
+    ).forEach(function(c){
 
         state.categories[c].level=
             levelFromXP(
                 Math.max(
                     0,
-                    num(state.categories[c].xp)
+                    num(
+                        state.categories[c].xp
+                    )
                 )
             );
 
     });
 
+
     state.player.level=
         levelFromXP(
             Math.max(
                 0,
-                num(state.player.xp)
+                num(
+                    state.player.xp
+                )
             )
         );
 
@@ -1541,10 +1935,16 @@ function updateLevels(){
 
 function addPlayerXP(a){
 
-    state.player.xp=Math.max(
-        0,
-        num(state.player.xp)+Math.round(num(a))
-    );
+    state.player.xp=
+        Math.max(
+            0,
+            num(
+                state.player.xp
+            )+
+            Math.round(
+                num(a)
+            )
+        );
 
     state.player.level=
         levelFromXP(
@@ -1556,60 +1956,45 @@ function addPlayerXP(a){
 
 function addCatXP(c,a){
 
-    let v=Math.max(
+    const v=Math.max(
         0,
-        Math.round(num(a))
+        Math.round(
+            num(a)
+        )
     );
+
+
+    if(
+        !state.categories[c]
+    ){
+
+        return;
+
+    }
+
 
     state.categories[c].xp=
         Math.max(
             0,
-            num(state.categories[c].xp)+v
+            num(
+                state.categories[c].xp
+            )+
+            v
         );
+
 
     state.categories[c].level=
         levelFromXP(
             state.categories[c].xp
         );
+
 
     addPlayerXP(
-        Math.round(v*.65)
+        Math.round(
+            v*.65
+        )
     );
 
-    save();
-
-}
-
-
-function removeCatXP(c,a){
-
-    let v=Math.max(
-        0,
-        Math.round(num(a))
-    );
-
-    state.categories[c].xp=
-        Math.max(
-            0,
-            state.categories[c].xp-v
-        );
-
-    state.categories[c].level=
-        levelFromXP(
-            state.categories[c].xp
-        );
-
-    state.player.xp=
-        Math.max(
-            0,
-            state.player.xp-
-            Math.round(v*.65)
-        );
-
-    state.player.level=
-        levelFromXP(
-            state.player.xp
-        );
 
     save();
 
@@ -1618,7 +2003,7 @@ function removeCatXP(c,a){
 
 function incomeXP(v){
 
-    let level=Math.max(
+    const level=Math.max(
         1,
         state.categories.finance.level
     );
@@ -1627,8 +2012,13 @@ function incomeXP(v){
         ? Math.max(
             1,
             Math.round(
-                v/50000*100/
-                Math.pow(level,.72)
+                v/
+                50000*
+                100/
+                Math.pow(
+                    level,
+                    .72
+                )
             )
         )
         : 0;
@@ -1636,118 +2026,97 @@ function incomeXP(v){
 }
 
 
-function applyIncome(oldV,newV){
+function applyIncome(
+    oldV,
+    newV
+){
 
-    let d=Math.max(
+    const d=Math.max(
         0,
         incomeXP(newV)-
         incomeXP(oldV)
     );
 
-    if(d)
-        addCatXP('finance',d);
-    else
+
+    if(d){
+
+        addCatXP(
+            'finance',
+            d
+        );
+
+    }else{
+
         save();
 
-}
-
-
-function expensesTotal(){
-
-    return expenses.reduce(
-        (a,e)=>a+num(e.amount),
-        0
-    );
+    }
 
 }
 
 
-function income(){
+/* =====================================================
+   DEVELOPMENT
+   ===================================================== */
 
-    return num(
-        state.categories.finance.monthlyIncome
-    );
+function developmentProgress(){
 
-}
-
-
-function expensePct(){
-
-    return income()
-        ? Math.round(
-            expensesTotal()/
-            income()*100
-        )
-        : 0;
-
-}
+    const x=
+        state.categories.development;
 
 
-function savings(){
-
-    return Math.max(
-        0,
-        income()-expensesTotal()
-    );
-
-}
+    const books=
+        x.books>=2
+            ? 100
+            : Math.round(
+                x.books/2*100
+            );
 
 
-function mp(a,b,over100=false){
-
-    let v=b>0
-        ? Math.round(
-            num(a)/num(b)*100
-        )
-        : 0;
-
-    return over100
-        ? Math.max(0,v)
-        : clamp(v,0,100);
-
-}
+    const language=
+        x.languageMinutes>=30
+            ? 100
+            : Math.round(
+                x.languageMinutes/
+                30*
+                100
+            );
 
 
-function financeProgress(){
+    const meditation=
+        x.meditationMinutes>=15
+            ? 100
+            : Math.round(
+                x.meditationMinutes/
+                15*
+                100
+            );
 
-    let c=state.categories.finance;
-
-    let i=income();
-
-    let g=Math.max(
-        1,
-        num(c.monthlyGoal)
-    );
 
     return Math.round(
         (
-            mp(i,g,true)+
-            mp(i*12,c.yearlyGoal)+
-            (
-                i
-                    ? clamp(
-                        Math.round(
-                            savings()/i*100
-                        ),
-                        0,
-                        100
-                    )
-                    : 0
-            )
+            books+
+            language+
+            meditation
         )/3
     );
 
 }
 
 
+/* =====================================================
+   HEALTH
+   ===================================================== */
+
 function healthProgress(){
 
-    let h=state.categories.health;
+    const h=
+        state.categories.health;
 
-    let training=
+    const t=
         state.categories.training;
 
-    let healthPart=
+
+    const healthPart=
         (
             clamp(
                 num(h.routine),
@@ -1759,47 +2128,82 @@ function healthProgress(){
                 0,
                 100
             )+
-            mp(
-                h.steps,
-                10000
+            clamp(
+                Math.round(
+                    num(h.steps)/
+                    10000*
+                    100
+                ),
+                0,
+                100
             )
         )/3;
 
-    let trainingPart=
-        mp(
-            training.workouts,
-            training.monthlyTarget
-        );
+
+    const trainingPart=
+        t.monthlyTarget>0
+            ? clamp(
+                Math.round(
+                    t.workouts/
+                    t.monthlyTarget*
+                    100
+                ),
+                0,
+                100
+            )
+            : 0;
+
 
     return Math.round(
-        (healthPart+trainingPart)/2
+        (
+            healthPart+
+            trainingPart
+        )/2
     );
 
 }
 
 
+/* =====================================================
+   GENERIC HELPERS
+   ===================================================== */
+
 function progress(c){
 
-    if(c==='finance')
-        return financeProgress();
+    if(c==='finance'){
 
-    if(c==='development'){
+        if(
+            window.LifeGameFinance &&
+            typeof
+            window.LifeGameFinance.progress===
+            'function'
+        ){
 
-        let x=
-            state.categories.development;
+            return window.LifeGameFinance.progress(
+                state,
+                expenses
+            );
 
-        return Math.round(
-            (
-                mp(x.books,2)+
-                mp(x.languageMinutes,30)+
-                mp(x.meditationMinutes,15)
-            )/3
-        );
+        }
+
+        return 0;
 
     }
 
-    if(c==='health')
+
+    if(c==='development'){
+
+        return developmentProgress();
+
+    }
+
+
+    if(c==='health'){
+
         return healthProgress();
+
+    }
+
 
     return 0;
 
@@ -1838,6 +2242,10 @@ function rank(l){
 }
 
 
+/* =====================================================
+   SHARED HTML
+   ===================================================== */
+
 function creatorHTML(){
 
     return `
@@ -1847,100 +2255,10 @@ function creatorHTML(){
             target="_blank"
             rel="noopener noreferrer"
         >
-            Created by <strong>&nbsp;@shkeltinsh</strong>
+            Created by
+            <strong>&nbsp;@shkeltinsh</strong>
         </a>
     `;
-
-}
-
-
-function renderHome(){
-
-    updateLevels();
-
-    document.getElementById(
-        'playerLevel'
-    ).textContent=
-        'LVL '+state.player.level;
-
-    document.getElementById(
-        'playerXP'
-    ).textContent=
-        fmt(state.player.xp)+' XP';
-
-    let cur=
-        xpForLevel(
-            state.player.level
-        );
-
-    let next=
-        xpForLevel(
-            state.player.level+1
-        );
-
-    document.getElementById(
-        'playerXPFill'
-    ).style.width=
-        clamp(
-            Math.round(
-                (
-                    state.player.xp-cur
-                )/
-                Math.max(
-                    1,
-                    next-cur
-                )*100
-            ),
-            0,
-            100
-        )+'%';
-
-    document.getElementById(
-        'xpNext'
-    ).textContent=
-        fmt(
-            Math.max(
-                0,
-                next-state.player.xp
-            )
-        )+
-        ' XP TO NEXT LEVEL';
-
-    document.getElementById(
-        'playerRank'
-    ).textContent=
-        rank(
-            state.player.level
-        );
-
-    let t=totalProgress();
-
-    document.getElementById(
-        'lifeProgress'
-    ).innerHTML=
-        t+'<span>%</span>';
-
-    document.getElementById(
-        'lifeFill'
-    ).style.width=
-        clamp(t,0,100)+'%';
-
-    ['finance','development','health']
-    .forEach(c=>{
-
-        let p=progress(c);
-
-        document.getElementById(
-            c+'Percent'
-        ).textContent=
-            p+'%';
-
-        document.getElementById(
-            c+'Fill'
-        ).style.width=
-            clamp(p,0,100)+'%';
-
-    });
 
 }
 
@@ -1955,6 +2273,7 @@ function metric(
 ){
 
     return `
+
         <div class="metric">
 
             <div class="metric-head">
@@ -1988,7 +2307,15 @@ function metric(
             </div>
 
             <div class="metric-bar">
-                <i style="width:${clamp(p,0,100)}%"></i>
+
+                <i
+                    style="width:${clamp(
+                        p,
+                        0,
+                        100
+                    )}%"
+                ></i>
+
             </div>
 
             ${
@@ -2005,292 +2332,29 @@ function metric(
             }
 
         </div>
+
     `;
 
 }
 
 
-function expenseHTML(e){
-
-    return `
-        <div
-            class="expense-swipe"
-            data-swipe-id="${esc(e.id)}"
-        >
-
-            <div class="expense-delete-reveal">
-                УДАЛИТЬ
-            </div>
-
-            <div class="expense">
-
-                <div class="expense-info">
-
-                    <div class="expense-name">
-                        ${esc(e.name)}
-                    </div>
-
-                    <div class="expense-amount">
-                        ${fmt(e.amount)} ₽
-                    </div>
-
-                </div>
-
-                <div class="expense-actions">
-
-                    <button
-                        class="small-btn expense-edit"
-                        data-id="${esc(e.id)}"
-                    >
-                        ✎
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-}
-
-
-function financePage(){
-
-    let c=
-        state.categories.finance;
-
-    let i=income();
-
-    let et=
-        expensesTotal();
-
-    let ep=
-        expensePct();
-
-    let sv=
-        savings();
-
-    let collapsed=
-        ui.expensesCollapsed;
-
-    let fp=
-        financeProgress();
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                FINANCE LEVEL ${c.level}
-            </div>
-
-            <div class="summary-number">
-                ${fp}%
-            </div>
-
-            <div class="progress">
-                <i style="width:${clamp(fp,0,100)}%"></i>
-            </div>
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-                    <span>FINANCE XP</span>
-                    <strong>
-                        ${fmt(c.xp)} XP
-                    </strong>
-                </div>
-
-                <div class="finance-line">
-                    <span>STREAK</span>
-                    <strong>
-                        🔥 ${c.streak}
-                    </strong>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="cards">
-
-            ${metric(
-                '💵',
-                'Заработано за месяц',
-                fmt(i)+' ₽',
-                fmt(c.monthlyGoal)+' ₽',
-                mp(i,c.monthlyGoal,true),
-                'income'
-            )}
-
-            <div
-                class="metric expenses-metric"
-                id="expensesMetric"
-            >
-
-                <div class="metric-head">
-
-                    <div class="metric-left">
-
-                        <div class="metric-icon">
-                            📉
-                        </div>
-
-                        <div class="metric-text">
-
-                            <strong>
-                                Обязательные расходы
-                            </strong>
-
-                            <span>
-                                ${fmt(et)} ₽ · ${ep}% от заработка
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="metric-percent">
-                        ${ep}%
-                    </div>
-
-                </div>
-
-                <div class="metric-bar">
-                    <i style="width:${Math.min(ep,100)}%"></i>
-                </div>
-
-                <div
-                    class="expenses ${collapsed?'collapsed':''}"
-                >
-
-                    <button
-                        class="expenses-title"
-                        id="expensesToggle"
-                        type="button"
-                        aria-expanded="${!collapsed}"
-                    >
-
-                        <div class="expenses-title-left">
-
-                            <span>
-                                МОИ ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
-                            </span>
-
-                        </div>
-
-                        <strong>
-                            ${fmt(et)} ₽
-                        </strong>
-
-                    </button>
-
-                    <div class="expense-content">
-
-                        <div class="expense-list">
-
-                            ${
-                                expenses.length
-                                ? expenses.map(expenseHTML).join('')
-                                : `
-                                    <div class="notice">
-                                        Добавь обязательные расходы:
-                                        аренда, коммунальные услуги,
-                                        продукты, транспорт, связь и т.д.
-                                    </div>
-                                `
-                            }
-
-                        </div>
-
-                        <button
-                            class="add"
-                            id="addExpense"
-                        >
-                            ＋ ДОБАВИТЬ РАСХОД
-                        </button>
-
-                        <div class="ratio">
-
-                            <span>
-                                РАСХОДЫ / ДОХОД
-                            </span>
-
-                            <strong>
-                                ${ep}%
-                            </strong>
-
-                        </div>
-
-                        <div class="ratio">
-
-                            <span>
-                                СВОБОДНЫЕ ДЕНЬГИ
-                            </span>
-
-                            <strong>
-                                ${fmt(sv)} ₽
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            ${metric(
-                '🏆',
-                'Цель на год',
-                fmt(i*12)+' ₽',
-                fmt(c.yearlyGoal)+' ₽',
-                mp(i*12,c.yearlyGoal),
-                'yearlyGoal'
-            )}
-
-            ${metric(
-                '🛡️',
-                'Финансовая эффективность',
-                ep<=0
-                    ? '—'
-                    : (100-ep)+'% свободного дохода',
-                '100%',
-                clamp(
-                    100-ep,
-                    0,
-                    100
-                ),
-                null
-            )}
-
-            <div class="notice">
-                💡 В «Заработано за месяц» можно
-                задать фактический доход и личную
-                цель на месяц.
-            </div>
-
-            ${creatorHTML()}
-
-        </div>
-    `;
-
-}
-
+/* =====================================================
+   HEALTH PAGE
+   ===================================================== */
 
 function healthPage(){
 
-    let h=
+    const h=
         state.categories.health;
 
-    let t=
+    const t=
         state.categories.training;
 
-    let p=
+    const p=
         healthProgress();
 
-    let workoutXP=
+
+    const workoutXP=
         Math.max(
             5,
             Math.round(
@@ -2305,6 +2369,7 @@ function healthPage(){
             )
         );
 
+
     return `
 
         <div class="summary">
@@ -2318,28 +2383,45 @@ function healthPage(){
             </div>
 
             <div class="progress">
-                <i style="width:${clamp(p,0,100)}%"></i>
+                <i
+                    style="width:${clamp(
+                        p,
+                        0,
+                        100
+                    )}%"
+                ></i>
             </div>
 
             <div class="finance-box">
 
                 <div class="finance-line">
-                    <span>HEALTH XP</span>
+
+                    <span>
+                        HEALTH XP
+                    </span>
+
                     <strong>
                         ${fmt(h.xp)} XP
                     </strong>
+
                 </div>
 
                 <div class="finance-line">
-                    <span>STREAK</span>
+
+                    <span>
+                        STREAK
+                    </span>
+
                     <strong>
                         🔥 ${h.streak}
                     </strong>
+
                 </div>
 
             </div>
 
         </div>
+
 
         <div class="cards">
 
@@ -2352,12 +2434,20 @@ function healthPage(){
                 'Тренировки',
                 fmt(t.workouts),
                 fmt(t.monthlyTarget),
-                mp(
-                    t.workouts,
-                    t.monthlyTarget
-                ),
+                t.monthlyTarget>0
+                    ? clamp(
+                        Math.round(
+                            t.workouts/
+                            t.monthlyTarget*
+                            100
+                        ),
+                        0,
+                        100
+                    )
+                    : 0,
                 'workouts'
             )}
+
 
             <div class="metric">
 
@@ -2399,9 +2489,11 @@ function healthPage(){
 
             </div>
 
+
             <div class="training-divider">
                 HEALTH
             </div>
+
 
             ${metric(
                 '⏰',
@@ -2416,6 +2508,7 @@ function healthPage(){
                 'routine'
             )}
 
+
             ${metric(
                 '🍎',
                 'Питание',
@@ -2429,63 +2522,98 @@ function healthPage(){
                 'nutrition'
             )}
 
+
             ${metric(
                 '🚶',
                 'Шаги',
                 fmt(h.steps),
                 '10 000',
-                mp(
-                    h.steps,
-                    10000
+                clamp(
+                    Math.round(
+                        num(h.steps)/
+                        10000*
+                        100
+                    ),
+                    0,
+                    100
                 ),
                 'steps'
             )}
 
+
             <div class="notice">
-                Прогресс тренировок теперь входит
-                в общий показатель здоровья.
-                Все ранее сохранённые тренировки
-                сохранены.
+
+                Прогресс тренировок теперь
+                входит в общий показатель
+                здоровья.
+
+                Все ранее сохранённые
+                тренировки сохранены.
+
             </div>
+
 
             ${creatorHTML()}
 
         </div>
+
     `;
 
 }
 
 
+/* =====================================================
+   DEVELOPMENT PAGE
+   ===================================================== */
+
 function genericPage(c){
 
-    let x=
+    const x=
         state.categories[c];
 
-    let p=
+    const p=
         progress(c);
 
     let body='';
 
+
     if(c==='development'){
 
         body=
+
             metric(
                 '📚',
                 'Чтение книг',
                 fmt(x.books),
                 '2',
-                mp(x.books,2),
+                clamp(
+                    Math.round(
+                        x.books/
+                        2*
+                        100
+                    ),
+                    0,
+                    100
+                ),
                 'books'
             )+
 
             metric(
                 '🌐',
                 'Изучение языка',
-                fmt(x.languageMinutes)+' мин',
+                fmt(
+                    x.languageMinutes
+                )+
+                ' мин',
                 '30 мин',
-                mp(
-                    x.languageMinutes,
-                    30
+                clamp(
+                    Math.round(
+                        x.languageMinutes/
+                        30*
+                        100
+                    ),
+                    0,
+                    100
                 ),
                 'languageMinutes'
             )+
@@ -2493,23 +2621,34 @@ function genericPage(c){
             metric(
                 '🧘',
                 'Медитация',
-                fmt(x.meditationMinutes)+' мин',
+                fmt(
+                    x.meditationMinutes
+                )+
+                ' мин',
                 '15 мин',
-                mp(
-                    x.meditationMinutes,
-                    15
+                clamp(
+                    Math.round(
+                        x.meditationMinutes/
+                        15*
+                        100
+                    ),
+                    0,
+                    100
                 ),
                 'meditationMinutes'
             );
 
     }
 
+
     return `
 
         <div class="summary">
 
             <div class="section-label">
-                ${c.toUpperCase()} LEVEL ${x.level}
+                ${c.toUpperCase()}
+                LEVEL
+                ${x.level}
             </div>
 
             <div class="summary-number">
@@ -2517,7 +2656,15 @@ function genericPage(c){
             </div>
 
             <div class="progress">
-                <i style="width:${clamp(p,0,100)}%"></i>
+
+                <i
+                    style="width:${clamp(
+                        p,
+                        0,
+                        100
+                    )}%"
+                ></i>
+
             </div>
 
             <div class="finance-box">
@@ -2550,34 +2697,90 @@ function genericPage(c){
 
         </div>
 
+
         <div class="cards">
 
             ${body}
 
             <div class="notice">
-                Прогресс сохраняется автоматически.
-                Повышение уровня XP происходит
-                сразу после изменения показателя
+
+                Прогресс сохраняется
+                автоматически.
+
+                Повышение уровня XP
+                происходит сразу после
+                изменения показателя
                 или выполнения действия.
+
             </div>
 
             ${creatorHTML()}
 
         </div>
+
     `;
 
 }
 
 
+/* =====================================================
+   PAGE OPEN
+   ===================================================== */
+
 function openCategory(c){
 
     closePage();
 
-    let p=
-        document.createElement('div');
+
+    const p=
+        document.createElement(
+            'div'
+        );
+
 
     p.className='page';
     p.id='activePage';
+
+
+    let pageContent='';
+
+
+    if(c==='finance'){
+
+        /*
+         * FINANCE IS NOW TAKEN
+         * FROM finance.js
+         */
+
+        pageContent=
+            window.LifeGameFinance &&
+            typeof
+            window.LifeGameFinance.page===
+            'function'
+                ? window.LifeGameFinance.page(
+                    state,
+                    expenses,
+                    ui
+                )
+                : `
+                    <div class="notice">
+                        Финансовый модуль
+                        не загружен.
+                    </div>
+                `;
+
+    }else if(c==='health'){
+
+        pageContent=
+            healthPage();
+
+    }else{
+
+        pageContent=
+            genericPage(c);
+
+    }
+
 
     p.innerHTML=`
 
@@ -2604,16 +2807,12 @@ function openCategory(c){
 
             </div>
 
-            ${
-                c==='finance'
-                ? financePage()
-                : c==='health'
-                ? healthPage()
-                : genericPage(c)
-            }
+            ${pageContent}
 
         </div>
+
     `;
+
 
     document.body.appendChild(p);
 
@@ -2621,72 +2820,114 @@ function openCategory(c){
         'locked'
     );
 
+
     p.querySelector(
         '.back'
-    ).onclick=()=>{
+    ).onclick=function(){
 
         closePage();
+
         setHome();
 
     };
 
-    bindPage(p,c);
+
+    bindPage(
+        p,
+        c
+    );
 
 }
 
+
+/* =====================================================
+   PAGE EVENTS
+   ===================================================== */
 
 function bindPage(p,c){
 
     p.querySelectorAll(
         '[data-edit]'
-    ).forEach(b=>{
+    ).forEach(function(b){
 
-        b.onclick=()=>openEditor(
-            c,
-            b.dataset.edit
-        );
+        b.onclick=function(){
+
+            openEditor(
+                c,
+                b.dataset.edit
+            );
+
+        };
 
     });
 
 
+    /*
+     * FINANCE EVENTS
+     */
+
     if(c==='finance'){
 
-        p.querySelector(
-            '#expensesToggle'
-        )?.addEventListener(
-            'click',
-            e=>{
-
-                e.stopPropagation();
-
-                ui.expensesCollapsed=
-                    !ui.expensesCollapsed;
-
-                save();
-
-                openCategory(
-                    'finance'
-                );
-
-            }
-        );
+        const toggle=
+            p.querySelector(
+                '#expensesToggle'
+            );
 
 
-        p.querySelector(
-            '#addExpense'
-        )?.addEventListener(
-            'click',
-            ()=>openExpense()
-        );
+        if(toggle){
+
+            toggle.addEventListener(
+                'click',
+                function(e){
+
+                    e.stopPropagation();
+
+                    ui.expensesCollapsed=
+                        !ui.expensesCollapsed;
+
+                    save();
+
+                    openCategory(
+                        'finance'
+                    );
+
+                }
+            );
+
+        }
+
+
+        const add=
+            p.querySelector(
+                '#addExpense'
+            );
+
+
+        if(add){
+
+            add.addEventListener(
+                'click',
+                function(){
+
+                    openExpense();
+
+                }
+            );
+
+        }
 
 
         p.querySelectorAll(
             '.expense-edit'
-        ).forEach(b=>{
+        ).forEach(function(b){
 
-            b.onclick=()=>openExpense(
-                b.dataset.id
-            );
+            b.onclick=function(){
+
+                openExpense(
+                    b.dataset.id
+                );
+
+            };
 
         });
 
@@ -2696,102 +2937,131 @@ function bindPage(p,c){
     }
 
 
+    /*
+     * HEALTH / TRAINING
+     */
+
     if(c==='health'){
 
-        p.querySelector(
-            '#completeWorkout'
-        )?.addEventListener(
-            'click',
-            ()=>{
+        const workout=
+            p.querySelector(
+                '#completeWorkout'
+            );
 
-                let t=
-                    state.categories.training;
 
-                let base=
-                    Math.max(
-                        5,
-                        Math.round(
-                            80/
-                            Math.pow(
-                                Math.max(
-                                    1,
-                                    t.level
-                                ),
-                                .58
+        if(workout){
+
+            workout.addEventListener(
+                'click',
+                function(){
+
+                    const t=
+                        state.categories.training;
+
+
+                    const base=
+                        Math.max(
+                            5,
+                            Math.round(
+                                80/
+                                Math.pow(
+                                    Math.max(
+                                        1,
+                                        t.level
+                                    ),
+                                    .58
+                                )
                             )
-                        )
+                        );
+
+
+                    t.workouts++;
+
+                    t.streak++;
+
+
+                    t.bestStreak=
+                        Math.max(
+                            t.bestStreak,
+                            t.streak
+                        );
+
+
+                    const q=
+                        Math.round(
+                            base*
+                            (
+                                1+
+                                t.streak*.08
+                            )
+                        );
+
+
+                    addCatXP(
+                        'training',
+                        q
                     );
 
-                t.workouts++;
 
-                t.streak++;
+                    const h=
+                        state.categories.health;
 
-                t.bestStreak=
-                    Math.max(
-                        t.bestStreak,
-                        t.streak
+
+                    h.streak++;
+
+
+                    h.bestStreak=
+                        Math.max(
+                            h.bestStreak,
+                            h.streak
+                        );
+
+
+                    save();
+
+
+                    toast(
+                        'Тренировка выполнена · +'+
+                        q+
+                        ' XP'
                     );
 
-                let q=
-                    Math.round(
-                        base*
-                        (
-                            1+
-                            t.streak*.08
-                        )
+
+                    openCategory(
+                        'health'
                     );
 
-                addCatXP(
-                    'training',
-                    q
-                );
+                    renderHome();
 
-                let h=
-                    state.categories.health;
+                }
+            );
 
-                h.streak++;
-
-                h.bestStreak=
-                    Math.max(
-                        h.bestStreak,
-                        h.streak
-                    );
-
-                save();
-
-                toast(
-                    'Тренировка выполнена · +'+
-                    q+
-                    ' XP'
-                );
-
-                openCategory(
-                    'health'
-                );
-
-                renderHome();
-
-            }
-        );
+        }
 
     }
 
 }
 
 
+/* =====================================================
+   SWIPE DELETE
+   ===================================================== */
+
 function swipes(p){
 
     p.querySelectorAll(
         '.expense-swipe'
-    ).forEach(w=>{
+    ).forEach(function(w){
 
-        let r=
+        const r=
             w.querySelector(
                 '.expense'
             );
 
+
         if(!r)
             return;
+
 
         let sx=0;
         let sy=0;
@@ -2824,7 +3094,9 @@ function swipes(p){
                 'transform .22s cubic-bezier(.2,.8,.2,1)';
 
             r.style.transform=
-                `translateX(-${reveal}px)`;
+                'translateX(-'+
+                reveal+
+                'px)';
 
             r.classList.add(
                 'swiped'
@@ -2837,12 +3109,13 @@ function swipes(p){
 
         r.addEventListener(
             'touchstart',
-            e=>{
+            function(e){
 
                 if(
                     e.touches.length!==1
                 )
                     return;
+
 
                 sx=
                     e.touches[0].clientX;
@@ -2850,12 +3123,14 @@ function swipes(p){
                 sy=
                     e.touches[0].clientY;
 
+
                 dx=
                     r.classList.contains(
                         'swiped'
                     )
                     ? -reveal
                     : 0;
+
 
                 drag=true;
 
@@ -2871,13 +3146,14 @@ function swipes(p){
 
         r.addEventListener(
             'touchmove',
-            e=>{
+            function(e){
 
                 if(
                     !drag ||
                     e.touches.length!==1
                 )
                     return;
+
 
                 const x=
                     e.touches[0].clientX-
@@ -2886,6 +3162,7 @@ function swipes(p){
                 const y=
                     e.touches[0].clientY-
                     sy;
+
 
                 if(
                     Math.abs(y)>
@@ -2901,14 +3178,16 @@ function swipes(p){
 
                 }
 
-                let base=
+
+                const base=
                     r.classList.contains(
                         'swiped'
                     )
                     ? -reveal
                     : 0;
 
-                let next=
+
+                const next=
                     Math.min(
                         0,
                         Math.max(
@@ -2917,10 +3196,14 @@ function swipes(p){
                         )
                     );
 
+
                 dx=next;
 
+
                 r.style.transform=
-                    `translateX(${next}px)`;
+                    'translateX('+
+                    next+
+                    'px)';
 
             },
             {
@@ -2931,14 +3214,16 @@ function swipes(p){
 
         r.addEventListener(
             'touchend',
-            ()=>{
+            function(){
 
                 if(!drag)
                     return;
 
+
                 drag=false;
 
                 r.style.transition='';
+
 
                 if(
                     dx<=-reveal*.45
@@ -2958,7 +3243,7 @@ function swipes(p){
 
         r.addEventListener(
             'touchcancel',
-            ()=>{
+            function(){
 
                 drag=false;
 
@@ -2968,35 +3253,47 @@ function swipes(p){
         );
 
 
-        w.querySelector(
-            '.expense-delete-reveal'
-        ).addEventListener(
-            'click',
-            ()=>{
+        const deleteReveal=
+            w.querySelector(
+                '.expense-delete-reveal'
+            );
 
-                if(
-                    r.classList.contains(
-                        'swiped'
-                    )
-                ){
 
-                    deleteExpense(
-                        w.dataset.swipeId
-                    );
+        if(deleteReveal){
+
+            deleteReveal.addEventListener(
+                'click',
+                function(){
+
+                    if(
+                        r.classList.contains(
+                            'swiped'
+                        )
+                    ){
+
+                        deleteExpense(
+                            w.dataset.swipeId
+                        );
+
+                    }
 
                 }
+            );
 
-            }
-        );
+        }
 
 
         r.querySelectorAll(
             'button'
-        ).forEach(btn=>{
+        ).forEach(function(btn){
 
             btn.addEventListener(
                 'click',
-                e=>e.stopPropagation()
+                function(e){
+
+                    e.stopPropagation();
+
+                }
             );
 
         });
@@ -3006,6 +3303,10 @@ function swipes(p){
 }
 
 
+/* =====================================================
+   EDITOR
+   ===================================================== */
+
 function openEditor(c,id){
 
     if(
@@ -3013,8 +3314,9 @@ function openEditor(c,id){
         id==='income'
     ){
 
-        let x=
+        const x=
             state.categories.finance;
+
 
         modal(`
 
@@ -3051,7 +3353,10 @@ function openEditor(c,id){
                 type="number"
                 inputmode="decimal"
                 min="1"
-                value="${Math.max(1,x.monthlyGoal)}"
+                value="${Math.max(
+                    1,
+                    x.monthlyGoal
+                )}"
             >
 
             <div class="modal-preview">
@@ -3061,10 +3366,15 @@ function openEditor(c,id){
                 </span>
 
                 <strong id="prev">
-                    ${mp(
-                        x.monthlyIncome,
-                        x.monthlyGoal
-                    )}%
+                    ${
+                        x.monthlyGoal>0
+                            ? Math.round(
+                                x.monthlyIncome/
+                                x.monthlyGoal*
+                                100
+                            )
+                            : 0
+                    }%
                 </strong>
 
             </div>
@@ -3079,34 +3389,44 @@ function openEditor(c,id){
         `);
 
 
-        let o=
+        const o=
             document.querySelector(
                 '.overlay'
             );
 
-        let i=
+
+        const i=
             o.querySelector(
                 '#income'
             );
 
-        let g=
+
+        const g=
             o.querySelector(
                 '#goal'
             );
 
 
-        let upd=()=>{
+        const upd=function(){
+
+            const goal=
+                Math.max(
+                    1,
+                    num(
+                        g.value
+                    )
+                );
+
 
             o.querySelector(
                 '#prev'
             ).textContent=
-                mp(
-                    i.value,
-                    Math.max(
-                        1,
-                        num(g.value)
-                    )
-                )+'%';
+                Math.round(
+                    num(i.value)/
+                    goal*
+                    100
+                )+
+                '%';
 
         };
 
@@ -3117,29 +3437,37 @@ function openEditor(c,id){
 
         o.querySelector(
             '#save'
-        ).onclick=()=>{
+        ).onclick=function(){
 
-            let old=
+            const old=
                 num(
                     x.monthlyIncome
                 );
 
+
             x.monthlyIncome=
                 Math.max(
                     0,
-                    num(i.value)
+                    num(
+                        i.value
+                    )
                 );
+
 
             x.monthlyGoal=
                 Math.max(
                     1,
-                    num(g.value)
+                    num(
+                        g.value
+                    )
                 );
+
 
             applyIncome(
                 old,
                 x.monthlyIncome
             );
+
 
             save();
 
@@ -3157,6 +3485,7 @@ function openEditor(c,id){
 
         };
 
+
         return;
 
     }
@@ -3167,8 +3496,9 @@ function openEditor(c,id){
         id==='workouts'
     ){
 
-        let x=
+        const x=
             state.categories.training;
+
 
         modal(`
 
@@ -3193,7 +3523,9 @@ function openEditor(c,id){
                 type="number"
                 inputmode="decimal"
                 min="0"
-                value="${num(x.workouts)}"
+                value="${num(
+                    x.workouts
+                )}"
             >
 
             <button
@@ -3205,14 +3537,16 @@ function openEditor(c,id){
 
         `);
 
-        let o=
+
+        const o=
             document.querySelector(
                 '.overlay'
             );
 
+
         o.querySelector(
             '#save'
-        ).onclick=()=>{
+        ).onclick=function(){
 
             x.workouts=
                 Math.max(
@@ -3223,6 +3557,7 @@ function openEditor(c,id){
                         ).value
                     )
                 );
+
 
             save();
 
@@ -3240,19 +3575,23 @@ function openEditor(c,id){
 
         };
 
+
         return;
 
     }
 
 
-    let x=
+    const x=
         state.categories[c];
 
-    let labels={
 
-        yearlyGoal:'Цель на год',
+    const labels={
 
-        books:'Книги',
+        yearlyGoal:
+            'Цель на год',
+
+        books:
+            'Книги',
 
         languageMinutes:
             'Минуты изучения языка',
@@ -3297,7 +3636,9 @@ function openEditor(c,id){
             type="number"
             inputmode="decimal"
             min="0"
-            value="${num(x[id])}"
+            value="${num(
+                x[id]
+            )}"
         >
 
         <button
@@ -3310,7 +3651,7 @@ function openEditor(c,id){
     `);
 
 
-    let o=
+    const o=
         document.querySelector(
             '.overlay'
         );
@@ -3318,7 +3659,7 @@ function openEditor(c,id){
 
     o.querySelector(
         '#save'
-    ).onclick=()=>{
+    ).onclick=function(){
 
         x[id]=
             Math.max(
@@ -3329,6 +3670,7 @@ function openEditor(c,id){
                     ).value
                 )
             );
+
 
         save();
 
@@ -3347,12 +3689,22 @@ function openEditor(c,id){
 }
 
 
-function openExpense(id=null){
+/* =====================================================
+   EXPENSE MODAL
+   ===================================================== */
 
-    let e=
+function openExpense(id){
+
+    const e=
         expenses.find(
-            x=>String(x.id)===String(id)
+            function(x){
+
+                return String(x.id)===
+                    String(id);
+
+            }
         );
+
 
     modal(`
 
@@ -3361,13 +3713,18 @@ function openExpense(id=null){
         </div>
 
         <div class="modal-label">
-            ${e?'EDIT EXPENSE':'NEW EXPENSE'}
+            ${
+                e
+                    ? 'EDIT EXPENSE'
+                    : 'NEW EXPENSE'
+            }
         </div>
 
         <h3>
-            ${e
-                ? 'Изменить расход'
-                : 'Добавить расход'
+            ${
+                e
+                    ? 'Изменить расход'
+                    : 'Добавить расход'
             }
         </h3>
 
@@ -3380,7 +3737,11 @@ function openExpense(id=null){
             type="text"
             maxlength="60"
             placeholder="Например: Аренда"
-            value="${e?esc(e.name):''}"
+            value="${
+                e
+                    ? esc(e.name)
+                    : ''
+            }"
         >
 
         <label>
@@ -3392,7 +3753,11 @@ function openExpense(id=null){
             type="number"
             inputmode="decimal"
             min="0"
-            value="${e?e.amount:''}"
+            value="${
+                e
+                    ? e.amount
+                    : ''
+            }"
         >
 
         <button
@@ -3405,7 +3770,7 @@ function openExpense(id=null){
     `);
 
 
-    let o=
+    const o=
         document.querySelector(
             '.overlay'
         );
@@ -3413,14 +3778,15 @@ function openExpense(id=null){
 
     o.querySelector(
         '#save'
-    ).onclick=()=>{
+    ).onclick=function(){
 
-        let n=
+        const n=
             o.querySelector(
                 '#name'
             ).value.trim();
 
-        let a=
+
+        const a=
             Math.max(
                 0,
                 num(
@@ -3462,7 +3828,9 @@ function openExpense(id=null){
 
             expenses.push({
 
-                id:Date.now().toString(),
+                id:
+                    Date.now()
+                    .toString(),
 
                 name:n,
 
@@ -3492,13 +3860,22 @@ function openExpense(id=null){
 }
 
 
+/* =====================================================
+   DELETE EXPENSE
+   ===================================================== */
+
 function deleteExpense(id){
 
     expenses=
         expenses.filter(
-            e=>String(e.id)!==
-            String(id)
+            function(e){
+
+                return String(e.id)!==
+                    String(id);
+
+            }
         );
+
 
     save();
 
@@ -3515,16 +3892,23 @@ function deleteExpense(id){
 }
 
 
+/* =====================================================
+   MODAL
+   ===================================================== */
+
 function modal(content){
 
     closeModal();
 
-    let o=
+
+    const o=
         document.createElement(
             'div'
         );
 
+
     o.className='overlay';
+
 
     o.innerHTML=`
 
@@ -3537,23 +3921,33 @@ function modal(content){
             ${content}
 
         </div>
+
     `;
 
+
     document.body.appendChild(o);
+
 
     document.body.classList.add(
         'locked'
     );
+
 
     o.querySelector(
         '.close'
     ).onclick=
         closeModal;
 
-    o.onclick=e=>{
 
-        if(e.target===o)
+    o.onclick=function(e){
+
+        if(
+            e.target===o
+        ){
+
             closeModal();
+
+        }
 
     };
 
@@ -3565,6 +3959,7 @@ function closeModal(){
     document.querySelector(
         '.overlay'
     )?.remove();
+
 
     if(
         !document.getElementById(
@@ -3587,6 +3982,7 @@ function closePage(){
         'activePage'
     )?.remove();
 
+
     if(
         !document.querySelector(
             '.overlay'
@@ -3606,7 +4002,7 @@ function setHome(){
 
     document.querySelectorAll(
         '[data-nav]'
-    ).forEach(b=>{
+    ).forEach(function(b){
 
         b.classList.toggle(
             'active',
@@ -3618,6 +4014,10 @@ function setHome(){
 }
 
 
+/* =====================================================
+   TOAST
+   ===================================================== */
+
 let tt;
 
 
@@ -3628,35 +4028,53 @@ function toast(m){
             '.toast'
         );
 
+
     if(t)
         t.remove();
+
 
     t=
         document.createElement(
             'div'
         );
 
+
     t.className='toast';
 
     t.textContent=m;
 
+
     document.body.appendChild(t);
 
+
     requestAnimationFrame(
-        ()=>t.classList.add('show')
+        function(){
+
+            t.classList.add(
+                'show'
+            );
+
+        }
     );
+
 
     clearTimeout(tt);
 
+
     tt=setTimeout(
-        ()=>{
+        function(){
 
             t.classList.remove(
                 'show'
             );
 
+
             setTimeout(
-                ()=>t.remove(),
+                function(){
+
+                    t.remove();
+
+                },
                 220
             );
 
@@ -3667,17 +4085,24 @@ function toast(m){
 }
 
 
+/* =====================================================
+   DAILY QUESTS
+   ===================================================== */
+
 function quests(){
 
     closePage();
 
-    let p=
+
+    const p=
         document.createElement(
             'div'
         );
 
+
     p.className='page';
     p.id='activePage';
+
 
     p.innerHTML=`
 
@@ -3703,54 +4128,83 @@ function quests(){
 
             </div>
 
+
             <div class="quest-card">
 
                 <div class="section-label">
                     TODAY'S QUESTS
                 </div>
 
-                ${state.quests.map(
-                    (q,i)=>`
+                ${
+                    state.quests
+                        .map(
+                            function(q,i){
 
-                    <div class="quest-item">
+                                return `
 
-                        <div class="quest-row">
+                                    <div
+                                        class="quest-item"
+                                    >
 
-                            <div class="quest-title">
-                                ${esc(q.title)}
-                            </div>
+                                        <div
+                                            class="quest-row"
+                                        >
 
-                            <div class="quest-xp">
-                                +${q.xp} XP
-                            </div>
+                                            <div
+                                                class="quest-title"
+                                            >
+                                                ${esc(
+                                                    q.title
+                                                )}
+                                            </div>
 
-                        </div>
+                                            <div
+                                                class="quest-xp"
+                                            >
+                                                +${q.xp} XP
+                                            </div>
 
-                        <button
-                            class="complete ${q.done?'done':''}"
-                            data-q="${i}"
-                        >
-                            ${
-                                q.done
-                                ? '✓ ВЫПОЛНЕНО'
-                                : 'ВЫПОЛНИТЬ'
+                                        </div>
+
+
+                                        <button
+                                            class="complete ${
+                                                q.done
+                                                    ? 'done'
+                                                    : ''
+                                            }"
+                                            data-q="${i}"
+                                        >
+
+                                            ${
+                                                q.done
+                                                    ? '✓ ВЫПОЛНЕНО'
+                                                    : 'ВЫПОЛНИТЬ'
+                                            }
+
+                                        </button>
+
+                                    </div>
+
+                                `;
+
                             }
-                        </button>
-
-                    </div>
-
-                `
-                ).join('')}
+                        )
+                        .join('')
+                }
 
             </div>
+
 
             ${creatorHTML()}
 
         </div>
+
     `;
 
 
     document.body.appendChild(p);
+
 
     document.body.classList.add(
         'locked'
@@ -3759,7 +4213,7 @@ function quests(){
 
     p.querySelector(
         '.back'
-    ).onclick=()=>{
+    ).onclick=function(){
 
         closePage();
 
@@ -3770,16 +4224,22 @@ function quests(){
 
     p.querySelectorAll(
         '[data-q]'
-    ).forEach(b=>{
+    ).forEach(function(b){
 
-        b.onclick=()=>{
+        b.onclick=function(){
 
-            let q=
+            const q=
                 state.quests[
-                    num(b.dataset.q)
+                    num(
+                        b.dataset.q
+                    )
                 ];
 
-            if(!q || q.done)
+
+            if(
+                !q ||
+                q.done
+            )
                 return;
 
 
@@ -3799,13 +4259,14 @@ function quests(){
             }
 
 
-            let x=
+            const x=
                 state.categories[
                     category
                 ];
 
 
             x.streak++;
+
 
             x.bestStreak=
                 Math.max(
@@ -3814,7 +4275,7 @@ function quests(){
                 );
 
 
-            let a=
+            const a=
                 Math.round(
                     q.xp*
                     (
@@ -3831,6 +4292,7 @@ function quests(){
 
 
             state.player.rating++;
+
 
             save();
 
@@ -3853,20 +4315,152 @@ function quests(){
 }
 
 
-/* NAVIGATION */
+/* =====================================================
+   HOME RENDER
+   ===================================================== */
+
+function renderHome(){
+
+    updateLevels();
+
+
+    document.getElementById(
+        'playerLevel'
+    ).textContent=
+        'LVL '+
+        state.player.level;
+
+
+    document.getElementById(
+        'playerXP'
+    ).textContent=
+        fmt(
+            state.player.xp
+        )+
+        ' XP';
+
+
+    const cur=
+        xpForLevel(
+            state.player.level
+        );
+
+
+    const next=
+        xpForLevel(
+            state.player.level+1
+        );
+
+
+    document.getElementById(
+        'playerXPFill'
+    ).style.width=
+        clamp(
+            (
+                state.player.xp-cur
+            )/
+            Math.max(
+                1,
+                next-cur
+            )*
+            100,
+            0,
+            100
+        )+
+        '%';
+
+
+    document.getElementById(
+        'xpNext'
+    ).textContent=
+        fmt(
+            Math.max(
+                0,
+                next-state.player.xp
+            )
+        )+
+        ' XP TO NEXT LEVEL';
+
+
+    document.getElementById(
+        'playerRank'
+    ).textContent=
+        rank(
+            state.player.level
+        );
+
+
+    const total=
+        totalProgress();
+
+
+    document.getElementById(
+        'lifeProgress'
+    ).innerHTML=
+        total+
+        '<span>%</span>';
+
+
+    document.getElementById(
+        'lifeFill'
+    ).style.width=
+        clamp(
+            total,
+            0,
+            100
+        )+
+        '%';
+
+
+    [
+        'finance',
+        'development',
+        'health'
+    ].forEach(function(c){
+
+        const p=
+            progress(c);
+
+
+        document.getElementById(
+            c+'Percent'
+        ).textContent=
+            p+
+            '%';
+
+
+        document.getElementById(
+            c+'Fill'
+        ).style.width=
+            clamp(
+                p,
+                0,
+                100
+            )+
+            '%';
+
+    });
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
 
 document.querySelectorAll(
     '[data-nav]'
-).forEach(b=>{
+).forEach(function(b){
 
-    b.onclick=()=>{
+    b.onclick=function(){
 
-        let c=
+        const c=
             b.dataset.nav;
+
 
         document.querySelectorAll(
             '[data-nav]'
-        ).forEach(x=>{
+        ).forEach(function(x){
 
             x.classList.toggle(
                 'active',
@@ -3887,27 +4481,36 @@ document.querySelectorAll(
         }
 
 
-        openCategory(c);
+        if(
+            META[c]
+        ){
+
+            openCategory(c);
+
+        }
 
     };
 
 });
 
 
-/* HOME CATEGORY CARDS */
+/* =====================================================
+   HOME CATEGORY CARDS
+   ===================================================== */
 
 document.querySelectorAll(
     '.category'
-).forEach(c=>{
+).forEach(function(card){
 
-    c.onclick=()=>{
+    card.onclick=function(){
 
-        let category=
-            c.dataset.category;
+        const category=
+            card.dataset.category;
+
 
         document.querySelectorAll(
             '[data-nav]'
-        ).forEach(x=>{
+        ).forEach(function(x){
 
             x.classList.toggle(
                 'active',
@@ -3915,6 +4518,7 @@ document.querySelectorAll(
             );
 
         });
+
 
         openCategory(
             category
@@ -3925,17 +4529,22 @@ document.querySelectorAll(
 });
 
 
-/* DAILY QUEST BUTTON */
+/* =====================================================
+   DAILY QUEST BUTTON
+   ===================================================== */
 
 document.getElementById(
     'dailyQuest'
-)?.addEventListener(
-    'click',
-    quests
-);
+).onclick=function(){
+
+    quests();
+
+};
 
 
-/* INITIALIZATION */
+/* =====================================================
+   INITIALIZATION
+   ===================================================== */
 
 updateLevels();
 
@@ -3943,17 +4552,17 @@ save();
 
 renderHome();
 
+
+console.log(
+    'LIFE GAME: index initialized'
+);
+
 })();
 </script>
 
+
 <div class="toast"></div>
-
-<script src="js/core/state.js"></script>
-<script src="js/core/storage.js"></script>
-<script src="js/core/xp.js"></script>
-<script src="js/core/utils.js"></script>
-
-<script src="js/sections/finance.js"></script>
 
 </body>
 </html>
+```
