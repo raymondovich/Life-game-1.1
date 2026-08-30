@@ -340,12 +340,56 @@
 
 
         <!-- JAVASCRIPT -->
-    <script src="app.js"></script>
-
     <script>
-        alert("LIFE GAME HTML JS WORKS");
-    </script>
+    alert("LIFE GAME WORKS");
 
-</body>
-</html>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        console.log("LIFE GAME: started");
+
+        const navItems = document.querySelectorAll(".nav-item");
+
+        navItems.forEach(function (button) {
+
+            button.addEventListener("click", function () {
+
+                const section = this.dataset.section;
+
+                console.log("Clicked:", section);
+
+                navItems.forEach(function (item) {
+                    item.classList.remove("active");
+                });
+
+                this.classList.add("active");
+
+                if (!section) {
+                    alert("Главная");
+                    return;
+                }
+
+                alert("Открываем: " + section);
+            });
+
+        });
+
+
+        const categoryCards =
+            document.querySelectorAll(".category-card");
+
+        categoryCards.forEach(function (card) {
+
+            card.addEventListener("click", function () {
+
+                const category =
+                    this.dataset.category;
+
+                alert("Категория: " + category);
+
+            });
+
+        });
+
+    });
+</script>
 
