@@ -1,32 +1,7 @@
-```javascript
 // ================================================================
 // LIFE GAME
 // APP.JS
 // Главный контроллер приложения
-// ================================================================
-//
-// Подключает:
-//
-// ./utils.js
-// ./xp.js
-// ./finance.js
-// ./health.js
-// ./development.js
-//
-// Отвечает за:
-//
-// 1. Общее состояние приложения
-// 2. LocalStorage
-// 3. Главную страницу
-// 4. Навигацию
-// 5. Страницы категорий
-// 6. Редактирование показателей
-// 7. XP
-// 8. Уровни
-// 9. Общий прогресс LIFE
-// 10. Daily Quest
-// 11. Toast
-//
 // ================================================================
 
 'use strict';
@@ -49,9 +24,9 @@ import {
     levelFromXP
 } from './xp.js';
 
-import './finance.js';
-import './health.js';
-import './development.js';
+import './sections/finance.js';
+import './sections/health.js';
+import './sections/development.js';
 
 
 // ================================================================
@@ -72,51 +47,80 @@ const DEFAULT_STATE = {
 
     level: 1,
 
+    dailyQuestDate: null,
+
     categories: {
+
+        // ============================================================
+        // FINANCE
+        // ============================================================
 
         finance: {
 
             xp: 0,
+
             level: 1,
+
             streak: 0,
+
             bestStreak: 0,
 
-            monthlyIncome: 0,
-            monthlyGoal: 100000,
-            yearlyGoal: 1200000,
+            // --------------------------------------------------------
+            // Основные финансовые данные
+            // --------------------------------------------------------
 
-            savings: 0,
-            expenses: 0,
-            expensesPercent: 0,
-            savingsPercent: 0,
-            financialHealth: 0
+            monthlyIncome: 0,
+
+            monthlyGoal: 0,
+
+            mandatoryExpenses: 0,
+
+            financialReserve: 0
 
         },
 
 
+        // ============================================================
+        // HEALTH
+        // ============================================================
+
         health: {
 
             xp: 0,
+
             level: 1,
+
             streak: 0,
+
             bestStreak: 0,
 
             routine: 0,
+
             nutrition: 0,
+
             steps: 0
 
         },
 
 
+        // ============================================================
+        // DEVELOPMENT
+        // ============================================================
+
         development: {
 
             xp: 0,
+
             level: 1,
+
             streak: 0,
+
             bestStreak: 0,
 
             books: 0,
+
             languageMinutes: 0,
+
             meditationMinutes: 0
 
         }
@@ -127,19 +131,7 @@ const DEFAULT_STATE = {
 
 
 // ================================================================
-// STATE
-// ================================================================
-
-let state =
-    loadState();
-
-
-window.lifeGameState =
-    state;
-
-
-// ================================================================
-// STATE HELPERS
+// CREATE STATE
 // ================================================================
 
 function createState() {
@@ -152,6 +144,10 @@ function createState() {
 
 }
 
+
+// ================================================================
+// DEEP MERGE
+// ================================================================
 
 function mergeState(
     target,
@@ -171,15 +167,20 @@ function mergeState(
     Object.keys(source).forEach(
         key => {
 
+            const sourceValue =
+                source[key];
+
+
             if (
-                source[key] &&
-                typeof source[key] === 'object' &&
-                !Array.isArray(source[key])
+                sourceValue &&
+                typeof sourceValue === 'object' &&
+                !Array.isArray(sourceValue)
             ) {
 
                 if (
                     !target[key] ||
-                    typeof target[key] !== 'object'
+                    typeof target[key] !== 'object' ||
+                    Array.isArray(target[key])
                 ) {
 
                     target[key] = {};
@@ -189,13 +190,13 @@ function mergeState(
 
                 mergeState(
                     target[key],
-                    source[key]
+                    sourceValue
                 );
 
             } else {
 
                 target[key] =
-                    source[key];
+                    sourceValue;
 
             }
 
@@ -258,6 +259,18 @@ function loadState() {
 
 
 // ================================================================
+// STATE
+// ================================================================
+
+let state =
+    loadState();
+
+
+window.lifeGameState =
+    state;
+
+
+// ================================================================
 // SAVE STATE
 // ================================================================
 
@@ -282,13 +295,164 @@ function saveState() {
 }
 
 
+window.saveLifeGameState =
+    saveState;
+
+
+// ================================================================
+// FINANCE MIGRATION
+// ================================================================
+//
+// Переход со старой финансовой модели:
+//
+// monthlyIncome
+// monthlyGoal
+// yearlyGoal
+// savings
+// expenses
+//
+// на:
+//
+// monthlyIncome
+// monthlyGoal
+// mandatoryExpenses
+// financialReserve
+//
+// ================================================================
+
+function migrateFinance(
+    finance
+) {
+
+    if (!finance) {
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------------------
+    // Старые savings → financialReserve
+    // --------------------------------------------------------------
+
+    if (
+        (
+            finance.financialReserve === undefined ||
+            finance.financialReserve === null
+        ) &&
+        finance.savings !== undefined
+    ) {
+
+        finance.financialReserve =
+            Math.max(
+                0,
+                num(
+                    finance.savings
+                )
+            );
+
+    }
+
+
+    // --------------------------------------------------------------
+    // Старое числовое expenses → mandatoryExpenses
+    // --------------------------------------------------------------
+
+    if (
+        (
+            finance.mandatoryExpenses === undefined ||
+            finance.mandatoryExpenses === null
+        ) &&
+        typeof finance.expenses === 'number'
+    ) {
+
+        finance.mandatoryExpenses =
+            Math.max(
+                0,
+                num(
+                    finance.expenses
+                )
+            );
+
+    }
+
+
+    // --------------------------------------------------------------
+    // Если старый monthlyGoal существовал —
+    // оставляем его.
+    //
+    // Если нет — 0.
+    // --------------------------------------------------------------
+
+    if (
+        finance.monthlyGoal === undefined ||
+        finance.monthlyGoal === null
+    ) {
+
+        finance.monthlyGoal = 0;
+
+    }
+
+
+    // --------------------------------------------------------------
+    // Старые значения больше не используются
+    // как основная модель.
+    //
+    // Мы намеренно их НЕ удаляем,
+    // чтобы старые данные не потерялись.
+    // --------------------------------------------------------------
+
+}
+
+
+// ================================================================
+// NORMALIZE NUMBER
+// ================================================================
+
+function normalizeNumber(
+    value,
+    fallback = 0
+) {
+
+    const result =
+        num(value);
+
+
+    if (
+        !Number.isFinite(result)
+    ) {
+
+        return fallback;
+
+    }
+
+
+    return result;
+
+}
+
+
 // ================================================================
 // NORMALIZE STATE
 // ================================================================
 
 function normalizeState() {
 
-    if (!state.categories) {
+    if (
+        !state ||
+        typeof state !== 'object'
+    ) {
+
+        state =
+            createState();
+
+    }
+
+
+    if (
+        !state.categories ||
+        typeof state.categories !== 'object'
+    ) {
 
         state.categories = {};
 
@@ -306,7 +470,8 @@ function normalizeState() {
         category => {
 
             if (
-                !state.categories[category]
+                !state.categories[category] ||
+                typeof state.categories[category] !== 'object'
             ) {
 
                 state.categories[category] =
@@ -322,56 +487,221 @@ function normalizeState() {
             data.xp =
                 Math.max(
                     0,
-                    num(data.xp)
+                    normalizeNumber(
+                        data.xp
+                    )
                 );
 
 
             data.level =
                 Math.max(
                     1,
-                    num(data.level) || 1
+                    normalizeNumber(
+                        data.level,
+                        1
+                    ) || 1
                 );
 
 
             data.streak =
                 Math.max(
                     0,
-                    num(data.streak)
+                    normalizeNumber(
+                        data.streak
+                    )
                 );
 
 
             data.bestStreak =
                 Math.max(
                     0,
-                    num(data.bestStreak)
+                    normalizeNumber(
+                        data.bestStreak
+                    )
                 );
 
         }
     );
 
+
+    // ============================================================
+    // FINANCE NORMALIZATION
+    // ============================================================
+
+    const finance =
+        state.categories.finance;
+
+
+    migrateFinance(
+        finance
+    );
+
+
+    finance.monthlyIncome =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.monthlyIncome
+            )
+        );
+
+
+    finance.monthlyGoal =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.monthlyGoal
+            )
+        );
+
+
+    finance.mandatoryExpenses =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.mandatoryExpenses
+            )
+        );
+
+
+    finance.financialReserve =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.financialReserve
+            )
+        );
+
+
+    // ============================================================
+    // HEALTH
+    // ============================================================
+
+    const health =
+        state.categories.health;
+
+
+    health.routine =
+        clamp(
+            normalizeNumber(
+                health.routine
+            ),
+            0,
+            100
+        );
+
+
+    health.nutrition =
+        clamp(
+            normalizeNumber(
+                health.nutrition
+            ),
+            0,
+            100
+        );
+
+
+    health.steps =
+        Math.max(
+            0,
+            normalizeNumber(
+                health.steps
+            )
+        );
+
+
+    // ============================================================
+    // DEVELOPMENT
+    // ============================================================
+
+    const development =
+        state.categories.development;
+
+
+    development.books =
+        Math.max(
+            0,
+            normalizeNumber(
+                development.books
+            )
+        );
+
+
+    development.languageMinutes =
+        Math.max(
+            0,
+            normalizeNumber(
+                development.languageMinutes
+            )
+        );
+
+
+    development.meditationMinutes =
+        Math.max(
+            0,
+            normalizeNumber(
+                development.meditationMinutes
+            )
+        );
+
+
+    // ============================================================
+    // GLOBAL XP
+    // ============================================================
+
+    state.xp =
+        Math.max(
+            0,
+            normalizeNumber(
+                state.xp
+            )
+        );
+
+
+    state.level =
+        Math.max(
+            1,
+            normalizeNumber(
+                state.level,
+                1
+            ) || 1
+        );
+
+
+    window.lifeGameState =
+        state;
+
 }
 
 
 // ================================================================
-// XP
+// XP / LEVEL
 // ================================================================
 
-function calculateLevel(xp) {
+function calculateLevel(
+    xp
+) {
+
+    const value =
+        Math.max(
+            0,
+            normalizeNumber(
+                xp
+            )
+        );
+
 
     if (
-        typeof levelFromXP ===
-        'function'
+        typeof levelFromXP === 'function'
     ) {
 
         return Math.max(
             1,
-            num(
+            normalizeNumber(
                 levelFromXP(
-                    Math.max(
-                        0,
-                        num(xp)
-                    )
-                )
+                    value
+                ),
+                1
             ) || 1
         );
 
@@ -381,10 +711,7 @@ function calculateLevel(xp) {
     return Math.max(
         1,
         Math.floor(
-            Math.max(
-                0,
-                num(xp)
-            ) / 100
+            value / 100
         ) + 1
     );
 
@@ -402,7 +729,9 @@ function updateLevels(
     currentState.xp =
         Math.max(
             0,
-            num(currentState.xp)
+            normalizeNumber(
+                currentState.xp
+            )
         );
 
 
@@ -424,14 +753,18 @@ function updateLevels(
 
 
             if (!data) {
+
                 return;
+
             }
 
 
             data.xp =
                 Math.max(
                     0,
-                    num(data.xp)
+                    normalizeNumber(
+                        data.xp
+                    )
                 );
 
 
@@ -473,21 +806,41 @@ function addCategoryXP(
 
 
     if (!data) {
+
         return 0;
+
     }
 
 
-    const gained =
-        xpWithStreak(
-            Math.max(
-                0,
-                num(baseXP)
-            ),
-            Math.max(
-                0,
-                num(data.streak)
+    const base =
+        Math.max(
+            0,
+            normalizeNumber(
+                baseXP
             )
         );
+
+
+    let gained =
+        base;
+
+
+    if (
+        typeof xpWithStreak === 'function'
+    ) {
+
+        gained =
+            xpWithStreak(
+                base,
+                Math.max(
+                    0,
+                    normalizeNumber(
+                        data.streak
+                    )
+                )
+            );
+
+    }
 
 
     data.xp +=
@@ -508,63 +861,206 @@ function addCategoryXP(
 
 
 // ================================================================
-// CALCULATE CATEGORY PROGRESS
+// FINANCE CALCULATIONS
+// ================================================================
+
+function financeCalculations() {
+
+    const finance =
+        state.categories.finance;
+
+
+    const income =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.monthlyIncome
+            )
+        );
+
+
+    const goal =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.monthlyGoal
+            )
+        );
+
+
+    const expenses =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.mandatoryExpenses
+            )
+        );
+
+
+    const reserve =
+        Math.max(
+            0,
+            normalizeNumber(
+                finance.financialReserve
+            )
+        );
+
+
+    const incomeProgress =
+        goal > 0
+            ? (
+                income /
+                goal *
+                100
+            )
+            : 0;
+
+
+    const expensePercent =
+        income > 0
+            ? (
+                expenses /
+                income *
+                100
+            )
+            : 0;
+
+
+    const freeMoney =
+        income -
+        expenses -
+        reserve;
+
+
+    return {
+
+        income,
+
+        goal,
+
+        expenses,
+
+        reserve,
+
+        incomeProgress,
+
+        expensePercent,
+
+        freeMoney
+
+    };
+
+}
+
+
+window.lifeGameFinanceCalculations =
+    financeCalculations;
+
+
+// ================================================================
+// CATEGORY PROGRESS
 // ================================================================
 
 function categoryProgress(
     category
 ) {
 
+    // --------------------------------------------------------------
+    // Finance
+    // --------------------------------------------------------------
+
     if (
         category === 'finance' &&
         window.LifeGameFinance
     ) {
 
+        if (
+            typeof window.LifeGameFinance.progress ===
+            'function'
+        ) {
+
+            return clamp(
+                normalizeNumber(
+                    window.LifeGameFinance.progress(
+                        state
+                    )
+                ),
+                0,
+                100
+            );
+
+        }
+
+
+        const finance =
+            financeCalculations();
+
+
         return clamp(
-            window.LifeGameFinance
-                .financialHealth
-                ? window.LifeGameFinance.financialHealth(
-                    state.categories.finance.monthlyIncome,
-                    state.categories.finance.monthlyGoal,
-                    window.LifeGameFinance.totalExpenses(),
-                    state.categories.finance.savings
-                )
-                : 0,
+            Math.round(
+                finance.incomeProgress
+            ),
             0,
             100
         );
 
     }
 
+
+    // --------------------------------------------------------------
+    // Health
+    // --------------------------------------------------------------
 
     if (
         category === 'health' &&
         window.LifeGameHealth
     ) {
 
-        return clamp(
-            window.LifeGameHealth.progress(
-                state
-            ),
-            0,
-            100
-        );
+        if (
+            typeof window.LifeGameHealth.progress ===
+            'function'
+        ) {
+
+            return clamp(
+                normalizeNumber(
+                    window.LifeGameHealth.progress(
+                        state
+                    )
+                ),
+                0,
+                100
+            );
+
+        }
 
     }
 
+
+    // --------------------------------------------------------------
+    // Development
+    // --------------------------------------------------------------
 
     if (
         category === 'development' &&
         window.LifeGameDevelopment
     ) {
 
-        return clamp(
-            window.LifeGameDevelopment.progress(
-                state
-            ),
-            0,
-            100
-        );
+        if (
+            typeof window.LifeGameDevelopment.progress ===
+            'function'
+        ) {
+
+            return clamp(
+                normalizeNumber(
+                    window.LifeGameDevelopment.progress(
+                        state
+                    )
+                ),
+                0,
+                100
+            );
+
+        }
 
     }
 
@@ -618,26 +1114,36 @@ function rankFromLevel(
 ) {
 
     const lv =
-        num(level);
+        normalizeNumber(
+            level
+        );
 
 
     if (lv >= 20) {
+
         return 'LEGEND';
+
     }
 
 
     if (lv >= 15) {
+
         return 'MASTER';
+
     }
 
 
     if (lv >= 10) {
+
         return 'ELITE';
+
     }
 
 
     if (lv >= 5) {
+
         return 'PLAYER';
+
     }
 
 
@@ -667,7 +1173,9 @@ function xpToNextLevel(
     return Math.max(
         0,
         nextLevelXP -
-        num(xp)
+        normalizeNumber(
+            xp
+        )
     );
 
 }
@@ -699,7 +1207,7 @@ function creatorHTML() {
 
 
 // ================================================================
-// HELPERS FOR MODULES
+// MODULE HELPERS
 // ================================================================
 
 const moduleHelpers = {
@@ -714,7 +1222,7 @@ const moduleHelpers = {
 
     percent,
 
-    metric: function (
+    metric: function(
         icon,
         title,
         current,
@@ -722,6 +1230,16 @@ const moduleHelpers = {
         progress,
         id
     ) {
+
+        const safeProgress =
+            clamp(
+                normalizeNumber(
+                    progress
+                ),
+                0,
+                100
+            );
+
 
         return `
 
@@ -754,11 +1272,7 @@ const moduleHelpers = {
 
 
                     <div class="metric-percent">
-                        ${clamp(
-                            progress,
-                            0,
-                            100
-                        )}%
+                        ${safeProgress}%
                     </div>
 
                 </div>
@@ -768,11 +1282,7 @@ const moduleHelpers = {
 
                     <i
                         style="
-                            width:${clamp(
-                                progress,
-                                0,
-                                100
-                            )}%;
+                            width:${safeProgress}%;
                         "
                     ></i>
 
@@ -833,7 +1343,9 @@ function homePage() {
 
 
     const xp =
-        num(state.xp);
+        normalizeNumber(
+            state.xp
+        );
 
 
     const level =
@@ -855,64 +1367,119 @@ function homePage() {
     const xpInsideLevel =
         Math.max(
             0,
-            xp - currentLevelBase
+            xp -
+            currentLevelBase
         );
 
 
     const xpPercent =
         clamp(
             Math.round(
-                xpInsideLevel /
-                100 *
-                100
+                xpInsideLevel
             ),
             0,
             100
         );
 
 
-    document.getElementById(
-        'playerLevel'
-    ).textContent =
-        `LVL ${level}`;
-
-
-    document.getElementById(
-        'playerXP'
-    ).textContent =
-        `${fmt(xp)} XP`;
-
-
-    document.getElementById(
-        'playerXPFill'
-    ).style.width =
-        `${xpPercent}%`;
-
-
-    document.getElementById(
-        'xpNext'
-    ).textContent =
-        `${fmt(xpNext)} XP TO NEXT LEVEL`;
-
-
-    document.getElementById(
-        'playerRank'
-    ).textContent =
-        rankFromLevel(
-            level
+    const playerLevel =
+        document.getElementById(
+            'playerLevel'
         );
 
 
-    document.getElementById(
-        'lifeProgress'
-    ).innerHTML =
-        `${life}<span>%</span>`;
+    if (playerLevel) {
+
+        playerLevel.textContent =
+            `LVL ${level}`;
+
+    }
 
 
-    document.getElementById(
-        'lifeFill'
-    ).style.width =
-        `${life}%`;
+    const playerXP =
+        document.getElementById(
+            'playerXP'
+        );
+
+
+    if (playerXP) {
+
+        playerXP.textContent =
+            `${fmt(xp)} XP`;
+
+    }
+
+
+    const playerXPFill =
+        document.getElementById(
+            'playerXPFill'
+        );
+
+
+    if (playerXPFill) {
+
+        playerXPFill.style.width =
+            `${xpPercent}%`;
+
+    }
+
+
+    const xpNextElement =
+        document.getElementById(
+            'xpNext'
+        );
+
+
+    if (xpNextElement) {
+
+        xpNextElement.textContent =
+            `${fmt(xpNext)} XP TO NEXT LEVEL`;
+
+    }
+
+
+    const playerRank =
+        document.getElementById(
+            'playerRank'
+        );
+
+
+    if (playerRank) {
+
+        playerRank.textContent =
+            rankFromLevel(
+                level
+            );
+
+    }
+
+
+    const lifeProgressElement =
+        document.getElementById(
+            'lifeProgress'
+        );
+
+
+    if (lifeProgressElement) {
+
+        lifeProgressElement.innerHTML =
+            `${life}<span>%</span>`;
+
+    }
+
+
+    const lifeFill =
+        document.getElementById(
+            'lifeFill'
+        );
+
+
+    if (lifeFill) {
+
+        lifeFill.style.width =
+            `${life}%`;
+
+    }
 
 
     setProgress(
@@ -958,7 +1525,9 @@ function setProgress(
 
     const p =
         clamp(
-            value,
+            normalizeNumber(
+                value
+            ),
             0,
             100
         );
@@ -983,14 +1552,46 @@ function setProgress(
 
 
 // ================================================================
-// PAGE CONTAINER
+// CATEGORY TITLES
+// ================================================================
+
+function categoryTitle(
+    category
+) {
+
+    const titles = {
+
+        finance:
+            'FINANCE',
+
+        health:
+            'HEALTH',
+
+        development:
+            'DEVELOPMENT'
+
+    };
+
+
+    return (
+        titles[category] ||
+        category
+    );
+
+}
+
+
+// ================================================================
+// CREATE CATEGORY PAGE
 // ================================================================
 
 function createPage(
     category
 ) {
 
-    closePage();
+    closePage(
+        false
+    );
 
 
     const page =
@@ -1052,7 +1653,7 @@ function createPage(
 
     back.addEventListener(
         'click',
-        closePage
+        () => closePage()
     );
 
 
@@ -1069,8 +1670,10 @@ function createPage(
         </div>
 
         <h2>
-            ${categoryTitle(
-                category
+            ${esc(
+                categoryTitle(
+                    category
+                )
             )}
         </h2>
 
@@ -1112,45 +1715,12 @@ function createPage(
     );
 
 
-    renderCategoryPage(
-        category
-    );
-
-
     document.body.classList.add(
         'locked'
     );
 
 
-    initPageEvents();
-
-}
-
-
-// ================================================================
-// CATEGORY TITLE
-// ================================================================
-
-function categoryTitle(
-    category
-) {
-
-    const titles = {
-
-        finance:
-            'FINANCE',
-
-        health:
-            'HEALTH',
-
-        development:
-            'DEVELOPMENT'
-
-    };
-
-
-    return (
-        titles[category] ||
+    renderCategoryPage(
         category
     );
 
@@ -1158,19 +1728,24 @@ function categoryTitle(
 
 
 // ================================================================
-// OPEN CATEGORY
+// OPEN CATEGORY PAGE
 // ================================================================
 
 function openCategoryPage(
     category
 ) {
 
+    const allowed = [
+        'finance',
+        'health',
+        'development'
+    ];
+
+
     if (
-        ![
-            'finance',
-            'health',
-            'development'
-        ].includes(category)
+        !allowed.includes(
+            category
+        )
     ) {
 
         return;
@@ -1182,6 +1757,11 @@ function openCategoryPage(
         category
     );
 
+
+    setActiveNav(
+        category
+    );
+
 }
 
 
@@ -1190,7 +1770,7 @@ window.openCategoryPage =
 
 
 // ================================================================
-// RENDER CATEGORY
+// RENDER CATEGORY PAGE
 // ================================================================
 
 function renderCategoryPage(
@@ -1204,51 +1784,87 @@ function renderCategoryPage(
 
 
     if (!content) {
+
         return;
+
     }
 
 
-    let html = '';
+    let html =
+        '';
 
+
+    // --------------------------------------------------------------
+    // FINANCE
+    // --------------------------------------------------------------
 
     if (
         category === 'finance' &&
         window.LifeGameFinance
     ) {
 
-        html =
-            window.LifeGameFinance.page(
-                state,
-                moduleHelpers
-            );
+        if (
+            typeof window.LifeGameFinance.page ===
+            'function'
+        ) {
+
+            html =
+                window.LifeGameFinance.page(
+                    state,
+                    moduleHelpers
+                );
+
+        }
 
     }
 
+
+    // --------------------------------------------------------------
+    // HEALTH
+    // --------------------------------------------------------------
 
     if (
         category === 'health' &&
         window.LifeGameHealth
     ) {
 
-        html =
-            window.LifeGameHealth.page(
-                state,
-                moduleHelpers
-            );
+        if (
+            typeof window.LifeGameHealth.page ===
+            'function'
+        ) {
+
+            html =
+                window.LifeGameHealth.page(
+                    state,
+                    moduleHelpers
+                );
+
+        }
 
     }
 
+
+    // --------------------------------------------------------------
+    // DEVELOPMENT
+    // --------------------------------------------------------------
 
     if (
         category === 'development' &&
         window.LifeGameDevelopment
     ) {
 
-        html =
-            window.LifeGameDevelopment.page(
-                state,
-                moduleHelpers
-            );
+        if (
+            typeof window.LifeGameDevelopment.page ===
+            'function'
+        ) {
+
+            html =
+                window.LifeGameDevelopment.page(
+                    state,
+                    moduleHelpers
+                );
+
+        }
 
     }
 
@@ -1260,12 +1876,15 @@ function renderCategoryPage(
     initPageEvents();
 
 
+    // --------------------------------------------------------------
+    // Finance swipe support
+    // --------------------------------------------------------------
+
     if (
         category === 'finance' &&
         window.LifeGameFinance &&
-        typeof window.LifeGameFinance
-            .initExpenseSwipe ===
-            'function'
+        typeof window.LifeGameFinance.initExpenseSwipe ===
+        'function'
     ) {
 
         window.LifeGameFinance
@@ -1280,7 +1899,9 @@ function renderCategoryPage(
 // CLOSE PAGE
 // ================================================================
 
-function closePage() {
+function closePage(
+    shouldRender = true
+) {
 
     const page =
         document.getElementById(
@@ -1305,7 +1926,11 @@ function closePage() {
     );
 
 
-    renderApp();
+    if (shouldRender) {
+
+        renderApp();
+
+    }
 
 }
 
@@ -1362,36 +1987,35 @@ function refreshCurrentPage() {
         );
 
 
-    let category =
-        '';
+    if (!title) {
 
-
-    if (title) {
-
-        const text =
-            title.textContent
-                .trim()
-                .toLowerCase();
-
-
-        if (text === 'finance') {
-            category = 'finance';
-        }
-
-        if (text === 'health') {
-            category = 'health';
-        }
-
-        if (
-            text === 'development'
-        ) {
-
-            category =
-                'development';
-
-        }
+        return;
 
     }
+
+
+    const text =
+        title.textContent
+            .trim()
+            .toLowerCase();
+
+
+    const categoryMap = {
+
+        finance:
+            'finance',
+
+        health:
+            'health',
+
+        development:
+            'development'
+
+    };
+
+
+    const category =
+        categoryMap[text];
 
 
     if (category) {
@@ -1418,7 +2042,9 @@ function initPageEvents() {
 
 
     if (!page) {
+
         return;
+
     }
 
 
@@ -1432,6 +2058,8 @@ function initPageEvents() {
                 button.addEventListener(
                     'click',
                     event => {
+
+                        event.preventDefault();
 
                         event.stopPropagation();
 
@@ -1488,100 +2116,114 @@ function editMetric(
 
 
         if (
-            module.canEdit(id)
+            !module.canEdit(
+                id
+            )
         ) {
 
-            const oldValue =
-                getMetricValue(
-                    id
-                );
+            continue;
+
+        }
 
 
-            let success =
-                false;
-
-
-            if (
-                typeof module.edit ===
-                'function'
-            ) {
-
-                success =
-                    module.edit(
-                        state,
-                        id
-                    ) !== false;
-
-            } else {
-
-                success =
-                    editGenericMetric(
-                        module,
-                        id
-                    );
-
-            }
-
-
-            if (!success) {
-                return;
-            }
-
-
-            updateLevels(
-                state
+        const oldValue =
+            getMetricValue(
+                id
             );
 
 
-            saveState();
+        let success =
+            false;
 
 
-            const newValue =
-                getMetricValue(
+        // ----------------------------------------------------------
+        // Module-specific editor
+        // ----------------------------------------------------------
+
+        if (
+            typeof module.edit ===
+            'function'
+        ) {
+
+            success =
+                module.edit(
+                    state,
+                    id
+                ) !== false;
+
+        } else {
+
+            success =
+                editGenericMetric(
+                    module,
                     id
                 );
 
-
-            if (
-                oldValue !==
-                newValue
-            ) {
-
-                const category =
-                    metricCategory(
-                        id
-                    );
+        }
 
 
-                if (category) {
-
-                    addCategoryXP(
-                        category,
-                        5
-                    );
-
-                }
-
-            }
-
-
-            saveState();
-
-
-            renderApp();
-
-
-            refreshCurrentPage();
-
-
-            showToast(
-                '✓ Сохранено'
-            );
-
+        if (!success) {
 
             return;
 
         }
+
+
+        normalizeState();
+
+
+        updateLevels(
+            state
+        );
+
+
+        saveState();
+
+
+        const newValue =
+            getMetricValue(
+                id
+            );
+
+
+        if (
+            oldValue !==
+            newValue
+        ) {
+
+            const category =
+                metricCategory(
+                    id
+                );
+
+
+            if (category) {
+
+                addCategoryXP(
+                    category,
+                    5
+                );
+
+            }
+
+        }
+
+
+        saveState();
+
+
+        renderApp();
+
+
+        refreshCurrentPage();
+
+
+        showToast(
+            '✓ Сохранено'
+        );
+
+
+        return;
 
     }
 
@@ -1618,7 +2260,9 @@ function editGenericMetric(
 
 
     if (!category) {
+
         return false;
+
     }
 
 
@@ -1629,7 +2273,9 @@ function editGenericMetric(
 
 
     const current =
-        num(data[id]);
+        normalizeNumber(
+            data[id]
+        );
 
 
     const value =
@@ -1649,17 +2295,28 @@ function editGenericMetric(
     }
 
 
-    const number =
-        Number(
-            value.replace(
+    const cleaned =
+        value
+            .replace(
                 /\s/g,
                 ''
             )
+            .replace(
+                ',',
+                '.'
+            );
+
+
+    const number =
+        Number(
+            cleaned
         );
 
 
     if (
-        !Number.isFinite(number) ||
+        !Number.isFinite(
+            number
+        ) ||
         number < 0
     ) {
 
@@ -1674,7 +2331,9 @@ function editGenericMetric(
 
 
     data[id] =
-        Math.round(number);
+        Math.round(
+            number
+        );
 
 
     return true;
@@ -1683,7 +2342,7 @@ function editGenericMetric(
 
 
 // ================================================================
-// METRIC VALUE
+// GET METRIC VALUE
 // ================================================================
 
 function getMetricValue(
@@ -1697,11 +2356,13 @@ function getMetricValue(
 
 
     if (!category) {
+
         return null;
+
     }
 
 
-    return num(
+    return normalizeNumber(
         state.categories[
             category
         ][id]
@@ -1711,7 +2372,7 @@ function getMetricValue(
 
 
 // ================================================================
-// METRIC CATEGORY
+// FIND METRIC CATEGORY
 // ================================================================
 
 function metricCategory(
@@ -1722,7 +2383,9 @@ function metricCategory(
         window.LifeGameFinance &&
         typeof window.LifeGameFinance.canEdit ===
         'function' &&
-        window.LifeGameFinance.canEdit(id)
+        window.LifeGameFinance.canEdit(
+            id
+        )
     ) {
 
         return 'finance';
@@ -1734,7 +2397,9 @@ function metricCategory(
         window.LifeGameHealth &&
         typeof window.LifeGameHealth.canEdit ===
         'function' &&
-        window.LifeGameHealth.canEdit(id)
+        window.LifeGameHealth.canEdit(
+            id
+        )
     ) {
 
         return 'health';
@@ -1746,7 +2411,9 @@ function metricCategory(
         window.LifeGameDevelopment &&
         typeof window.LifeGameDevelopment.canEdit ===
         'function' &&
-        window.LifeGameDevelopment.canEdit(id)
+        window.LifeGameDevelopment.canEdit(
+            id
+        )
     ) {
 
         return 'development';
@@ -1786,6 +2453,10 @@ function setActiveNav(
 }
 
 
+window.setActiveNav =
+    setActiveNav;
+
+
 // ================================================================
 // NAVIGATION
 // ================================================================
@@ -1808,7 +2479,8 @@ function initNavigation() {
 
 
                         if (
-                            category === 'home'
+                            category ===
+                            'home'
                         ) {
 
                             closePage();
@@ -1818,14 +2490,21 @@ function initNavigation() {
                         }
 
 
-                        setActiveNav(
-                            category
-                        );
+                        if (
+                            [
+                                'finance',
+                                'health',
+                                'development'
+                            ].includes(
+                                category
+                            )
+                        ) {
 
+                            openCategoryPage(
+                                category
+                            );
 
-                        openCategoryPage(
-                            category
-                        );
+                        }
 
                     }
                 );
@@ -1857,12 +2536,22 @@ function initCategoryCards() {
                             card.dataset.category;
 
 
+                        if (
+                            ![
+                                'finance',
+                                'health',
+                                'development'
+                            ].includes(
+                                category
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
                         openCategoryPage(
-                            category
-                        );
-
-
-                        setActiveNav(
                             category
                         );
 
@@ -1888,24 +2577,22 @@ function initDailyQuest() {
 
 
     if (!button) {
+
         return;
+
     }
 
 
     button.addEventListener(
         'click',
-        () => {
-
-            completeDailyQuest();
-
-        }
+        completeDailyQuest
     );
 
 }
 
 
 // ================================================================
-// DAILY QUEST COMPLETE
+// COMPLETE DAILY QUEST
 // ================================================================
 
 function completeDailyQuest() {
@@ -1935,10 +2622,13 @@ function completeDailyQuest() {
 
 
     const gained =
-        xpWithStreak(
-            10,
-            0
-        );
+        typeof xpWithStreak ===
+        'function'
+            ? xpWithStreak(
+                10,
+                0
+            )
+            : 10;
 
 
     state.xp +=
@@ -1986,7 +2676,9 @@ function showToast(
 
 
     if (!toast) {
+
         return;
+
     }
 
 
@@ -2048,22 +2740,28 @@ window.LifeGameApp = {
 
     lifeProgress,
 
-    categoryProgress
+    categoryProgress,
+
+    financeCalculations,
+
+    normalizeState
 
 };
 
 
 // ================================================================
-// INIT
+// INITIALIZATION
 // ================================================================
 
 function init() {
 
     normalizeState();
 
+
     updateLevels(
         state
     );
+
 
     saveState();
 
@@ -2107,4 +2805,3 @@ if (
     init();
 
 }
-```
