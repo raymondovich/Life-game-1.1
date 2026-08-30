@@ -1,640 +1,807 @@
-```javascript
-/* =========================================================
-   LIFE GAME — FINANCE SECTION
-   js/sections/finance.js
-   ========================================================= */
+// =====================================================
+// LIFE GAME
+// FINANCE SECTION
+// =====================================================
+//
+// Финансовый модуль.
+// Этот файл загружается отдельно от index.html.
+//
+// API:
+//
+// window.LifeGameFinance.progress(state, expenses)
+// window.LifeGameFinance.page(state, expenses, ui)
+//
+// =====================================================
 
 (function () {
 
     'use strict';
 
-    /*
-     * Финансовый раздел.
-     *
-     * Здесь находятся:
-     * - расчёт финансового прогресса
-     * - доход
-     * - расходы
-     * - свободные деньги
-     * - процент расходов
-     * - финансовая страница
-     * - HTML расходов
-     */
 
-    window.LifeGameFinance = {
+    // =================================================
+    // HELPERS
+    // =================================================
 
-        /* -------------------------------------------------
-           FINANCE PROGRESS
-        ------------------------------------------------- */
+    function num(value) {
 
-        progress: function (state, expenses) {
+        const n = Number(value);
 
-            const c = state.categories.finance;
+        return Number.isFinite(n)
+            ? n
+            : 0;
 
-            const income = Number(c.monthlyIncome) || 0;
+    }
 
-            const monthlyGoal =
-                Math.max(
-                    1,
-                    Number(c.monthlyGoal) || 1
-                );
 
-            const yearlyGoal =
-                Math.max(
-                    1,
-                    Number(c.yearlyGoal) || 1
-                );
+    function clamp(value, min, max) {
 
-            const expensesTotal =
-                expenses.reduce(
-                    function (total, expense) {
+        return Math.min(
+            max,
+            Math.max(
+                min,
+                num(value)
+            )
+        );
 
-                        return total +
-                            (Number(expense.amount) || 0);
+    }
 
-                    },
-                    0
-                );
 
-            const monthlyProgress =
-                Math.round(
-                    income /
-                    monthlyGoal *
-                    100
-                );
+    function fmt(value) {
 
-            const yearlyProgress =
-                Math.round(
-                    income * 12 /
-                    yearlyGoal *
-                    100
-                );
+        return new Intl.NumberFormat(
+            'ru-RU'
+        ).format(
+            num(value)
+        );
 
-            const savingsProgress =
-                income > 0
-                    ? Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            Math.round(
-                                (
-                                    income -
-                                    expensesTotal
-                                ) /
-                                income *
-                                100
-                            )
-                        )
-                    )
-                    : 0;
+    }
 
-            return Math.round(
-                (
-                    Math.max(
-                        0,
-                        monthlyProgress
-                    ) +
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            yearlyProgress
-                        )
-                    ) +
-                    savingsProgress
-                ) / 3
+
+    function esc(value) {
+
+        return String(value).replace(
+            /[&<>"']/g,
+            function (character) {
+
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+
+                }[character];
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // FINANCE PROGRESS
+    // =================================================
+
+    function progress(
+        state,
+        expenses
+    ) {
+
+        if (
+            !state ||
+            !state.categories ||
+            !state.categories.finance
+        ) {
+
+            return 0;
+
+        }
+
+
+        const finance =
+            state.categories.finance;
+
+
+        const income =
+            Math.max(
+                0,
+                num(
+                    finance.monthlyIncome
+                )
             );
 
-        },
+
+        const monthlyGoal =
+            Math.max(
+                1,
+                num(
+                    finance.monthlyGoal
+                )
+            );
 
 
-        /* -------------------------------------------------
-           TOTAL EXPENSES
-        ------------------------------------------------- */
+        const yearlyGoal =
+            Math.max(
+                1,
+                num(
+                    finance.yearlyGoal
+                )
+            );
 
-        expensesTotal: function (expenses) {
 
-            return expenses.reduce(
-                function (total, expense) {
+        const savings =
+            Math.max(
+                0,
+                num(
+                    finance.savings
+                )
+            );
+
+
+        // Доход относительно месячной цели
+        const incomeProgress =
+            clamp(
+                income /
+                monthlyGoal *
+                100,
+                0,
+                100
+            );
+
+
+        // Годовая цель
+        const yearlyProgress =
+            clamp(
+                income * 12 /
+                yearlyGoal *
+                100,
+                0,
+                100
+            );
+
+
+        // Накопления
+        const savingsTarget =
+            Math.max(
+                monthlyGoal,
+                1
+            );
+
+
+        const savingsProgress =
+            clamp(
+                savings /
+                savingsTarget *
+                100,
+                0,
+                100
+            );
+
+
+        // Расходы
+        const list =
+            Array.isArray(expenses)
+                ? expenses
+                : [];
+
+
+        const totalExpenses =
+            list.reduce(
+                function (
+                    total,
+                    expense
+                ) {
 
                     return total +
-                        (Number(expense.amount) || 0);
+                        Math.max(
+                            0,
+                            num(
+                                expense.amount
+                            )
+                        );
 
                 },
                 0
             );
 
-        },
+
+        // Расходы относительно дохода.
+        // Чем меньше доля расходов,
+        // тем лучше показатель.
+
+        let expenseProgress = 100;
 
 
-        /* -------------------------------------------------
-           EXPENSE PERCENT
-        ------------------------------------------------- */
+        if (income > 0) {
 
-        expensePercent: function (
-            state,
-            expenses
-        ) {
-
-            const income =
-                Number(
-                    state.categories.finance.monthlyIncome
-                ) || 0;
-
-            if (!income)
-                return 0;
-
-            return Math.round(
-                this.expensesTotal(expenses) /
+            const expenseRatio =
+                totalExpenses /
                 income *
-                100
-            );
-
-        },
+                100;
 
 
-        /* -------------------------------------------------
-           SAVINGS
-        ------------------------------------------------- */
+            expenseProgress =
+                clamp(
+                    100 -
+                    expenseRatio,
+                    0,
+                    100
+                );
 
-        savings: function (
-            state,
-            expenses
-        ) {
-
-            const income =
-                Number(
-                    state.categories.finance.monthlyIncome
-                ) || 0;
-
-            return Math.max(
-                0,
-                income -
-                this.expensesTotal(expenses)
-            );
-
-        },
+        }
 
 
-        /* -------------------------------------------------
-           EXPENSE HTML
-        ------------------------------------------------- */
+        return Math.round(
+            (
+                incomeProgress +
+                yearlyProgress +
+                savingsProgress +
+                expenseProgress
+            ) / 4
+        );
 
-        expenseHTML: function (expense) {
+    }
 
-            const esc =
-                window.LifeGameUtils &&
-                window.LifeGameUtils.escapeHTML
-                    ? window.LifeGameUtils.escapeHTML
-                    : function (value) {
-                        return String(value);
-                    };
 
-            const fmt =
-                window.LifeGameUtils &&
-                window.LifeGameUtils.formatNumber
-                    ? window.LifeGameUtils.formatNumber
-                    : function (value) {
-                        return new Intl.NumberFormat(
-                            'ru-RU'
-                        ).format(
-                            Number(value) || 0
-                        );
-                    };
+    // =================================================
+    // METRIC
+    // =================================================
 
-            return `
-                <div
-                    class="expense-swipe"
-                    data-swipe-id="${esc(expense.id)}"
-                >
+    function metric(
+        icon,
+        title,
+        current,
+        target,
+        percent,
+        edit
+    ) {
 
-                    <div class="expense-delete-reveal">
-                        УДАЛИТЬ
-                    </div>
+        return `
 
-                    <div class="expense">
+            <div class="metric">
 
-                        <div class="expense-info">
+                <div class="metric-head">
 
-                            <div class="expense-name">
-                                ${esc(expense.name)}
-                            </div>
+                    <div class="metric-left">
 
-                            <div class="expense-amount">
-                                ${fmt(expense.amount)} ₽
-                            </div>
-
+                        <div class="metric-icon">
+                            ${icon}
                         </div>
 
-                        <div class="expense-actions">
+                        <div class="metric-text">
 
-                            <button
-                                class="small-btn expense-edit"
-                                data-id="${esc(expense.id)}"
-                            >
-                                ✎
-                            </button>
+                            <strong>
+                                ${esc(title)}
+                            </strong>
+
+                            <span>
+                                ${esc(current)}
+                                /
+                                ${esc(target)}
+                            </span>
 
                         </div>
 
                     </div>
 
-                </div>
-            `;
 
-        },
-
-
-        /* -------------------------------------------------
-           FINANCE PAGE
-        ------------------------------------------------- */
-
-        page: function (
-            state,
-            expenses,
-            ui
-        ) {
-
-            const c =
-                state.categories.finance;
-
-            const income =
-                Number(c.monthlyIncome) || 0;
-
-            const totalExpenses =
-                this.expensesTotal(expenses);
-
-            const expensePercent =
-                this.expensePercent(
-                    state,
-                    expenses
-                );
-
-            const savings =
-                this.savings(
-                    state,
-                    expenses
-                );
-
-            const progress =
-                this.progress(
-                    state,
-                    expenses
-                );
-
-            const collapsed =
-                Boolean(
-                    ui &&
-                    ui.expensesCollapsed
-                );
-
-            const fmt =
-                window.LifeGameUtils &&
-                window.LifeGameUtils.formatNumber
-                    ? window.LifeGameUtils.formatNumber
-                    : function (value) {
-                        return new Intl.NumberFormat(
-                            'ru-RU'
-                        ).format(
-                            Number(value) || 0
-                        );
-                    };
-
-            const clamp =
-                window.LifeGameUtils &&
-                window.LifeGameUtils.clamp
-                    ? window.LifeGameUtils.clamp
-                    : function (value, min, max) {
-                        return Math.min(
-                            max,
-                            Math.max(
-                                min,
-                                value
-                            )
-                        );
-                    };
-
-            const metric =
-                window.LifeGameUtils &&
-                window.LifeGameUtils.metric
-                    ? window.LifeGameUtils.metric
-                    : function () {
-                        return '';
-                    };
-
-            const mp = function (
-                a,
-                b,
-                over100
-            ) {
-
-                const value =
-                    b > 0
-                        ? Math.round(
-                            Number(a || 0) /
-                            Number(b || 0) *
-                            100
-                        )
-                        : 0;
-
-                return over100
-                    ? Math.max(
-                        0,
-                        value
-                    )
-                    : clamp(
-                        value,
-                        0,
-                        100
-                    );
-
-            };
-
-            return `
-
-                <div class="summary">
-
-                    <div class="section-label">
-                        FINANCE LEVEL ${c.level}
-                    </div>
-
-                    <div class="summary-number">
-                        ${progress}%
-                    </div>
-
-                    <div class="progress">
-                        <i style="width:${clamp(
-                            progress,
+                    <div class="metric-percent">
+                        ${clamp(
+                            percent,
                             0,
                             100
-                        )}%"></i>
-                    </div>
-
-                    <div class="finance-box">
-
-                        <div class="finance-line">
-
-                            <span>
-                                FINANCE XP
-                            </span>
-
-                            <strong>
-                                ${fmt(c.xp)} XP
-                            </strong>
-
-                        </div>
-
-                        <div class="finance-line">
-
-                            <span>
-                                STREAK
-                            </span>
-
-                            <strong>
-                                🔥 ${c.streak}
-                            </strong>
-
-                        </div>
-
+                        )}%
                     </div>
 
                 </div>
 
-                <div class="cards">
 
-                    ${
-                        metric(
-                            '💵',
-                            'Заработано за месяц',
-                            fmt(income)+' ₽',
-                            fmt(c.monthlyGoal)+' ₽',
-                            mp(
-                                income,
-                                c.monthlyGoal,
-                                true
-                            ),
-                            'income'
-                        )
-                    }
+                <div class="metric-bar">
 
-                    <div
-                        class="metric expenses-metric"
-                        id="expensesMetric"
-                    >
-
-                        <div class="metric-head">
-
-                            <div class="metric-left">
-
-                                <div class="metric-icon">
-                                    📉
-                                </div>
-
-                                <div class="metric-text">
-
-                                    <strong>
-                                        Обязательные расходы
-                                    </strong>
-
-                                    <span>
-                                        ${fmt(totalExpenses)}
-                                        ₽ ·
-                                        ${expensePercent}%
-                                        от заработка
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                            <div class="metric-percent">
-                                ${expensePercent}%
-                            </div>
-
-                        </div>
-
-                        <div class="metric-bar">
-
-                            <i
-                                style="width:${Math.min(
-                                    expensePercent,
-                                    100
-                                )}%"
-                            ></i>
-
-                        </div>
-
-                        <div
-                            class="expenses ${
-                                collapsed
-                                    ? 'collapsed'
-                                    : ''
-                            }"
-                        >
-
-                            <button
-                                class="expenses-title"
-                                id="expensesToggle"
-                                type="button"
-                                aria-expanded="${
-                                    !collapsed
-                                }"
-                            >
-
-                                <div
-                                    class="expenses-title-left"
-                                >
-
-                                    <span>
-                                        МОИ ОБЯЗАТЕЛЬНЫЕ
-                                        РАСХОДЫ
-                                    </span>
-
-                                </div>
-
-                                <strong>
-                                    ${fmt(totalExpenses)} ₽
-                                </strong>
-
-                            </button>
-
-                            <div class="expense-content">
-
-                                <div class="expense-list">
-
-                                    ${
-                                        expenses.length
-                                            ? expenses
-                                                .map(
-                                                    this.expenseHTML
-                                                )
-                                                .join('')
-                                            : `
-                                                <div class="notice">
-
-                                                    Добавь
-                                                    обязательные
-                                                    расходы:
-                                                    аренда,
-                                                    коммунальные
-                                                    услуги,
-                                                    продукты,
-                                                    транспорт,
-                                                    связь и т.д.
-
-                                                </div>
-                                            `
-                                    }
-
-                                </div>
-
-                                <button
-                                    class="add"
-                                    id="addExpense"
-                                >
-                                    ＋ ДОБАВИТЬ РАСХОД
-                                </button>
-
-                                <div class="ratio">
-
-                                    <span>
-                                        РАСХОДЫ / ДОХОД
-                                    </span>
-
-                                    <strong>
-                                        ${expensePercent}%
-                                    </strong>
-
-                                </div>
-
-                                <div class="ratio">
-
-                                    <span>
-                                        СВОБОДНЫЕ ДЕНЬГИ
-                                    </span>
-
-                                    <strong>
-                                        ${fmt(savings)} ₽
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    ${
-                        metric(
-                            '🏆',
-                            'Цель на год',
-                            fmt(income * 12)+' ₽',
-                            fmt(c.yearlyGoal)+' ₽',
-                            mp(
-                                income * 12,
-                                c.yearlyGoal
-                            ),
-                            'yearlyGoal'
-                        )
-                    }
-
-                    ${
-                        metric(
-                            '🛡️',
-                            'Финансовая эффективность',
-                            expensePercent <= 0
-                                ? '—'
-                                : (
-                                    100 -
-                                    expensePercent
-                                ) +
-                                '% свободного дохода',
-                            '100%',
-                            clamp(
-                                100 -
-                                expensePercent,
+                    <i
+                        style="
+                            width:${clamp(
+                                percent,
                                 0,
                                 100
-                            ),
-                            null
-                        )
-                    }
+                            )}%;
+                        "
+                    ></i>
 
-                    <div class="notice">
+                </div>
 
-                        💡 В «Заработано за месяц»
-                        можно задать фактический
-                        доход и личную цель
-                        на месяц.
 
-                    </div>
+                ${
+                    edit
+                        ? `
+                            <button
+                                class="edit"
+                                data-edit="${esc(
+                                    edit
+                                )}"
+                            >
+                                ✎ ИЗМЕНИТЬ
+                            </button>
+                        `
+                        : ''
+                }
 
-                    ${
-                        window.LifeGameUtils &&
-                        window.LifeGameUtils.creatorHTML
-                            ? window.LifeGameUtils.creatorHTML()
-                            : ''
-                    }
+            </div>
 
+        `;
+
+    }
+
+
+    // =================================================
+    // FINANCE PAGE
+    // =================================================
+
+    function page(
+        state,
+        expenses,
+        ui
+    ) {
+
+        if (
+            !state ||
+            !state.categories ||
+            !state.categories.finance
+        ) {
+
+            return `
+
+                <div class="notice">
+                    Финансовые данные
+                    недоступны.
                 </div>
 
             `;
 
         }
 
+
+        const finance =
+            state.categories.finance;
+
+
+        const list =
+            Array.isArray(expenses)
+                ? expenses
+                : [];
+
+
+        const income =
+            Math.max(
+                0,
+                num(
+                    finance.monthlyIncome
+                )
+            );
+
+
+        const monthlyGoal =
+            Math.max(
+                1,
+                num(
+                    finance.monthlyGoal
+                )
+            );
+
+
+        const yearlyGoal =
+            Math.max(
+                1,
+                num(
+                    finance.yearlyGoal
+                )
+            );
+
+
+        const savings =
+            Math.max(
+                0,
+                num(
+                    finance.savings
+                )
+            );
+
+
+        const totalExpenses =
+            list.reduce(
+                function (
+                    total,
+                    expense
+                ) {
+
+                    return total +
+                        Math.max(
+                            0,
+                            num(
+                                expense.amount
+                            )
+                        );
+
+                },
+                0
+            );
+
+
+        const incomePercent =
+            clamp(
+                income /
+                monthlyGoal *
+                100,
+                0,
+                100
+            );
+
+
+        const yearlyPercent =
+            clamp(
+                income * 12 /
+                yearlyGoal *
+                100,
+                0,
+                100
+            );
+
+
+        const savingsPercent =
+            clamp(
+                savings /
+                monthlyGoal *
+                100,
+                0,
+                100
+            );
+
+
+        const totalProgress =
+            progress(
+                state,
+                list
+            );
+
+
+        const expensesHTML =
+            list.length
+                ? list.map(
+                    function (expense) {
+
+                        return `
+
+                            <div
+                                class="expense-swipe"
+                                data-id="${esc(
+                                    expense.id
+                                )}"
+                            >
+
+                                <div class="expense">
+
+                                    <div>
+
+                                        <strong>
+                                            ${esc(
+                                                expense.name
+                                            )}
+                                        </strong>
+
+                                        <span>
+                                            Расход
+                                        </span>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <strong>
+                                            −${fmt(
+                                                expense.amount
+                                            )} ₽
+                                        </strong>
+
+                                        <button
+                                            class="expense-edit"
+                                            data-id="${esc(
+                                                expense.id
+                                            )}"
+                                        >
+                                            ✎
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                ).join('')
+                : `
+
+                    <div class="notice">
+
+                        Расходов пока нет.
+
+                    </div>
+
+                `;
+
+
+        return `
+
+            <!-- =========================================
+                 SUMMARY
+            ========================================== -->
+
+            <div class="summary">
+
+                <div class="section-label">
+                    FINANCE LEVEL ${num(
+                        finance.level
+                    )}
+                </div>
+
+
+                <div class="summary-number">
+                    ${totalProgress}%
+                </div>
+
+
+                <div class="progress">
+
+                    <i
+                        style="
+                            width:${totalProgress}%;
+                        "
+                    ></i>
+
+                </div>
+
+
+                <div class="finance-box">
+
+                    <div class="finance-line">
+
+                        <span>
+                            FINANCE XP
+                        </span>
+
+                        <strong>
+                            ${fmt(
+                                finance.xp
+                            )} XP
+                        </strong>
+
+                    </div>
+
+
+                    <div class="finance-line">
+
+                        <span>
+                            STREAK
+                        </span>
+
+                        <strong>
+                            🔥 ${num(
+                                finance.streak
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================================
+                 METRICS
+            ========================================== -->
+
+            <div class="cards">
+
+
+                ${metric(
+                    '💵',
+                    'Заработано за месяц',
+                    fmt(income) + ' ₽',
+                    fmt(monthlyGoal) + ' ₽',
+                    incomePercent,
+                    'income'
+                )}
+
+
+                ${metric(
+                    '🎯',
+                    'Цель на год',
+                    fmt(income * 12) + ' ₽',
+                    fmt(yearlyGoal) + ' ₽',
+                    yearlyPercent,
+                    'yearlyGoal'
+                )}
+
+
+                ${metric(
+                    '💰',
+                    'Накопления',
+                    fmt(savings) + ' ₽',
+                    fmt(monthlyGoal) + ' ₽',
+                    savingsPercent,
+                    'savings'
+                )}
+
+
+                <!-- =====================================
+                     EXPENSES
+                ====================================== -->
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                📉
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Расходы
+                                </strong>
+
+                                <span>
+                                    ${fmt(
+                                        totalExpenses
+                                    )} ₽
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric-percent">
+
+                            ${income > 0
+                                ? Math.round(
+                                    totalExpenses /
+                                    income *
+                                    100
+                                )
+                                : 0
+                            }%
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="
+                                width:${income > 0
+                                    ? clamp(
+                                        totalExpenses /
+                                        income *
+                                        100,
+                                        0,
+                                        100
+                                    )
+                                    : 0
+                                }%;
+                            "
+                        ></i>
+
+                    </div>
+
+
+                    <button
+                        class="edit"
+                        id="addExpense"
+                    >
+                        ＋ ДОБАВИТЬ РАСХОД
+                    </button>
+
+                </div>
+
+
+                <!-- =====================================
+                     EXPENSES LIST
+                ====================================== -->
+
+                <div class="expenses">
+
+                    <div
+                        class="expenses-head"
+                        id="expensesToggle"
+                    >
+
+                        <span>
+                            ИСТОРИЯ РАСХОДОВ
+                        </span>
+
+                        <strong>
+                            ${
+                                ui &&
+                                ui.expensesCollapsed
+                                    ? '＋'
+                                    : '−'
+                            }
+                        </strong>
+
+                    </div>
+
+
+                    ${
+                        ui &&
+                        ui.expensesCollapsed
+                            ? ''
+                            : expensesHTML
+                    }
+
+                </div>
+
+
+                <div class="notice">
+
+                    Финансовый прогресс
+                    рассчитывается автоматически.
+
+                    Изменения сохраняются
+                    автоматически.
+
+                </div>
+
+
+                <a
+                    class="creator"
+                    href="https://t.me/shkeltinsh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Created by
+                    <strong>
+                        &nbsp;@shkeltinsh
+                    </strong>
+                </a>
+
+
+            </div>
+
+        `;
+
+    }
+
+
+    // =================================================
+    // PUBLIC API
+    // =================================================
+
+    window.LifeGameFinance = {
+
+        progress: progress,
+
+        page: page
+
     };
 
 
-    /*
-     * Сигнал в консоль.
-     * Позволяет быстро проверить,
-     * что файл действительно подключён.
-     */
+    // =================================================
+    // DEBUG
+    // =================================================
 
     console.log(
-        'LIFE GAME: finance.js loaded'
+        'LIFE GAME: Finance module loaded'
     );
 
+
 })();
-```
