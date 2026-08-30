@@ -21,6 +21,10 @@
 
     <style>
 
+        /* =========================================
+           LIFE GAME — PREMIUM BLACK
+        ========================================= */
+
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -28,29 +32,42 @@
 
 
         :root {
+
             --bg: #050505;
+            --bg-soft: #090909;
+
             --card: #101010;
+            --card-light: #151515;
+
             --border: #242424;
+            --border-light: #303030;
 
             --text: #f5f5f5;
-            --muted: #666666;
+            --text-soft: #a0a0a0;
+            --text-muted: #626262;
 
             --white: #ffffff;
 
             --radius-large: 24px;
+            --radius-medium: 18px;
+
         }
 
 
         html {
+
             margin: 0;
             padding: 0;
+
             min-height: 100%;
 
             background: var(--bg);
+
         }
 
 
         body {
+
             margin: 0;
             padding: 0;
 
@@ -59,13 +76,13 @@
             background:
                 radial-gradient(
                     circle at 50% -15%,
-                    rgba(255,255,255,.07),
+                    rgba(255,255,255,0.07),
                     transparent 38%
                 ),
                 linear-gradient(
                     180deg,
                     #080808 0%,
-                    #050505 50%,
+                    #050505 45%,
                     #030303 100%
                 );
 
@@ -83,7 +100,10 @@
 
             -webkit-font-smoothing: antialiased;
 
+            text-rendering: optimizeLegibility;
+
             overflow-x: hidden;
+
         }
 
 
@@ -94,7 +114,7 @@
 
         button,
         input {
-            font: inherit;
+            font-family: inherit;
         }
 
 
@@ -109,6 +129,7 @@
         ========================================= */
 
         .app {
+
             width: 100%;
             max-width: 520px;
 
@@ -120,6 +141,7 @@
                 24px
                 18px
                 120px;
+
         }
 
 
@@ -128,40 +150,38 @@
         ========================================= */
 
         .header {
+
             display: flex;
 
             align-items: center;
             justify-content: space-between;
 
             margin-bottom: 28px;
-        }
 
-
-        .eyebrow,
-        .label,
-        .section-label,
-        .page-eyebrow,
-        .editor-eyebrow {
-            color: #626262;
-
-            font-size: 9px;
-            font-weight: 700;
-
-            letter-spacing: 2.5px;
-
-            text-transform: uppercase;
         }
 
 
         .eyebrow {
+
             margin-bottom: 5px;
+
+            color: var(--text-muted);
+
+            font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
         }
 
 
         .header h1 {
+
             margin: 0;
 
-            color: #f5f5f5;
+            color: var(--text);
 
             font-size: 27px;
             line-height: 1;
@@ -169,10 +189,12 @@
             font-weight: 800;
 
             letter-spacing: -1.2px;
+
         }
 
 
         .avatar {
+
             width: 44px;
             height: 44px;
 
@@ -198,16 +220,18 @@
             font-weight: 700;
 
             box-shadow:
-                0 12px 30px rgba(0,0,0,.45),
-                inset 0 1px 0 rgba(255,255,255,.08);
+                0 12px 30px rgba(0,0,0,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+
         }
 
 
         /* =========================================
-           LEVEL CARD
+           LEVEL
         ========================================= */
 
         .level-card {
+
             position: relative;
 
             margin-bottom: 30px;
@@ -229,32 +253,14 @@
                 );
 
             box-shadow:
-                0 24px 60px rgba(0,0,0,.38),
-                inset 0 1px 0 rgba(255,255,255,.035);
-        }
+                0 24px 60px rgba(0,0,0,0.38),
+                inset 0 1px 0 rgba(255,255,255,0.035);
 
-
-        .level-card::before {
-            content: "";
-
-            position: absolute;
-
-            width: 180px;
-            height: 180px;
-
-            top: -130px;
-            right: -80px;
-
-            border-radius: 50%;
-
-            background:
-                rgba(255,255,255,.035);
-
-            filter: blur(20px);
         }
 
 
         .level-top {
+
             position: relative;
 
             display: flex;
@@ -263,20 +269,29 @@
             justify-content: space-between;
 
             z-index: 1;
+
         }
 
 
         .label {
+
             display: block;
 
             margin-bottom: 5px;
 
+            color: var(--text-muted);
+
             font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 2px;
+
         }
 
 
         .level-number {
-            color: #f5f5f5;
+
+            color: var(--text);
 
             font-size: 26px;
             line-height: 1;
@@ -284,22 +299,28 @@
             font-weight: 800;
 
             letter-spacing: -1px;
+
         }
 
 
         .xp-value {
+
             color: #8b8b8b;
 
             font-size: 11px;
             font-weight: 600;
+
+            letter-spacing: 0.5px;
+
         }
 
 
         .xp-bar {
+
             position: relative;
 
             width: 100%;
-            height: 5px;
+            height: 4px;
 
             margin-top: 19px;
 
@@ -308,10 +329,12 @@
             border-radius: 20px;
 
             background: #252525;
+
         }
 
 
         .xp-fill {
+
             width: 0%;
 
             height: 100%;
@@ -325,11 +348,9 @@
                     #ffffff
                 );
 
-            box-shadow:
-                0 0 12px rgba(255,255,255,.25);
-
             transition:
-                width .8s cubic-bezier(.2,.8,.2,1);
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
         }
 
 
@@ -343,25 +364,37 @@
 
 
         .section-label {
-            margin-bottom: 4px;
+
+            margin-bottom: 3px;
+
+            color: var(--text-muted);
+
+            font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 2.5px;
+
         }
 
 
         .overall-value {
+
             margin-bottom: 12px;
 
-            color: #f5f5f5;
+            color: var(--text);
 
             font-size: 58px;
-            line-height: .95;
+            line-height: 0.95;
 
             font-weight: 800;
 
             letter-spacing: -4px;
+
         }
 
 
         .overall-value span {
+
             margin-left: 2px;
 
             color: #777777;
@@ -369,10 +402,12 @@
             font-size: 27px;
 
             letter-spacing: -1px;
+
         }
 
 
         .overall-bar {
+
             width: 100%;
             height: 3px;
 
@@ -381,10 +416,12 @@
             border-radius: 20px;
 
             background: #1c1c1c;
+
         }
 
 
         .overall-fill {
+
             width: 0%;
 
             height: 100%;
@@ -394,10 +431,11 @@
             background: #eeeeee;
 
             box-shadow:
-                0 0 10px rgba(255,255,255,.18);
+                0 0 10px rgba(255,255,255,0.18);
 
             transition:
-                width .8s cubic-bezier(.2,.8,.2,1);
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
         }
 
 
@@ -406,15 +444,18 @@
         ========================================= */
 
         .categories {
+
             display: flex;
 
             flex-direction: column;
 
             gap: 13px;
+
         }
 
 
         .category-card {
+
             position: relative;
 
             padding: 20px;
@@ -432,24 +473,30 @@
                     #0b0b0b
                 );
 
+            cursor: pointer;
+
             box-shadow:
-                0 16px 40px rgba(0,0,0,.22),
-                inset 0 1px 0 rgba(255,255,255,.025);
+                0 16px 40px rgba(0,0,0,0.22),
+                inset 0 1px 0 rgba(255,255,255,0.025);
 
             transition:
-                transform .18s ease,
-                border-color .18s ease;
+                transform 0.18s ease,
+                border-color 0.18s ease;
+
         }
 
 
         .category-card:active {
-            transform: scale(.985);
+
+            transform: scale(0.985);
 
             border-color: #3a3a3a;
+
         }
 
 
         .category-header {
+
             position: relative;
 
             display: flex;
@@ -458,19 +505,25 @@
             justify-content: space-between;
 
             margin-bottom: 18px;
+
+            z-index: 1;
+
         }
 
 
         .category-title {
+
             display: flex;
 
             align-items: center;
 
             gap: 12px;
+
         }
 
 
         .category-icon {
+
             width: 43px;
             height: 43px;
 
@@ -493,10 +546,12 @@
                 );
 
             font-size: 19px;
+
         }
 
 
         .category-name strong {
+
             display: block;
 
             color: #eeeeee;
@@ -507,21 +562,27 @@
             font-weight: 750;
 
             letter-spacing: 1.1px;
+
         }
 
 
         .category-name span {
+
             display: block;
 
             margin-top: 6px;
 
-            color: #626262;
+            color: var(--text-muted);
 
             font-size: 10px;
+
+            font-weight: 500;
+
         }
 
 
         .category-percent {
+
             color: #eeeeee;
 
             font-size: 20px;
@@ -529,11 +590,13 @@
 
             font-weight: 800;
 
-            letter-spacing: -.7px;
+            letter-spacing: -0.7px;
+
         }
 
 
         .progress-bar {
+
             width: 100%;
             height: 4px;
 
@@ -542,10 +605,12 @@
             border-radius: 20px;
 
             background: #222222;
+
         }
 
 
         .progress-fill {
+
             width: 0%;
 
             height: 100%;
@@ -559,11 +624,9 @@
                     #f5f5f5
                 );
 
-            box-shadow:
-                0 0 12px rgba(255,255,255,.15);
-
             transition:
-                width .8s cubic-bezier(.2,.8,.2,1);
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
         }
 
 
@@ -572,6 +635,7 @@
         ========================================= */
 
         .quest-button {
+
             width: 100%;
             height: 58px;
 
@@ -601,22 +665,26 @@
             letter-spacing: 2px;
 
             box-shadow:
-                0 18px 40px rgba(0,0,0,.35);
+                0 18px 40px rgba(0,0,0,0.35);
+
         }
 
 
         .quest-icon {
+
             margin-right: 8px;
 
             font-size: 19px;
+
         }
 
 
         /* =========================================
-           NAVIGATION
+           BOTTOM NAV
         ========================================= */
 
         .bottom-nav {
+
             position: fixed;
 
             left: 50%;
@@ -643,17 +711,20 @@
             border-radius: 23px;
 
             background:
-                rgba(14,14,14,.92);
+                rgba(14,14,14,0.92);
 
             backdrop-filter: blur(24px);
+
             -webkit-backdrop-filter: blur(24px);
 
             box-shadow:
-                0 20px 50px rgba(0,0,0,.65);
+                0 20px 50px rgba(0,0,0,0.65);
+
         }
 
 
         .nav-item {
+
             min-width: 65px;
             height: 56px;
 
@@ -671,26 +742,35 @@
             background: transparent;
 
             color: #555555;
+
         }
 
 
         .nav-item.active {
+
             color: #ffffff;
 
             background:
-                rgba(255,255,255,.055);
+                rgba(255,255,255,0.055);
+
         }
 
 
         .nav-icon {
+
             font-size: 17px;
+
+            line-height: 1;
+
         }
 
 
         .nav-label {
+
             font-size: 8px;
 
             font-weight: 500;
+
         }
 
 
@@ -699,6 +779,7 @@
         ========================================= */
 
         .category-page {
+
             position: fixed;
 
             inset: 0;
@@ -715,7 +796,7 @@
             background:
                 radial-gradient(
                     circle at 50% -10%,
-                    rgba(255,255,255,.07),
+                    rgba(255,255,255,0.07),
                     transparent 38%
                 ),
                 linear-gradient(
@@ -726,7 +807,8 @@
                 );
 
             animation:
-                pageIn .25s ease;
+                pageIn 0.25s ease;
+
         }
 
 
@@ -746,6 +828,7 @@
 
 
         .category-page-header {
+
             display: flex;
 
             align-items: center;
@@ -753,10 +836,12 @@
             gap: 14px;
 
             margin-bottom: 24px;
+
         }
 
 
         .back-button {
+
             width: 44px;
             height: 44px;
 
@@ -776,29 +861,44 @@
             color: #ffffff;
 
             font-size: 20px;
+
         }
 
 
         .page-eyebrow {
+
             margin-bottom: 5px;
+
+            color: #5f5f5f;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 2.5px;
+
         }
 
 
         .category-page h2 {
+
             margin: 0;
 
             color: #f5f5f5;
 
             font-size: 25px;
+
             line-height: 1;
 
             font-weight: 800;
 
-            letter-spacing: -.8px;
+            letter-spacing: -0.8px;
+
         }
 
 
         .category-summary {
+
             margin-bottom: 18px;
 
             padding: 22px;
@@ -815,25 +915,30 @@
                 );
 
             box-shadow:
-                0 20px 50px rgba(0,0,0,.35);
+                0 20px 50px rgba(0,0,0,0.35);
+
         }
 
 
         .summary-value {
-            margin: 5px 0 15px;
+
+            margin-bottom: 15px;
 
             color: #f5f5f5;
 
             font-size: 46px;
+
             line-height: 1;
 
             font-weight: 800;
 
             letter-spacing: -3px;
+
         }
 
 
         .summary-bar {
+
             width: 100%;
             height: 4px;
 
@@ -842,10 +947,12 @@
             border-radius: 20px;
 
             background: #222222;
+
         }
 
 
         .summary-fill {
+
             height: 100%;
 
             border-radius: inherit;
@@ -858,7 +965,8 @@
                 );
 
             transition:
-                width .5s ease;
+                width 0.5s ease;
+
         }
 
 
@@ -867,15 +975,18 @@
         ========================================= */
 
         .metrics-list {
+
             display: flex;
 
             flex-direction: column;
 
             gap: 12px;
+
         }
 
 
         .metric-card {
+
             padding: 18px;
 
             border: 1px solid #222222;
@@ -890,11 +1001,13 @@
                 );
 
             box-shadow:
-                0 14px 35px rgba(0,0,0,.22);
+                0 14px 35px rgba(0,0,0,0.22);
+
         }
 
 
         .metric-top {
+
             display: flex;
 
             align-items: center;
@@ -903,10 +1016,12 @@
             gap: 12px;
 
             margin-bottom: 15px;
+
         }
 
 
         .metric-title {
+
             display: flex;
 
             align-items: center;
@@ -914,10 +1029,12 @@
             gap: 12px;
 
             min-width: 0;
+
         }
 
 
         .metric-icon {
+
             width: 42px;
             height: 42px;
 
@@ -935,10 +1052,12 @@
             background: #171717;
 
             font-size: 18px;
+
         }
 
 
         .metric-title strong {
+
             display: block;
 
             color: #eeeeee;
@@ -948,10 +1067,12 @@
             line-height: 1.2;
 
             font-weight: 700;
+
         }
 
 
         .metric-title span {
+
             display: block;
 
             margin-top: 5px;
@@ -959,10 +1080,14 @@
             color: #666666;
 
             font-size: 9px;
+
+            line-height: 1.2;
+
         }
 
 
         .metric-percent {
+
             color: #eeeeee;
 
             font-size: 19px;
@@ -970,10 +1095,12 @@
             font-weight: 800;
 
             white-space: nowrap;
+
         }
 
 
         .metric-progress {
+
             width: 100%;
             height: 3px;
 
@@ -984,10 +1111,12 @@
             border-radius: 20px;
 
             background: #202020;
+
         }
 
 
         .metric-progress-fill {
+
             height: 100%;
 
             border-radius: inherit;
@@ -1000,11 +1129,13 @@
                 );
 
             transition:
-                width .5s ease;
+                width 0.5s ease;
+
         }
 
 
         .metric-edit {
+
             width: 100%;
             height: 38px;
 
@@ -1021,6 +1152,293 @@
             font-weight: 700;
 
             letter-spacing: 1.5px;
+
+        }
+
+
+        /* =========================================
+           EXPENSES SUBBLOCK
+        ========================================= */
+
+        .expenses-subblock {
+
+            margin-top: 15px;
+
+            padding-top: 16px;
+
+            border-top: 1px solid #222222;
+
+        }
+
+
+        .expenses-subblock-header {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .expenses-subblock-title {
+
+            color: #777777;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.8px;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .expenses-subblock-total {
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+        }
+
+
+        .expense-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+
+        }
+
+
+        .expense-row {
+
+            min-height: 48px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 10px;
+
+            padding:
+                8px
+                10px
+                8px
+                12px;
+
+            border: 1px solid #1f1f1f;
+
+            border-radius: 13px;
+
+            background: #0c0c0c;
+
+        }
+
+
+        .expense-row-info {
+
+            min-width: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 3px;
+
+        }
+
+
+        .expense-row-name {
+
+            overflow: hidden;
+
+            color: #dcdcdc;
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+
+        }
+
+
+        .expense-row-amount {
+
+            color: #888888;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+        }
+
+
+        .expense-row-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .expense-action {
+
+            width: 31px;
+            height: 31px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #262626;
+
+            border-radius: 9px;
+
+            background: #141414;
+
+            color: #777777;
+
+            font-size: 14px;
+
+        }
+
+
+        .expense-action.delete {
+
+            color: #666666;
+
+        }
+
+
+        .expense-empty {
+
+            padding: 16px 10px;
+
+            border: 1px dashed #292929;
+
+            border-radius: 13px;
+
+            color: #555555;
+
+            font-size: 10px;
+
+            line-height: 1.5;
+
+            text-align: center;
+
+        }
+
+
+        .add-expense-button {
+
+            width: 100%;
+            height: 42px;
+
+            margin-top: 10px;
+
+            border: 1px solid #292929;
+
+            border-radius: 12px;
+
+            background: #111111;
+
+            color: #999999;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.4px;
+
+        }
+
+
+        .expenses-ratio {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-top: 10px;
+
+            padding: 11px 12px;
+
+            border-radius: 12px;
+
+            background: #141414;
+
+        }
+
+
+        .expenses-ratio span {
+
+            color: #666666;
+
+            font-size: 9px;
+
+            font-weight: 600;
+
+        }
+
+
+        .expenses-ratio strong {
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =========================================
+           EXPENSES PAGE
+        ========================================= */
+
+        .expenses-page .category-summary {
+
+            margin-bottom: 14px;
+
+        }
+
+
+        .expenses-income-info {
+
+            margin-top: 11px;
+
+            color: #666666;
+
+            font-size: 10px;
+
+            font-weight: 600;
+
         }
 
 
@@ -1029,6 +1447,7 @@
         ========================================= */
 
         .editor-overlay {
+
             position: fixed;
 
             inset: 0;
@@ -1043,13 +1462,15 @@
             padding: 14px;
 
             background:
-                rgba(0,0,0,.72);
+                rgba(0,0,0,0.72);
 
             backdrop-filter: blur(12px);
+
             -webkit-backdrop-filter: blur(12px);
 
             animation:
-                overlayIn .2s ease;
+                overlayIn 0.2s ease;
+
         }
 
 
@@ -1067,6 +1488,7 @@
 
 
         .editor {
+
             position: relative;
 
             width: 100%;
@@ -1086,10 +1508,11 @@
                 );
 
             box-shadow:
-                0 -10px 60px rgba(0,0,0,.55);
+                0 -10px 60px rgba(0,0,0,0.55);
 
             animation:
-                editorIn .25s cubic-bezier(.2,.8,.2,1);
+                editorIn 0.25s cubic-bezier(.2,.8,.2,1);
+
         }
 
 
@@ -1107,6 +1530,7 @@
 
 
         .editor-close {
+
             position: absolute;
 
             top: 15px;
@@ -1114,6 +1538,11 @@
 
             width: 34px;
             height: 34px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
 
             border: 1px solid #292929;
 
@@ -1124,10 +1553,12 @@
             color: #777777;
 
             font-size: 20px;
+
         }
 
 
         .editor-icon {
+
             width: 48px;
             height: 48px;
 
@@ -1145,15 +1576,27 @@
             background: #191919;
 
             font-size: 21px;
+
         }
 
 
         .editor-eyebrow {
+
             margin-bottom: 5px;
+
+            color: #606060;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
         }
 
 
         .editor h3 {
+
             margin: 0 0 23px;
 
             padding-right: 40px;
@@ -1165,10 +1608,12 @@
             line-height: 1.1;
 
             font-weight: 800;
+
         }
 
 
         .editor label {
+
             display: block;
 
             margin-bottom: 7px;
@@ -1178,10 +1623,12 @@
             font-size: 9px;
 
             font-weight: 600;
+
         }
 
 
         .editor input {
+
             width: 100%;
             height: 50px;
 
@@ -1201,20 +1648,28 @@
 
             color: #f5f5f5;
 
+            font-family: inherit;
+
             font-size: 16px;
 
             font-weight: 600;
+
+            -webkit-appearance: none;
+
         }
 
 
         .editor input:focus {
+
             border-color: #555555;
 
             background: #111111;
+
         }
 
 
         .editor-preview {
+
             display: flex;
 
             align-items: center;
@@ -1229,28 +1684,34 @@
             border-radius: 14px;
 
             background: #0d0d0d;
+
         }
 
 
         .editor-preview span {
+
             color: #666666;
 
             font-size: 9px;
 
             font-weight: 600;
+
         }
 
 
         .editor-preview strong {
+
             color: #eeeeee;
 
             font-size: 16px;
 
             font-weight: 800;
+
         }
 
 
         .save-button {
+
             width: 100%;
             height: 52px;
 
@@ -1270,6 +1731,7 @@
             font-weight: 800;
 
             letter-spacing: 2px;
+
         }
 
 
@@ -1278,6 +1740,7 @@
         ========================================= */
 
         .life-message {
+
             position: fixed;
 
             left: 50%;
@@ -1296,7 +1759,7 @@
             border-radius: 14px;
 
             background:
-                rgba(20,20,20,.96);
+                rgba(20,20,20,0.95);
 
             color: #ffffff;
 
@@ -1306,78 +1769,27 @@
 
             white-space: nowrap;
 
+            box-shadow:
+                0 15px 40px rgba(0,0,0,0.5);
+
             opacity: 0;
 
             pointer-events: none;
 
             transition:
-                opacity .2s ease,
-                transform .2s ease;
+                opacity 0.2s ease,
+                transform 0.2s ease;
+
         }
 
 
         .life-message.show {
+
             opacity: 1;
 
             transform:
                 translate(-50%, 0);
-        }
 
-
-        /* =========================================
-           LEVEL UP
-        ========================================= */
-
-        .level-up {
-            text-align: center;
-        }
-
-
-        .level-up .editor-icon {
-            margin-left: auto;
-            margin-right: auto;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    #ffffff,
-                    #999999
-                );
-
-            color: #050505;
-
-            font-size: 24px;
-        }
-
-
-        .level-up h3 {
-            margin-bottom: 10px;
-        }
-
-
-        .level-up p {
-            margin: 0 0 20px;
-
-            color: #777777;
-
-            font-size: 13px;
-
-            line-height: 1.5;
-        }
-
-
-        .new-level {
-            display: block;
-
-            margin-top: 7px;
-
-            color: #ffffff;
-
-            font-size: 38px;
-
-            font-weight: 900;
-
-            letter-spacing: -2px;
         }
 
 
@@ -1388,55 +1800,74 @@
         @media (max-width: 360px) {
 
             .app {
+
                 padding-left: 14px;
                 padding-right: 14px;
+
             }
 
 
             .header h1 {
+
                 font-size: 24px;
+
             }
 
 
             .overall-value {
+
                 font-size: 51px;
+
             }
 
 
             .category-card {
+
                 padding: 17px;
+
             }
 
 
             .category-icon {
+
                 width: 40px;
                 height: 40px;
+
             }
 
 
             .category-name strong {
+
                 font-size: 12px;
+
             }
 
 
             .category-percent {
+
                 font-size: 18px;
-            }
 
-
-            .category-page {
-                padding-left: 14px;
-                padding-right: 14px;
-            }
-
-
-            .category-page h2 {
-                font-size: 22px;
             }
 
 
             .metric-card {
+
                 padding: 16px;
+
+            }
+
+
+            .metric-title strong {
+
+                font-size: 11px;
+
+            }
+
+
+            .metric-title span {
+
+                font-size: 8px;
+
             }
 
         }
@@ -1445,12 +1876,16 @@
         @media (min-width: 700px) {
 
             .app {
+
                 padding-top: 45px;
+
             }
 
 
             .category-page {
-                padding-top: 45px;
+
+                padding-top: 35px;
+
             }
 
         }
@@ -1466,7 +1901,9 @@
 <div class="app">
 
 
-    <!-- HEADER -->
+    <!-- =====================================
+         HEADER
+    ====================================== -->
 
     <header class="header">
 
@@ -1490,7 +1927,9 @@
     </header>
 
 
-    <!-- LEVEL -->
+    <!-- =====================================
+         LEVEL
+    ====================================== -->
 
     <section class="level-card">
 
@@ -1502,21 +1941,15 @@
                     CURRENT LEVEL
                 </span>
 
-                <div
-                    class="level-number"
-                    id="levelNumber"
-                >
+                <div class="level-number">
                     LVL 1
                 </div>
 
             </div>
 
 
-            <div
-                class="xp-value"
-                id="xpValue"
-            >
-                0 / 100 XP
+            <div class="xp-value">
+                0 XP
             </div>
 
         </div>
@@ -1526,7 +1959,7 @@
 
             <div
                 class="xp-fill"
-                id="xpFill"
+                style="width:0%"
             ></div>
 
         </div>
@@ -1534,7 +1967,9 @@
     </section>
 
 
-    <!-- LIFE PROGRESS -->
+    <!-- =====================================
+         LIFE PROGRESS
+    ====================================== -->
 
     <section class="overall-section">
 
@@ -1543,10 +1978,7 @@
         </div>
 
 
-        <div
-            class="overall-value"
-            id="overallValue"
-        >
+        <div class="overall-value">
             0<span>%</span>
         </div>
 
@@ -1555,7 +1987,7 @@
 
             <div
                 class="overall-fill"
-                id="overallFill"
+                style="width:0%"
             ></div>
 
         </div>
@@ -1563,10 +1995,14 @@
     </section>
 
 
-    <!-- CATEGORIES -->
+    <!-- =====================================
+         CATEGORIES
+    ====================================== -->
 
     <main class="categories">
 
+
+        <!-- FINANCE -->
 
         <article
             class="category-card"
@@ -1580,6 +2016,7 @@
                     <div class="category-icon">
                         💰
                     </div>
+
 
                     <div class="category-name">
 
@@ -1605,12 +2042,17 @@
 
             <div class="progress-bar">
 
-                <div class="progress-fill"></div>
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
 
             </div>
 
         </article>
 
+
+        <!-- HEALTH -->
 
         <article
             class="category-card"
@@ -1624,6 +2066,7 @@
                     <div class="category-icon">
                         ❤️
                     </div>
+
 
                     <div class="category-name">
 
@@ -1649,12 +2092,17 @@
 
             <div class="progress-bar">
 
-                <div class="progress-fill"></div>
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
 
             </div>
 
         </article>
 
+
+        <!-- DEVELOPMENT -->
 
         <article
             class="category-card"
@@ -1668,6 +2116,7 @@
                     <div class="category-icon">
                         🧠
                     </div>
+
 
                     <div class="category-name">
 
@@ -1693,7 +2142,10 @@
 
             <div class="progress-bar">
 
-                <div class="progress-fill"></div>
+                <div
+                    class="progress-fill"
+                    style="width:0%"
+                ></div>
 
             </div>
 
@@ -1702,7 +2154,9 @@
     </main>
 
 
-    <!-- DAILY QUEST -->
+    <!-- =====================================
+         DAILY QUEST
+    ====================================== -->
 
     <button
         class="quest-button"
@@ -1719,14 +2173,16 @@
     </button>
 
 
-    <!-- NAVIGATION -->
+    <!-- =====================================
+         NAVIGATION
+    ====================================== -->
 
     <nav class="bottom-nav">
 
         <button
             class="nav-item active"
-            data-section="home"
             type="button"
+            data-section="home"
         >
 
             <span class="nav-icon">
@@ -1742,8 +2198,8 @@
 
         <button
             class="nav-item"
-            data-section="finance"
             type="button"
+            data-section="finance"
         >
 
             <span class="nav-icon">
@@ -1759,8 +2215,8 @@
 
         <button
             class="nav-item"
-            data-section="health"
             type="button"
+            data-section="health"
         >
 
             <span class="nav-icon">
@@ -1776,8 +2232,8 @@
 
         <button
             class="nav-item"
-            data-section="development"
             type="button"
+            data-section="development"
         >
 
             <span class="nav-icon">
@@ -1807,10 +2263,11 @@
     ========================================= */
 
     const STORAGE_KEY =
-        "life_game_v3";
-
-    const OLD_STORAGE_KEY =
         "life_game_v2";
+
+
+    const EXPENSES_KEY =
+        "life_game_expenses_v1";
 
 
     /* =========================================
@@ -1854,7 +2311,7 @@
                 name: "Обязательные расходы",
                 unit: "₽",
                 current: 0,
-                target: 50000
+                target: 0
             },
 
             {
@@ -1944,26 +2401,16 @@
     };
 
 
-    /* =========================================
-       GAME DATA
-    ========================================= */
-
-    let game = {
-
-        xp: 0,
-
-        level: 1,
-
-        rewardedProgress: {}
-
-    };
+    let data =
+        loadData();
 
 
-    let data;
+    let expenses =
+        loadExpenses();
 
 
     /* =========================================
-       HELPERS
+       CLONE
     ========================================= */
 
     function clone(object) {
@@ -1974,6 +2421,231 @@
 
     }
 
+
+    /* =========================================
+       LOAD DATA
+    ========================================= */
+
+    function loadData() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+
+                return mergeData(parsed);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "LIFE GAME storage error:",
+                error
+            );
+
+        }
+
+
+        return clone(defaultData);
+
+    }
+
+
+    /* =========================================
+       MERGE DATA
+    ========================================= */
+
+    function mergeData(saved) {
+
+        const result =
+            clone(defaultData);
+
+
+        Object.keys(result).forEach(
+            function(category) {
+
+                if (
+                    Array.isArray(
+                        saved[category]
+                    )
+                ) {
+
+                    saved[category].forEach(
+                        function(savedItem) {
+
+                            const item =
+                                result[category].find(
+                                    function(element) {
+
+                                        return (
+                                            element.id ===
+                                            savedItem.id
+                                        );
+
+                                    }
+                                );
+
+
+                            if (item) {
+
+                                item.current =
+                                    Number(
+                                        savedItem.current
+                                    ) || 0;
+
+
+                                item.target =
+                                    Number(
+                                        savedItem.target
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        return result;
+
+    }
+
+
+    /* =========================================
+       SAVE DATA
+    ========================================= */
+
+    function saveData() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(data)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Cannot save data:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       LOAD EXPENSES
+    ========================================= */
+
+    function loadExpenses() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    EXPENSES_KEY
+                );
+
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+
+                if (Array.isArray(parsed)) {
+
+                    return parsed.map(
+                        function(expense) {
+
+                            return {
+
+                                id:
+                                    String(
+                                        expense.id ||
+                                        Date.now()
+                                    ),
+
+                                name:
+                                    String(
+                                        expense.name ||
+                                        ""
+                                    ),
+
+                                amount:
+                                    Number(
+                                        expense.amount
+                                    ) || 0
+
+                            };
+
+                        }
+                    );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Expenses storage error:",
+                error
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /* =========================================
+       SAVE EXPENSES
+    ========================================= */
+
+    function saveExpenses() {
+
+        try {
+
+            localStorage.setItem(
+                EXPENSES_KEY,
+                JSON.stringify(expenses)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Cannot save expenses:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       CALCULATIONS
+    ========================================= */
 
     function progress(
         current,
@@ -1988,7 +2660,9 @@
 
 
         if (t <= 0) {
+
             return 0;
+
         }
 
 
@@ -2005,12 +2679,65 @@
     }
 
 
-    function formatNumber(value) {
+    function getIncome() {
 
-        return new Intl.NumberFormat(
-            "ru-RU"
-        ).format(
-            Number(value) || 0
+        const item =
+            data.finance.find(
+                function(element) {
+
+                    return element.id === "income";
+
+                }
+            );
+
+
+        return Number(
+            item?.current
+        ) || 0;
+
+    }
+
+
+    function getExpensesTotal() {
+
+        return expenses.reduce(
+            function(total, expense) {
+
+                return (
+                    total +
+                    (
+                        Number(
+                            expense.amount
+                        ) || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+    }
+
+
+    function getExpensesPercent() {
+
+        const income =
+            getIncome();
+
+
+        const total =
+            getExpensesTotal();
+
+
+        if (income <= 0) {
+
+            return 0;
+
+        }
+
+
+        return Math.round(
+            total / income * 100
         );
 
     }
@@ -2028,16 +2755,38 @@
             data[category];
 
 
-        if (
-            !items ||
-            !items.length
-        ) {
+        if (!items || !items.length) {
+
             return 0;
+
+        }
+
+
+        /*
+         * Обязательные расходы НЕ являются
+         * целью. Они не должны увеличивать
+         * прогресс просто за счёт большой суммы.
+         */
+
+        const progressItems =
+            items.filter(
+                function(item) {
+
+                    return item.id !== "expenses";
+
+                }
+            );
+
+
+        if (!progressItems.length) {
+
+            return 0;
+
         }
 
 
         const total =
-            items.reduce(
+            progressItems.reduce(
                 function(sum, item) {
 
                     return (
@@ -2054,7 +2803,7 @@
 
 
         return Math.round(
-            total / items.length
+            total / progressItems.length
         );
 
     }
@@ -2076,591 +2825,89 @@
     }
 
 
+    function formatNumber(value) {
+
+        return new Intl.NumberFormat(
+            "ru-RU"
+        ).format(
+            Number(value) || 0
+        );
+
+    }
+
+
     /* =========================================
-       LEVEL SYSTEM
+       ESCAPE
     ========================================= */
 
-    function xpRequiredForLevel(
-        level
-    ) {
+    function escapeHTML(value) {
 
-        if (level <= 1) {
-            return 0;
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =========================================
+       UPDATE EXPENSE METRIC
+    ========================================= */
+
+    function updateExpenseMetric() {
+
+        const metric =
+            data.finance.find(
+                function(item) {
+
+                    return item.id === "expenses";
+
+                }
+            );
+
+
+        if (!metric) {
+
+            return;
+
         }
+
+
+        metric.current =
+            getExpensesTotal();
 
 
         /*
-            Level 2 = 100
-            Level 3 = 250
-            Level 4 = 450
-            Level 5 = 700
-            etc.
-        */
+         * target больше не используется
+         * для расчёта обязательных расходов.
+         */
 
-        let total = 0;
+        metric.target = 0;
 
 
-        for (
-            let i = 1;
-            i < level;
-            i++
-        ) {
-
-            total +=
-                100 +
-                ((i - 1) * 50);
-
-        }
-
-
-        return total;
-
-    }
-
-
-    function getLevelFromXP(
-        xp
-    ) {
-
-        let level = 1;
-
-
-        while (
-            xp >=
-            xpRequiredForLevel(
-                level + 1
-            )
-        ) {
-
-            level++;
-
-        }
-
-
-        return level;
-
-    }
-
-
-    function getLevelStartXP(
-        level
-    ) {
-
-        return xpRequiredForLevel(
-            level
-        );
-
-    }
-
-
-    function getNextLevelXP(
-        level
-    ) {
-
-        return xpRequiredForLevel(
-            level + 1
-        );
-
-    }
-
-
-    function updateGameLevel(
-        showLevelUp
-    ) {
-
-        const previousLevel =
-            game.level;
-
-
-        game.level =
-            getLevelFromXP(
-                game.xp
-            );
-
-
-        if (
-            showLevelUp &&
-            game.level >
-            previousLevel
-        ) {
-
-            showLevelUpModal(
-                game.level
-            );
-
-        }
-
-    }
-
-
-    function updateXPUI() {
-
-        const level =
-            game.level;
-
-
-        const startXP =
-            getLevelStartXP(
-                level
-            );
-
-
-        const nextXP =
-            getNextLevelXP(
-                level
-            );
-
-
-        const currentLevelXP =
-            game.xp -
-            startXP;
-
-
-        const requiredLevelXP =
-            nextXP -
-            startXP;
-
-
-        const percentage =
-            Math.min(
-                100,
-                Math.max(
-                    0,
-                    Math.round(
-                        currentLevelXP /
-                        requiredLevelXP *
-                        100
-                    )
-                )
-            );
-
-
-        const levelElement =
-            document.getElementById(
-                "levelNumber"
-            );
-
-
-        const xpElement =
-            document.getElementById(
-                "xpValue"
-            );
-
-
-        const fill =
-            document.getElementById(
-                "xpFill"
-            );
-
-
-        if (levelElement) {
-
-            levelElement.textContent =
-                "LVL " + level;
-
-        }
-
-
-        if (xpElement) {
-
-            xpElement.textContent =
-                formatNumber(
-                    currentLevelXP
-                ) +
-                " / " +
-                formatNumber(
-                    requiredLevelXP
-                ) +
-                " XP";
-
-        }
-
-
-        if (fill) {
-
-            fill.style.width =
-                percentage + "%";
-
-        }
-
-    }
-
-
-    /* =========================================
-       XP REWARDS
-    ========================================= */
-
-    function getRewardKey(
-        category,
-        item
-    ) {
-
-        return (
-            category +
-            "_" +
-            item.id
-        );
-
-    }
-
-
-    function calculateXPForProgress(
-        category,
-        item
-    ) {
-
-        const key =
-            getRewardKey(
-                category,
-                item
-            );
-
-
-        const currentProgress =
-            progress(
-                item.current,
-                item.target
-            );
-
-
-        const rewarded =
-            Number(
-                game.rewardedProgress[key]
-            ) || 0;
-
-
-        const difference =
-            currentProgress -
-            rewarded;
-
-
-        if (difference <= 0) {
-
-            return 0;
-
-        }
-
-
-        return difference * 2;
-
-    }
-
-
-    function awardXPForChanges(
-        previousData
-    ) {
-
-        let earnedXP = 0;
-
-
-        Object.keys(data).forEach(
-            function(category) {
-
-                data[category].forEach(
-                    function(item) {
-
-                        const oldItem =
-                            previousData[
-                                category
-                            ].find(
-                                function(element) {
-
-                                    return (
-                                        element.id ===
-                                        item.id
-                                    );
-
-                                }
-                            );
-
-
-                        const currentProgress =
-                            progress(
-                                item.current,
-                                item.target
-                            );
-
-
-                        const key =
-                            getRewardKey(
-                                category,
-                                item
-                            );
-
-
-                        const previousRewarded =
-                            Number(
-                                game.rewardedProgress[key]
-                            ) || 0;
-
-
-                        let oldProgress =
-                            oldItem
-                                ? progress(
-                                    oldItem.current,
-                                    oldItem.target
-                                )
-                                : 0;
-
-
-                        /*
-                            Reward only for
-                            progress that has
-                            actually increased.
-                        */
-
-                        const effectiveOld =
-                            Math.max(
-                                oldProgress,
-                                previousRewarded
-                            );
-
-
-                        if (
-                            currentProgress >
-                            effectiveOld
-                        ) {
-
-                            const difference =
-                                currentProgress -
-                                effectiveOld;
-
-
-                            const earned =
-                                difference * 2;
-
-
-                            earnedXP +=
-                                earned;
-
-
-                            game.rewardedProgress[key] =
-                                currentProgress;
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-
-        if (earnedXP > 0) {
-
-            game.xp +=
-                earnedXP;
-
-            updateGameLevel(true);
-
-            showToast(
-                "+" +
-                earnedXP +
-                " XP"
-            );
-
-        }
-
-
-        updateXPUI();
-
-    }
-
-
-    /* =========================================
-       STORAGE
-    ========================================= */
-
-    function loadApplication() {
-
-        data =
-            clone(defaultData);
-
-
-        try {
-
-            let saved =
-                localStorage.getItem(
-                    STORAGE_KEY
-                );
-
-
-            /*
-                If v3 doesn't exist,
-                import existing v2 data.
-            */
-
-            if (!saved) {
-
-                saved =
-                    localStorage.getItem(
-                        OLD_STORAGE_KEY
-                    );
-
-            }
-
-
-            if (saved) {
-
-                const parsed =
-                    JSON.parse(
-                        saved
-                    );
-
-
-                if (
-                    parsed.data
-                ) {
-
-                    mergeSavedData(
-                        parsed.data
-                    );
-
-                } else {
-
-                    /*
-                        Old v2 format.
-                    */
-
-                    mergeSavedData(
-                        parsed
-                    );
-
-                }
-
-            }
-
-
-            const gameSaved =
-                localStorage.getItem(
-                    STORAGE_KEY +
-                    "_game"
-                );
-
-
-            if (gameSaved) {
-
-                const parsedGame =
-                    JSON.parse(
-                        gameSaved
-                    );
-
-
-                game.xp =
-                    Number(
-                        parsedGame.xp
-                    ) || 0;
-
-
-                game.rewardedProgress =
-                    parsedGame.rewardedProgress
-                    || {};
-
-            }
-
-
-            game.level =
-                getLevelFromXP(
-                    game.xp
-                );
-
-        } catch (error) {
-
-            console.error(
-                "Load error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    function mergeSavedData(
-        saved
-    ) {
-
-        if (!saved) {
-            return;
-        }
-
-
-        Object.keys(data).forEach(
-            function(category) {
-
-                if (
-                    !Array.isArray(
-                        saved[category]
-                    )
-                ) {
-                    return;
-                }
-
-
-                saved[category].forEach(
-                    function(savedItem) {
-
-                        const item =
-                            data[category].find(
-                                function(element) {
-
-                                    return (
-                                        element.id ===
-                                        savedItem.id
-                                    );
-
-                                }
-                            );
-
-
-                        if (item) {
-
-                            item.current =
-                                Number(
-                                    savedItem.current
-                                ) || 0;
-
-
-                            item.target =
-                                Number(
-                                    savedItem.target
-                                ) || 0;
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-
-    function saveApplication() {
-
-        try {
-
-            localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(data)
-            );
-
-
-            localStorage.setItem(
-                STORAGE_KEY +
-                "_game",
-                JSON.stringify(game)
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Save error:",
-                error
-            );
-
-        }
+        saveData();
 
     }
 
@@ -2676,14 +2923,14 @@
 
 
         const overallValue =
-            document.getElementById(
-                "overallValue"
+            document.querySelector(
+                ".overall-value"
             );
 
 
         const overallFill =
-            document.getElementById(
-                "overallFill"
+            document.querySelector(
+                ".overall-fill"
             );
 
 
@@ -2751,9 +2998,6 @@
                 }
             );
 
-
-        updateXPUI();
-
     }
 
 
@@ -2782,6 +3026,11 @@
                                 this.dataset.section;
 
 
+                            setActiveNav(
+                                section
+                            );
+
+
                             if (
                                 section ===
                                 "home"
@@ -2789,17 +3038,11 @@
 
                                 closeCategory();
 
-                                setActiveNav(
-                                    "home"
-                                );
+                                updateHome();
 
                             } else {
 
                                 openCategory(
-                                    section
-                                );
-
-                                setActiveNav(
                                     section
                                 );
 
@@ -2824,11 +3067,6 @@
                         function() {
 
                             openCategory(
-                                this.dataset.category
-                            );
-
-
-                            setActiveNav(
                                 this.dataset.category
                             );
 
@@ -2872,12 +3110,14 @@
         category
     ) {
 
+        if (!data[category]) {
+
+            return;
+
+        }
+
+
         closeCategory();
-
-
-        document.body.classList.add(
-            "page-open"
-        );
 
 
         const titles = {
@@ -2904,13 +3144,152 @@
             "category-page";
 
 
+        if (category === "finance") {
+
+            page.innerHTML =
+                renderFinancePage();
+
+        } else {
+
+            const percent =
+                categoryProgress(
+                    category
+                );
+
+
+            page.innerHTML = `
+
+                <div class="category-page-header">
+
+                    <button
+                        class="back-button"
+                        type="button"
+                    >
+                        ←
+                    </button>
+
+                    <div>
+
+                        <div class="page-eyebrow">
+                            LIFE GAME
+                        </div>
+
+                        <h2>
+                            ${titles[category]}
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="category-summary">
+
+                    <div class="section-label">
+                        CATEGORY PROGRESS
+                    </div>
+
+                    <div class="summary-value">
+                        ${percent}%
+                    </div>
+
+                    <div class="summary-bar">
+
+                        <div
+                            class="summary-fill"
+                            style="width:${percent}%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metrics-list">
+
+                    ${data[category]
+                        .map(
+                            function(item) {
+
+                                return renderMetric(
+                                    item,
+                                    category
+                                );
+
+                            }
+                        )
+                        .join("")}
+
+                </div>
+
+            `;
+
+        }
+
+
+        document.body.appendChild(
+            page
+        );
+
+
+        document.body.classList.add(
+            "page-open"
+        );
+
+
+        bindCategoryPage(
+            page,
+            category
+        );
+
+    }
+
+
+    /* =========================================
+       FINANCE PAGE
+    ========================================= */
+
+    function renderFinancePage() {
+
         const percent =
             categoryProgress(
-                category
+                "finance"
             );
 
 
-        page.innerHTML = `
+        const income =
+            getIncome();
+
+
+        const totalExpenses =
+            getExpensesTotal();
+
+
+        const expensesPercent =
+            getExpensesPercent();
+
+
+        const regularMetrics =
+            data.finance.filter(
+                function(item) {
+
+                    return item.id !== "expenses";
+
+                }
+            );
+
+
+        const expensesMetric =
+            data.finance.find(
+                function(item) {
+
+                    return item.id === "expenses";
+
+                }
+            );
+
+
+        return `
 
             <div class="category-page-header">
 
@@ -2928,7 +3307,7 @@
                     </div>
 
                     <h2>
-                        ${titles[category]}
+                        💰 Финансы
                     </h2>
 
                 </div>
@@ -2960,119 +3339,413 @@
 
             <div class="metrics-list">
 
-                ${data[category]
+
+                ${regularMetrics
                     .map(
                         function(item) {
 
-                            const p =
-                                progress(
-                                    item.current,
-                                    item.target
-                                );
-
-
-                            return `
-
-                                <div
-                                    class="metric-card"
-                                >
-
-                                    <div class="metric-top">
-
-                                        <div class="metric-title">
-
-                                            <div class="metric-icon">
-                                                ${item.icon}
-                                            </div>
-
-                                            <div>
-
-                                                <strong>
-                                                    ${item.name}
-                                                </strong>
-
-                                                <span>
-                                                    ${formatNumber(
-                                                        item.current
-                                                    )}
-                                                    ${item.unit}
-                                                    /
-                                                    ${formatNumber(
-                                                        item.target
-                                                    )}
-                                                    ${item.unit}
-                                                </span>
-
-                                            </div>
-
-                                        </div>
-
-
-                                        <div class="metric-percent">
-                                            ${p}%
-                                        </div>
-
-                                    </div>
-
-
-                                    <div class="metric-progress">
-
-                                        <div
-                                            class="metric-progress-fill"
-                                            style="width:${p}%"
-                                        ></div>
-
-                                    </div>
-
-
-                                    <button
-                                        class="metric-edit"
-                                        type="button"
-                                        data-edit="${item.id}"
-                                    >
-                                        ✎ ИЗМЕНИТЬ
-                                    </button>
-
-                                </div>
-
-                            `;
+                            return renderMetric(
+                                item,
+                                "finance"
+                            );
 
                         }
                     )
                     .join("")}
 
+
+                <!-- =================================
+                     MANDATORY EXPENSES
+                ================================== -->
+
+                <div
+                    class="metric-card"
+                    data-id="expenses"
+                >
+
+                    <div class="metric-top">
+
+                        <div class="metric-title">
+
+                            <div class="metric-icon">
+                                ${expensesMetric.icon}
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Обязательные расходы
+                                </strong>
+
+                                <span>
+                                    ${formatNumber(totalExpenses)}
+                                    ₽
+                                    ·
+                                    ${expensesPercent}%
+                                    от заработанного
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric-percent">
+                            ${expensesPercent}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-progress">
+
+                        <div
+                            class="metric-progress-fill"
+                            style="width:${Math.min(
+                                expensesPercent,
+                                100
+                            )}%"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- MY EXPENSES -->
+
+                    <div class="expenses-subblock">
+
+                        <div class="expenses-subblock-header">
+
+                            <div class="expenses-subblock-title">
+                                МОИ ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
+                            </div>
+
+                            <div class="expenses-subblock-total">
+                                ${formatNumber(totalExpenses)} ₽
+                            </div>
+
+                        </div>
+
+
+                        <div class="expense-list">
+
+                            ${
+                                expenses.length
+                                    ? expenses
+                                        .map(
+                                            expenseHTML
+                                        )
+                                        .join("")
+                                    : `
+                                        <div class="expense-empty">
+                                            Добавь свои обязательные расходы.
+                                            Например: аренда, коммунальные,
+                                            связь, транспорт или продукты.
+                                        </div>
+                                    `
+                            }
+
+                        </div>
+
+
+                        <button
+                            class="add-expense-button"
+                            type="button"
+                        >
+                            ＋ ДОБАВИТЬ РАСХОД
+                        </button>
+
+
+                        <div class="expenses-ratio">
+
+                            <span>
+                                ОТ ЗАРАБОТАННОГО ЗА МЕСЯЦ
+                            </span>
+
+                            <strong>
+                                ${expensesPercent}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
             </div>
 
         `;
 
-
-        document.body.appendChild(
-            page
-        );
+    }
 
 
-        page
-            .querySelector(
+    /* =========================================
+       METRIC
+    ========================================= */
+
+    function renderMetric(
+        item,
+        category
+    ) {
+
+        const p =
+            progress(
+                item.current,
+                item.target
+            );
+
+
+        return `
+
+            <div
+                class="metric-card"
+                data-id="${item.id}"
+            >
+
+                <div class="metric-top">
+
+                    <div class="metric-title">
+
+                        <div class="metric-icon">
+                            ${item.icon}
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                ${escapeHTML(item.name)}
+                            </strong>
+
+                            <span>
+                                ${formatNumber(item.current)}
+                                ${item.unit}
+                                /
+                                ${formatNumber(item.target)}
+                                ${item.unit}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-percent">
+                        ${p}%
+                    </div>
+
+                </div>
+
+
+                <div class="metric-progress">
+
+                    <div
+                        class="metric-progress-fill"
+                        style="width:${p}%"
+                    ></div>
+
+                </div>
+
+
+                <button
+                    class="metric-edit"
+                    type="button"
+                    data-edit="${item.id}"
+                >
+                    ✎ ИЗМЕНИТЬ
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       EXPENSE HTML
+    ========================================= */
+
+    function expenseHTML(
+        expense
+    ) {
+
+        return `
+
+            <div class="expense-row">
+
+                <div class="expense-row-info">
+
+                    <div class="expense-row-name">
+                        ${escapeHTML(
+                            expense.name
+                        )}
+                    </div>
+
+                    <div class="expense-row-amount">
+                        ${formatNumber(
+                            expense.amount
+                        )} ₽
+                    </div>
+
+                </div>
+
+
+                <div class="expense-row-actions">
+
+                    <button
+                        class="expense-action expense-edit"
+                        type="button"
+                        data-expense="${expense.id}"
+                        aria-label="Изменить"
+                    >
+                        ✎
+                    </button>
+
+
+                    <button
+                        class="expense-action delete expense-delete"
+                        type="button"
+                        data-expense="${expense.id}"
+                        aria-label="Удалить"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       CATEGORY PAGE EVENTS
+    ========================================= */
+
+    function bindCategoryPage(
+        page,
+        category
+    ) {
+
+        const backButton =
+            page.querySelector(
                 ".back-button"
-            )
-            .addEventListener(
+            );
+
+
+        if (backButton) {
+
+            backButton.addEventListener(
                 "click",
                 function(event) {
 
                     event.preventDefault();
                     event.stopPropagation();
 
+
                     closeCategory();
+
+                    updateHome();
 
                     setActiveNav(
                         "home"
                     );
 
-                    updateHome();
-
                 }
             );
 
+        }
+
+
+        /*
+         * Финансы
+         */
+
+        if (category === "finance") {
+
+            const addButton =
+                page.querySelector(
+                    ".add-expense-button"
+                );
+
+
+            if (addButton) {
+
+                addButton.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        openExpenseEditor();
+
+                    }
+                );
+
+            }
+
+
+            page
+                .querySelectorAll(
+                    ".expense-edit"
+                )
+                .forEach(
+                    function(button) {
+
+                        button.addEventListener(
+                            "click",
+                            function(event) {
+
+                                event.preventDefault();
+                                event.stopPropagation();
+
+
+                                openExpenseEditor(
+                                    this.dataset.expense
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            page
+                .querySelectorAll(
+                    ".expense-delete"
+                )
+                .forEach(
+                    function(button) {
+
+                        button.addEventListener(
+                            "click",
+                            function(event) {
+
+                                event.preventDefault();
+                                event.stopPropagation();
+
+
+                                deleteExpense(
+                                    this.dataset.expense
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /*
+         * Обычные метрики
+         */
 
         page
             .querySelectorAll(
@@ -3103,30 +3776,343 @@
     }
 
 
-    function closeCategory() {
+    /* =========================================
+       EXPENSE EDITOR
+    ========================================= */
 
-        const page =
-            document.querySelector(
-                ".category-page"
+    function openExpenseEditor(
+        expenseId = null
+    ) {
+
+        const expense =
+            expenses.find(
+                function(item) {
+
+                    return (
+                        String(item.id) ===
+                        String(expenseId)
+                    );
+
+                }
             );
 
 
-        if (page) {
+        const overlay =
+            document.createElement(
+                "div"
+            );
 
-            page.remove();
+
+        overlay.className =
+            "editor-overlay";
+
+
+        overlay.innerHTML = `
+
+            <div class="editor">
+
+                <button
+                    class="editor-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+
+                <div class="editor-icon">
+                    📉
+                </div>
+
+
+                <div class="editor-eyebrow">
+                    ${
+                        expense
+                            ? "EDIT EXPENSE"
+                            : "NEW EXPENSE"
+                    }
+                </div>
+
+
+                <h3>
+                    ${
+                        expense
+                            ? "Изменить расход"
+                            : "Добавить расход"
+                    }
+                </h3>
+
+
+                <label>
+                    Название расхода
+                </label>
+
+
+                <input
+                    class="expense-name-input"
+                    type="text"
+                    inputmode="text"
+                    maxlength="60"
+                    placeholder="Например: Аренда"
+                    value="${
+                        expense
+                            ? escapeHTML(
+                                expense.name
+                            )
+                            : ""
+                    }"
+                >
+
+
+                <label>
+                    Сумма
+                </label>
+
+
+                <input
+                    class="expense-amount-input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                    value="${
+                        expense
+                            ? expense.amount
+                            : ""
+                    }"
+                >
+
+
+                <button
+                    class="save-button"
+                    type="button"
+                >
+                    СОХРАНИТЬ
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        const nameInput =
+            overlay.querySelector(
+                ".expense-name-input"
+            );
+
+
+        const amountInput =
+            overlay.querySelector(
+                ".expense-amount-input"
+            );
+
+
+        overlay
+            .querySelector(
+                ".editor-close"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    overlay.remove();
+
+                }
+            );
+
+
+        overlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    overlay.remove();
+
+                }
+
+            }
+        );
+
+
+        overlay
+            .querySelector(
+                ".save-button"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    const name =
+                        nameInput.value.trim();
+
+
+                    const amount =
+                        Number(
+                            amountInput.value
+                        ) || 0;
+
+
+                    if (!name) {
+
+                        showToast(
+                            "Введите название расхода"
+                        );
+
+                        nameInput.focus();
+
+                        return;
+
+                    }
+
+
+                    if (amount <= 0) {
+
+                        showToast(
+                            "Введите сумму расхода"
+                        );
+
+                        amountInput.focus();
+
+                        return;
+
+                    }
+
+
+                    if (expense) {
+
+                        expense.name =
+                            name;
+
+
+                        expense.amount =
+                            amount;
+
+                    } else {
+
+                        expenses.push({
+
+                            id:
+                                Date.now()
+                                .toString(),
+
+                            name:
+                                name,
+
+                            amount:
+                                amount
+
+                        });
+
+                    }
+
+
+                    saveExpenses();
+
+                    updateExpenseMetric();
+
+                    overlay.remove();
+
+
+                    const currentPage =
+                        document.querySelector(
+                            ".category-page"
+                        );
+
+
+                    if (currentPage) {
+
+                        openCategory(
+                            "finance"
+                        );
+
+                    }
+
+
+                    updateHome();
+
+
+                    showToast(
+                        "Расход сохранён"
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* =========================================
+       DELETE EXPENSE
+    ========================================= */
+
+    function deleteExpense(
+        expenseId
+    ) {
+
+        const expense =
+            expenses.find(
+                function(item) {
+
+                    return (
+                        String(item.id) ===
+                        String(expenseId)
+                    );
+
+                }
+            );
+
+
+        if (!expense) {
+
+            return;
 
         }
 
 
-        document.body.classList.remove(
-            "page-open"
+        expenses =
+            expenses.filter(
+                function(item) {
+
+                    return (
+                        String(item.id) !==
+                        String(expenseId)
+                    );
+
+                }
+            );
+
+
+        saveExpenses();
+
+        updateExpenseMetric();
+
+
+        openCategory(
+            "finance"
+        );
+
+
+        updateHome();
+
+
+        showToast(
+            "Расход удалён"
         );
 
     }
 
 
     /* =========================================
-       EDITOR
+       STANDARD EDITOR
     ========================================= */
 
     function openEditor(
@@ -3138,21 +4124,17 @@
             data[category].find(
                 function(element) {
 
-                    return (
-                        element.id === id
-                    );
+                    return element.id === id;
 
                 }
             );
 
 
         if (!item) {
+
             return;
+
         }
-
-
-        const previousData =
-            clone(data);
 
 
         const overlay =
@@ -3188,7 +4170,7 @@
 
 
                 <h3>
-                    ${item.name}
+                    ${escapeHTML(item.name)}
                 </h3>
 
 
@@ -3201,6 +4183,7 @@
                     class="current-input"
                     type="number"
                     inputmode="decimal"
+                    min="0"
                     value="${item.current}"
                 >
 
@@ -3214,6 +4197,7 @@
                     class="target-input"
                     type="number"
                     inputmode="decimal"
+                    min="0"
                     value="${item.target}"
                 >
 
@@ -3317,23 +4301,24 @@
                 function() {
 
                     item.current =
-                        Number(
-                            currentInput.value
-                        ) || 0;
+                        Math.max(
+                            0,
+                            Number(
+                                currentInput.value
+                            ) || 0
+                        );
 
 
                     item.target =
-                        Number(
-                            targetInput.value
-                        ) || 0;
+                        Math.max(
+                            0,
+                            Number(
+                                targetInput.value
+                            ) || 0
+                        );
 
 
-                    awardXPForChanges(
-                        previousData
-                    );
-
-
-                    saveApplication();
+                    saveData();
 
 
                     overlay.remove();
@@ -3345,6 +4330,11 @@
 
 
                     updateHome();
+
+
+                    showToast(
+                        "Изменения сохранены"
+                    );
 
                 }
             );
@@ -3370,126 +4360,26 @@
 
 
     /* =========================================
-       LEVEL UP MODAL
+       CLOSE CATEGORY
     ========================================= */
 
-    function showLevelUpModal(
-        level
-    ) {
+    function closeCategory() {
 
-        setTimeout(
-            function() {
-
-                const overlay =
-                    document.createElement(
-                        "div"
-                    );
+        const page =
+            document.querySelector(
+                ".category-page"
+            );
 
 
-                overlay.className =
-                    "editor-overlay";
+        if (page) {
+
+            page.remove();
+
+        }
 
 
-                overlay.innerHTML = `
-
-                    <div class="editor level-up">
-
-                        <button
-                            class="editor-close"
-                            type="button"
-                        >
-                            ×
-                        </button>
-
-
-                        <div class="editor-icon">
-                            ↑
-                        </div>
-
-
-                        <div class="editor-eyebrow">
-                            LEVEL UP
-                        </div>
-
-
-                        <h3>
-                            Новый уровень
-                        </h3>
-
-
-                        <p>
-                            Отличная работа.<br>
-                            Ты продолжаешь прокачивать свою жизнь.
-                        </p>
-
-
-                        <span class="new-level">
-                            LVL ${level}
-                        </span>
-
-
-                        <button
-                            class="save-button"
-                            type="button"
-                        >
-                            ПРОДОЛЖИТЬ
-                        </button>
-
-                    </div>
-
-                `;
-
-
-                document.body.appendChild(
-                    overlay
-                );
-
-
-                function close() {
-
-                    overlay.remove();
-
-                }
-
-
-                overlay
-                    .querySelector(
-                        ".editor-close"
-                    )
-                    .addEventListener(
-                        "click",
-                        close
-                    );
-
-
-                overlay
-                    .querySelector(
-                        ".save-button"
-                    )
-                    .addEventListener(
-                        "click",
-                        close
-                    );
-
-
-                overlay.addEventListener(
-                    "click",
-                    function(event) {
-
-                        if (
-                            event.target ===
-                            overlay
-                        ) {
-
-                            close();
-
-                        }
-
-                    }
-                );
-
-            },
-            350
+        document.body.classList.remove(
+            "page-open"
         );
 
     }
@@ -3503,56 +4393,69 @@
         message
     ) {
 
-        let toast =
+        const old =
             document.querySelector(
                 ".life-message"
             );
 
 
-        if (!toast) {
+        if (old) {
 
-            toast =
-                document.createElement(
-                    "div"
-                );
-
-
-            toast.className =
-                "life-message";
-
-
-            document.body.appendChild(
-                toast
-            );
+            old.remove();
 
         }
+
+
+        const toast =
+            document.createElement(
+                "div"
+            );
+
+
+        toast.className =
+            "life-message";
 
 
         toast.textContent =
             message;
 
 
-        toast.classList.add(
-            "show"
+        document.body.appendChild(
+            toast
         );
 
 
-        clearTimeout(
-            toast._timer
+        requestAnimationFrame(
+            function() {
+
+                toast.classList.add(
+                    "show"
+                );
+
+            }
         );
 
 
-        toast._timer =
-            setTimeout(
-                function() {
+        setTimeout(
+            function() {
 
-                    toast.classList.remove(
-                        "show"
-                    );
+                toast.classList.remove(
+                    "show"
+                );
 
-                },
-                1800
-            );
+
+                setTimeout(
+                    function() {
+
+                        toast.remove();
+
+                    },
+                    250
+                );
+
+            },
+            1800
+        );
 
     }
 
@@ -3570,7 +4473,9 @@
 
 
         if (!button) {
+
             return;
+
         }
 
 
@@ -3579,6 +4484,7 @@
             function(event) {
 
                 event.preventDefault();
+                event.stopPropagation();
 
 
                 const overlay =
@@ -3676,6 +4582,23 @@
                         }
                     );
 
+
+                overlay.addEventListener(
+                    "click",
+                    function(event) {
+
+                        if (
+                            event.target ===
+                            overlay
+                        ) {
+
+                            overlay.remove();
+
+                        }
+
+                    }
+                );
+
             }
         );
 
@@ -3688,15 +4611,18 @@
 
     function startApp() {
 
-        loadApplication();
+        /*
+         * Синхронизируем старое значение
+         * обязательных расходов с новым
+         * списком пользовательских расходов.
+         */
+
+        updateExpenseMetric();
+
 
         setupNavigation();
 
         setupQuest();
-
-        updateGameLevel(false);
-
-        updateXPUI();
 
         updateHome();
 
@@ -3718,6 +4644,7 @@
         startApp();
 
     }
+
 
 })();
 
