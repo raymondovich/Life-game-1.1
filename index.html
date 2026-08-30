@@ -391,5 +391,867 @@
         });
 
     });
+
+```html
+<script>
+
+const STORAGE_KEY = "life_game_data_v1";
+
+const DEFAULT_DATA = {
+
+    finance: [
+        {
+            id: "monthly_income",
+            icon: "💵",
+            name: "Заработано за месяц",
+            unit: "₽",
+            current: 10000,
+            target: 100000
+        },
+        {
+            id: "monthly_goal",
+            icon: "🎯",
+            name: "Цель на месяц",
+            unit: "₽",
+            current: 0,
+            target: 100000
+        },
+        {
+            id: "yearly_goal",
+            icon: "🏆",
+            name: "Цель на год",
+            unit: "₽",
+            current: 0,
+            target: 1200000
+        },
+        {
+            id: "mandatory_expenses",
+            icon: "📉",
+            name: "Обязательные расходы",
+            unit: "₽",
+            current: 0,
+            target: 50000
+        },
+        {
+            id: "safety_cushion",
+            icon: "🛡️",
+            name: "Подушка безопасности",
+            unit: "₽",
+            current: 0,
+            target: 300000
+        }
+    ],
+
+    health: [
+        {
+            id: "daily_routine",
+            icon: "⏰",
+            name: "Режим дня",
+            unit: "%",
+            current: 0,
+            target: 100
+        },
+        {
+            id: "nutrition",
+            icon: "🍎",
+            name: "Питание КБЖУ",
+            unit: "%",
+            current: 0,
+            target: 100
+        },
+        {
+            id: "workouts",
+            icon: "🏋️",
+            name: "Программа тренировок",
+            unit: "тренировок",
+            current: 0,
+            target: 12
+        },
+        {
+            id: "daily_steps",
+            icon: "🚶",
+            name: "Шаги в день",
+            unit: "шагов",
+            current: 0,
+            target: 10000
+        }
+    ],
+
+    development: [
+        {
+            id: "books",
+            icon: "📚",
+            name: "Чтение книг",
+            unit: "книг",
+            current: 0,
+            target: 2
+        },
+        {
+            id: "language",
+            icon: "🌐",
+            name: "Изучение языка",
+            unit: "минут",
+            current: 0,
+            target: 30
+        },
+        {
+            id: "meditation",
+            icon: "🧘",
+            name: "Медитация",
+            unit: "минут",
+            current: 0,
+            target: 15
+        }
+    ]
+
+};
+
+
+let data = loadData();
+
+
+function loadData() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(STORAGE_KEY);
+
+        if (saved) {
+
+            return JSON.parse(saved);
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+    return JSON.parse(
+        JSON.stringify(DEFAULT_DATA)
+    );
+
+}
+
+
+function saveData() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+    );
+
+}
+
+
+function getProgress(current, target) {
+
+    current = Number(current) || 0;
+    target = Number(target) || 0;
+
+    if (target <= 0) {
+
+        return 0;
+
+    }
+
+    return Math.min(
+        100,
+        Math.round(
+            (current / target) * 100
+        )
+    );
+
+}
+
+
+function formatNumber(value) {
+
+    return new Intl.NumberFormat(
+        "ru-RU"
+    ).format(
+        Number(value) || 0
+    );
+
+}
+
+
+function categoryProgress(category) {
+
+    const items = data[category];
+
+    if (!items.length) {
+
+        return 0;
+
+    }
+
+    let total = 0;
+
+    items.forEach(function(item) {
+
+        total += getProgress(
+            item.current,
+            item.target
+        );
+
+    });
+
+    return Math.round(
+        total / items.length
+    );
+
+}
+
+
+function overallProgress() {
+
+    return Math.round(
+        (
+            categoryProgress("finance") +
+            categoryProgress("health") +
+            categoryProgress("development")
+        ) / 3
+    );
+
+}
+
+
+/* ==============================
+   HOME
+============================== */
+
+function updateHome() {
+
+    const overall =
+        overallProgress();
+
+
+    const overallValue =
+        document.querySelector(
+            ".overall-value"
+        );
+
+
+    const overallFill =
+        document.querySelector(
+            ".overall-fill"
+        );
+
+
+    if (overallValue) {
+
+        overallValue.innerHTML =
+            overall + "<span>%</span>";
+
+    }
+
+
+    if (overallFill) {
+
+        overallFill.style.width =
+            overall + "%";
+
+    }
+
+
+    document
+        .querySelectorAll(".category-card")
+        .forEach(function(card) {
+
+            const category =
+                card.dataset.category;
+
+            const percent =
+                categoryProgress(category);
+
+
+            const percentElement =
+                card.querySelector(
+                    ".category-percent"
+                );
+
+
+            const fill =
+                card.querySelector(
+                    ".progress-fill"
+                );
+
+
+            if (percentElement) {
+
+                percentElement.textContent =
+                    percent + "%";
+
+            }
+
+
+            if (fill) {
+
+                fill.style.width =
+                    percent + "%";
+
+            }
+
+        });
+
+}
+
+
+/* ==============================
+   NAVIGATION
+============================== */
+
+function setupNavigation() {
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const section =
+                        this.dataset.section;
+
+
+                    document
+                        .querySelectorAll(".nav-item")
+                        .forEach(function(item) {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        });
+
+
+                    this.classList.add("active");
+
+
+                    if (!section) {
+
+                        closeCategory();
+
+                        updateHome();
+
+                        return;
+
+                    }
+
+
+                    openCategory(section);
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".category-card")
+        .forEach(function(card) {
+
+            card.addEventListener(
+                "click",
+                function() {
+
+                    openCategory(
+                        this.dataset.category
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+/* ==============================
+   CATEGORY PAGE
+============================== */
+
+function openCategory(category) {
+
+    closeCategory();
+
+
+    const names = {
+
+        finance: "💰 Финансы",
+        health: "❤️ Здоровье",
+        development: "🧠 Развитие"
+
+    };
+
+
+    const page =
+        document.createElement("div");
+
+
+    page.className =
+        "category-page";
+
+
+    const percent =
+        categoryProgress(category);
+
+
+    page.innerHTML = `
+
+        <div class="category-page-header">
+
+            <button
+                class="back-button"
+                type="button"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <div class="page-eyebrow">
+                    LIFE GAME
+                </div>
+
+                <h2>
+                    ${names[category]}
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="category-summary">
+
+            <div class="summary-label">
+                CATEGORY PROGRESS
+            </div>
+
+            <div class="summary-value">
+                ${percent}%
+            </div>
+
+            <div class="summary-bar">
+
+                <div
+                    class="summary-fill"
+                    style="width:${percent}%"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="metrics-list">
+
+            ${data[category]
+                .map(function(item) {
+
+                    const p =
+                        getProgress(
+                            item.current,
+                            item.target
+                        );
+
+
+                    return `
+
+                        <div class="metric-card">
+
+                            <div class="metric-top">
+
+                                <div class="metric-title">
+
+                                    <div class="metric-icon">
+                                        ${item.icon}
+                                    </div>
+
+                                    <div>
+
+                                        <strong>
+                                            ${item.name}
+                                        </strong>
+
+                                        <span>
+                                            ${formatNumber(item.current)}
+                                            ${item.unit}
+                                            /
+                                            ${formatNumber(item.target)}
+                                            ${item.unit}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="metric-percent">
+                                    ${p}%
+                                </div>
+
+                            </div>
+
+
+                            <div class="metric-progress">
+
+                                <div
+                                    class="metric-progress-fill"
+                                    style="width:${p}%"
+                                ></div>
+
+                            </div>
+
+
+                            <button
+                                class="metric-edit"
+                                type="button"
+                                data-id="${item.id}"
+                            >
+                                ✎ ИЗМЕНИТЬ
+                            </button>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("")}
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(page);
+
+
+    page
+        .querySelector(".back-button")
+        .addEventListener(
+            "click",
+            function() {
+
+                closeCategory();
+
+                updateHome();
+
+                activateHome();
+
+            }
+        );
+
+
+    page
+        .querySelectorAll(".metric-edit")
+        .forEach(function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    openEditor(
+                        category,
+                        this.dataset.id
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+function closeCategory() {
+
+    const page =
+        document.querySelector(
+            ".category-page"
+        );
+
+
+    if (page) {
+
+        page.remove();
+
+    }
+
+}
+
+
+function activateHome() {
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(function(item) {
+
+            item.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    const home =
+        document.querySelector(
+            ".nav-item:first-child"
+        );
+
+
+    if (home) {
+
+        home.classList.add("active");
+
+    }
+
+}
+
+
+/* ==============================
+   EDITOR
+============================== */
+
+function openEditor(
+    category,
+    id
+) {
+
+    const item =
+        data[category].find(
+            function(element) {
+
+                return element.id === id;
+
+            }
+        );
+
+
+    if (!item) {
+
+        return;
+
+    }
+
+
+    const overlay =
+        document.createElement("div");
+
+
+    overlay.className =
+        "editor-overlay";
+
+
+    overlay.innerHTML = `
+
+        <div class="editor">
+
+            <button
+                class="editor-close"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <div class="editor-icon">
+                ${item.icon}
+            </div>
+
+
+            <div class="editor-eyebrow">
+                EDIT GOAL
+            </div>
+
+
+            <h3>
+                ${item.name}
+            </h3>
+
+
+            <label>
+                Текущее значение
+            </label>
+
+            <input
+                class="current-input"
+                type="number"
+                value="${item.current}"
+            >
+
+
+            <label>
+                Цель
+            </label>
+
+            <input
+                class="target-input"
+                type="number"
+                value="${item.target}"
+            >
+
+
+            <div class="editor-preview">
+
+                <span>
+                    Прогресс
+                </span>
+
+                <strong class="editor-progress">
+                    ${getProgress(
+                        item.current,
+                        item.target
+                    )}%
+                </strong>
+
+            </div>
+
+
+            <button
+                class="save-button"
+                type="button"
+            >
+                СОХРАНИТЬ
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    const currentInput =
+        overlay.querySelector(
+            ".current-input"
+        );
+
+
+    const targetInput =
+        overlay.querySelector(
+            ".target-input"
+        );
+
+
+    const progressElement =
+        overlay.querySelector(
+            ".editor-progress"
+        );
+
+
+    function updatePreview() {
+
+        progressElement.textContent =
+            getProgress(
+                currentInput.value,
+                targetInput.value
+            ) + "%";
+
+    }
+
+
+    currentInput.addEventListener(
+        "input",
+        updatePreview
+    );
+
+
+    targetInput.addEventListener(
+        "input",
+        updatePreview
+    );
+
+
+    overlay
+        .querySelector(".editor-close")
+        .addEventListener(
+            "click",
+            function() {
+
+                overlay.remove();
+
+            }
+        );
+
+
+    overlay
+        .querySelector(".save-button")
+        .addEventListener(
+            "click",
+            function() {
+
+                item.current =
+                    Number(
+                        currentInput.value
+                    ) || 0;
+
+
+                item.target =
+                    Number(
+                        targetInput.value
+                    ) || 0;
+
+
+                saveData();
+
+
+                overlay.remove();
+
+
+                openCategory(
+                    category
+                );
+
+
+                updateHome();
+
+            }
+        );
+
+
+    overlay.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === overlay
+            ) {
+
+                overlay.remove();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==============================
+   START
+============================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        setupNavigation();
+
+        updateHome();
+
+    }
+);
+
 </script>
+```
+
 
