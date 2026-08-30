@@ -1,229 +1,99 @@
-<\> JavaScript
-/* =========================================
-   LIFE GAME
-   Interactive MVP
-   ========================================= */
+```javascript
+const STORAGE_KEY = "life_game_data_v1";
 
-const STORAGE_KEY = "lifeGameData";
+const DEFAULT_DATA = {
+    finance: [
+        ["monthly_income", "💵", "Заработано за месяц", "₽", 10000, 100000],
+        ["monthly_goal", "🎯", "Цель на месяц", "₽", 0, 100000],
+        ["yearly_goal", "🏆", "Цель на год", "₽", 0, 1200000],
+        ["mandatory_expenses", "📉", "Обязательные расходы", "₽", 0, 50000],
+        ["safety_cushion", "🛡️", "Подушка безопасности", "₽", 0, 300000]
+    ],
 
+    health: [
+        ["daily_routine", "⏰", "Режим дня", "%", 0, 100],
+        ["nutrition", "🍎", "Питание КБЖУ", "%", 0, 100],
+        ["workouts", "🏋️", "Программа тренировок", "тренировок", 0, 12],
+        ["daily_steps", "🚶", "Шаги в день", "шагов", 0, 10000]
+    ],
 
-// =========================================
-// DEFAULT DATA
-// =========================================
-
-const defaultData = {
-
-    level: 1,
-
-    xp: 0,
-
-    categories: {
-
-        finance: {
-
-            title: "Финансы",
-            icon: "💰",
-
-            metrics: [
-
-                {
-                    id: "monthly_income",
-                    name: "Заработано за месяц",
-                    icon: "💵",
-                    unit: "₽",
-                    current: 10000,
-                    target: 100000
-                },
-
-                {
-                    id: "monthly_goal",
-                    name: "Цель на месяц",
-                    icon: "🎯",
-                    unit: "₽",
-                    current: 0,
-                    target: 100000
-                },
-
-                {
-                    id: "yearly_goal",
-                    name: "Цель на год",
-                    icon: "🏆",
-                    unit: "₽",
-                    current: 0,
-                    target: 1200000
-                },
-
-                {
-                    id: "mandatory_expenses",
-                    name: "Обязательные расходы",
-                    icon: "📉",
-                    unit: "₽",
-                    current: 0,
-                    target: 50000
-                },
-
-                {
-                    id: "safety_cushion",
-                    name: "Подушка безопасности",
-                    icon: "🛡️",
-                    unit: "₽",
-                    current: 0,
-                    target: 300000
-                }
-
-            ]
-
-        },
-
-
-        health: {
-
-            title: "Здоровье",
-            icon: "❤️",
-
-            metrics: [
-
-                {
-                    id: "daily_routine",
-                    name: "Режим дня",
-                    icon: "⏰",
-                    unit: "%",
-                    current: 0,
-                    target: 100
-                },
-
-                {
-                    id: "nutrition",
-                    name: "Питание КБЖУ",
-                    icon: "🍎",
-                    unit: "%",
-                    current: 0,
-                    target: 100
-                },
-
-                {
-                    id: "workouts",
-                    name: "Программа тренировок",
-                    icon: "🏋️",
-                    unit: "тренировок",
-                    current: 0,
-                    target: 12
-                },
-
-                {
-                    id: "daily_steps",
-                    name: "Шаги в день",
-                    icon: "🚶",
-                    unit: "шагов",
-                    current: 0,
-                    target: 10000
-                }
-
-            ]
-
-        },
-
-
-        development: {
-
-            title: "Развитие",
-            icon: "🧠",
-
-            metrics: [
-
-                {
-                    id: "books",
-                    name: "Чтение книг",
-                    icon: "📚",
-                    unit: "книг",
-                    current: 0,
-                    target: 2
-                },
-
-                {
-                    id: "language",
-                    name: "Изучение языка",
-                    icon: "🌐",
-                    unit: "минут",
-                    current: 0,
-                    target: 30
-                },
-
-                {
-                    id: "meditation",
-                    name: "Медитация",
-                    icon: "🧘",
-                    unit: "минут",
-                    current: 0,
-                    target: 15
-                }
-
-            ]
-
-        }
-
-    }
-
+    development: [
+        ["books", "📚", "Чтение книг", "книг", 0, 2],
+        ["language", "🌐", "Изучение языка", "минут", 0, 30],
+        ["meditation", "🧘", "Медитация", "минут", 0, 15]
+    ]
 };
 
 
-// =========================================
-// APPLICATION STATE
-// =========================================
-
-let lifeData = loadData();
+let data = loadData();
 
 
-// =========================================
+// ========================================
 // START
-// =========================================
+// ========================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        renderHome();
-
-        initializeNavigation();
-
-        initializeQuest();
-
-    }
-);
+document.addEventListener("DOMContentLoaded", init);
 
 
-// =========================================
-// STORAGE
-// =========================================
+function init() {
+
+    console.log("LIFE GAME: JavaScript loaded");
+
+    bindNavigation();
+    bindCategoryCards();
+    bindQuest();
+
+    renderHome();
+
+}
+
+
+// ========================================
+// DATA
+// ========================================
 
 function loadData() {
 
     try {
 
-        const saved =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+        const saved = localStorage.getItem(STORAGE_KEY);
 
         if (saved) {
-
             return JSON.parse(saved);
-
         }
 
     } catch (error) {
 
-        console.error(
-            "Storage error:",
-            error
-        );
+        console.error("LIFE GAME storage error:", error);
 
     }
 
-    return structuredClone(
-        defaultData
-    );
+    return createDefaultData();
+}
 
+
+function createDefaultData() {
+
+    const result = {};
+
+    Object.keys(DEFAULT_DATA).forEach(category => {
+
+        result[category] = DEFAULT_DATA[category].map(item => {
+
+            return {
+                id: item[0],
+                icon: item[1],
+                name: item[2],
+                unit: item[3],
+                current: item[4],
+                target: item[5]
+            };
+
+        });
+
+    });
+
+    return result;
 }
 
 
@@ -231,469 +101,310 @@ function saveData() {
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(lifeData)
+        JSON.stringify(data)
     );
 
 }
 
 
-// =========================================
+// ========================================
 // PROGRESS
-// =========================================
+// ========================================
 
-function calculateProgress(
-    current,
-    target
-) {
+function progress(current, target) {
 
-    current =
-        Number(current) || 0;
-
-    target =
-        Number(target) || 0;
+    current = Number(current) || 0;
+    target = Number(target) || 0;
 
     if (target <= 0) {
-
         return 0;
-
     }
 
     return Math.min(
-        Math.round(
-            (current / target) * 100
-        ),
+        Math.round((current / target) * 100),
         100
     );
 
 }
 
 
-// =========================================
-// CATEGORY PROGRESS
-// =========================================
+function categoryProgress(category) {
 
-function calculateCategoryProgress(
-    category
-) {
+    const items = data[category];
 
-    const metrics =
-        lifeData.categories[
-            category
-        ].metrics;
-
-
-    if (!metrics.length) {
-
+    if (!items || items.length === 0) {
         return 0;
-
     }
 
+    const total = items.reduce((sum, item) => {
 
-    const total =
-        metrics.reduce(
-            (
-                sum,
-                metric
-            ) => {
-
-                return sum +
-                    calculateProgress(
-                        metric.current,
-                        metric.target
-                    );
-
-            },
-            0
+        return sum + progress(
+            item.current,
+            item.target
         );
 
+    }, 0);
 
-    return Math.round(
-        total / metrics.length
-    );
+    return Math.round(total / items.length);
 
 }
 
 
-// =========================================
-// OVERALL PROGRESS
-// =========================================
-
-function calculateOverallProgress() {
-
-    const finance =
-        calculateCategoryProgress(
-            "finance"
-        );
-
-    const health =
-        calculateCategoryProgress(
-            "health"
-        );
-
-    const development =
-        calculateCategoryProgress(
-            "development"
-        );
-
+function overallProgress() {
 
     return Math.round(
         (
-            finance +
-            health +
-            development
+            categoryProgress("finance") +
+            categoryProgress("health") +
+            categoryProgress("development")
         ) / 3
     );
 
 }
 
 
-// =========================================
+// ========================================
 // HOME
-// =========================================
+// ========================================
 
 function renderHome() {
 
-    renderLevel();
+    const app = document.querySelector(".app");
 
-    renderOverall();
-
-    renderCategories();
-
-}
-
-
-// =========================================
-// LEVEL
-// =========================================
-
-function renderLevel() {
-
-    const level =
-        document.querySelector(
-            ".level-number"
-        );
-
-    const xp =
-        document.querySelector(
-            ".xp-value"
-        );
-
-    const xpFill =
-        document.querySelector(
-            ".xp-fill"
-        );
+    if (!app) {
+        console.error("LIFE GAME: .app not found");
+        return;
+    }
 
 
-    if (level) {
+    // Update overall progress
 
-        level.textContent =
-            `LVL ${lifeData.level}`;
+    const overall = overallProgress();
+
+    const overallValue =
+        document.querySelector(".overall-value");
+
+    const overallFill =
+        document.querySelector(".overall-fill");
+
+
+    if (overallValue) {
+
+        overallValue.innerHTML =
+            `${overall}<span>%</span>`;
 
     }
 
 
-    if (xp) {
+    if (overallFill) {
 
-        xp.textContent =
-            `${lifeData.xp} XP`;
+        overallFill.style.width =
+            `${overall}%`;
 
     }
 
 
-    if (xpFill) {
+    // Update categories
 
-        const xpTarget = 1000;
+    ["finance", "health", "development"].forEach(category => {
 
-        const progress =
-            Math.min(
-                (
-                    lifeData.xp /
-                    xpTarget
-                ) * 100,
-                100
+        const card =
+            document.querySelector(
+                `[data-category="${category}"]`
             );
 
-        xpFill.style.width =
-            `${progress}%`;
-
-    }
-
-}
+        if (!card) {
+            return;
+        }
 
 
-// =========================================
-// OVERALL
-// =========================================
-
-function renderOverall() {
-
-    const progress =
-        calculateOverallProgress();
+        const percent =
+            categoryProgress(category);
 
 
-    const value =
-        document.querySelector(
-            ".overall-value"
-        );
-
-    const bar =
-        document.querySelector(
-            ".overall-fill"
-        );
+        const percentElement =
+            card.querySelector(".category-percent");
 
 
-    if (value) {
-
-        value.innerHTML =
-            `${progress}<span>%</span>`;
-
-    }
+        const fill =
+            card.querySelector(".progress-fill");
 
 
-    if (bar) {
+        if (percentElement) {
 
-        setTimeout(
-            () => {
+            percentElement.textContent =
+                `${percent}%`;
 
-                bar.style.width =
-                    `${progress}%`;
+        }
 
-            },
-            100
-        );
 
-    }
+        if (fill) {
+
+            fill.style.width =
+                `${percent}%`;
+
+        }
+
+    });
 
 }
 
 
-// =========================================
-// CATEGORY CARDS
-// =========================================
+// ========================================
+// NAVIGATION
+// ========================================
 
-function renderCategories() {
+function bindNavigation() {
 
-    Object.keys(
-        lifeData.categories
-    ).forEach(
-        category => {
-
-            const progress =
-                calculateCategoryProgress(
-                    category
-                );
+    const buttons =
+        document.querySelectorAll(".nav-item");
 
 
-            const card =
-                document.querySelector(
-                    `[data-category="${category}"]`
-                );
+    console.log(
+        "LIFE GAME: navigation buttons:",
+        buttons.length
+    );
 
 
-            if (!card) {
+    buttons.forEach(button => {
+
+        button.addEventListener("click", function(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+
+            const section =
+                this.dataset.section;
+
+
+            console.log(
+                "LIFE GAME navigation:",
+                section || "home"
+            );
+
+
+            buttons.forEach(item => {
+
+                item.classList.remove("active");
+
+            });
+
+
+            this.classList.add("active");
+
+
+            if (!section) {
+
+                closePage();
+                renderHome();
 
                 return;
 
             }
 
 
-            const percent =
-                card.querySelector(
-                    ".category-percent"
-                );
+            openCategory(section);
 
-            const fill =
-                card.querySelector(
-                    ".progress-fill"
-                );
+        });
 
-
-            if (percent) {
-
-                percent.textContent =
-                    `${progress}%`;
-
-            }
-
-
-            if (fill) {
-
-                setTimeout(
-                    () => {
-
-                        fill.style.width =
-                            `${progress}%`;
-
-                    },
-                    150
-                );
-
-            }
-
-        }
-    );
+    });
 
 }
 
 
-// =========================================
-// NAVIGATION
-// =========================================
+// ========================================
+// CATEGORY CARDS
+// ========================================
 
-function initializeNavigation() {
+function bindCategoryCards() {
 
-    const navItems =
-        document.querySelectorAll(
-            ".nav-item"
-        );
+    const cards =
+        document.querySelectorAll(".category-card");
 
 
-    navItems.forEach(
-        item => {
+    cards.forEach(card => {
 
-            item.addEventListener(
-                "click",
-                () => {
+        card.addEventListener("click", function() {
 
-                    const section =
-                        item.dataset.section;
+            const category =
+                this.dataset.category;
 
 
-                    if (!section) {
+            openCategory(category);
 
-                        renderHome();
+        });
 
-                        setActiveNavigation(
-                            item
-                        );
-
-                        return;
-
-                    }
-
-
-                    setActiveNavigation(
-                        item
-                    );
-
-
-                    renderCategoryPage(
-                        section
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    const categoryCards =
-        document.querySelectorAll(
-            ".category-card"
-        );
-
-
-    categoryCards.forEach(
-        card => {
-
-            card.addEventListener(
-                "click",
-                () => {
-
-                    const category =
-                        card.dataset.category;
-
-
-                    renderCategoryPage(
-                        category
-                    );
-
-                }
-            );
-
-        }
-    );
+    });
 
 }
 
 
-// =========================================
-// ACTIVE NAV
-// =========================================
+// ========================================
+// QUEST
+// ========================================
 
-function setActiveNavigation(
-    activeItem
-) {
+function bindQuest() {
 
-    document
-        .querySelectorAll(
-            ".nav-item"
-        )
-        .forEach(
-            item => {
-
-                item.classList.remove(
-                    "active"
-                );
-
-            }
-        );
+    const button =
+        document.querySelector(".quest-button");
 
 
-    activeItem.classList.add(
-        "active"
-    );
-
-}
-
-
-// =========================================
-// CATEGORY PAGE
-// =========================================
-
-function renderCategoryPage(
-    category
-) {
-
-    const data =
-        lifeData.categories[
-            category
-        ];
-
-
-    if (!data) {
-
+    if (!button) {
         return;
-
     }
 
 
-    const progress =
-        calculateCategoryProgress(
-            category
+    button.addEventListener("click", function() {
+
+        showToast(
+            "Daily Quest будет добавлен следующим этапом"
         );
 
+    });
 
-    const metricsHTML =
-        data.metrics
-            .map(
-                metric =>
-                    createMetricHTML(
-                        metric
-                    )
-            )
-            .join("");
+}
+
+
+// ========================================
+// OPEN CATEGORY
+// ========================================
+
+function openCategory(category) {
+
+    if (!data[category]) {
+        return;
+    }
+
+
+    closePage();
 
 
     const page =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     page.className =
         "category-page";
+
+
+    const categoryNames = {
+
+        finance: "💰 Финансы",
+
+        health: "❤️ Здоровье",
+
+        development: "🧠 Развитие"
+
+    };
+
+
+    const metrics =
+        data[category];
+
+
+    const categoryPercent =
+        categoryProgress(category);
 
 
     page.innerHTML = `
@@ -714,8 +425,7 @@ function renderCategoryPage(
                 </div>
 
                 <h2>
-                    ${data.icon}
-                    ${data.title}
+                    ${categoryNames[category]}
                 </h2>
 
             </div>
@@ -730,14 +440,16 @@ function renderCategoryPage(
             </div>
 
             <div class="summary-value">
-                ${progress}%
+                ${categoryPercent}%
             </div>
 
             <div class="summary-bar">
+
                 <div
                     class="summary-fill"
-                    style="width:${progress}%"
+                    style="width:${categoryPercent}%"
                 ></div>
+
             </div>
 
         </div>
@@ -745,86 +457,59 @@ function renderCategoryPage(
 
         <div class="metrics-list">
 
-            ${metricsHTML}
+            ${metrics.map(metricHTML).join("")}
 
         </div>
 
     `;
 
 
-    document
-        .querySelector(".app")
-        .appendChild(page);
+    document.body.appendChild(page);
 
 
-    document.body.classList.add(
-        "page-open"
-    );
-
+    // Back button
 
     page
         .querySelector(".back-button")
-        .addEventListener(
-            "click",
-            () => {
+        .addEventListener("click", function() {
 
-                page.remove();
+            closePage();
 
-                document.body.classList.remove(
-                    "page-open"
-                );
+            renderHome();
 
-                renderHome();
+            activateHome();
 
-                setActiveNavigation(
-                    document.querySelector(
-                        ".nav-item:first-child"
-                    )
-                );
+        });
 
-            }
-        );
 
+    // Edit buttons
 
     page
-        .querySelectorAll(
-            ".metric-edit"
-        )
-        .forEach(
-            button => {
+        .querySelectorAll(".metric-edit")
+        .forEach(button => {
 
-                button.addEventListener(
-                    "click",
-                    () => {
+            button.addEventListener("click", function() {
 
-                        const metricId =
-                            button.dataset.metric;
-
-                        openMetricEditor(
-                            category,
-                            metricId,
-                            page
-                        );
-
-                    }
+                openEditor(
+                    category,
+                    this.dataset.metric
                 );
 
-            }
-        );
+            });
+
+        });
 
 }
 
 
-// =========================================
-// METRIC HTML
-// =========================================
+// ========================================
+// METRIC CARD
+// ========================================
 
-function createMetricHTML(
-    metric
-) {
+function metricHTML(metric) {
 
-    const progress =
-        calculateProgress(
+    const percent =
+        progress(
             metric.current,
             metric.target
         );
@@ -862,7 +547,7 @@ function createMetricHTML(
 
 
                 <div class="metric-percent">
-                    ${progress}%
+                    ${percent}%
                 </div>
 
             </div>
@@ -872,7 +557,7 @@ function createMetricHTML(
 
                 <div
                     class="metric-progress-fill"
-                    style="width:${progress}%"
+                    style="width:${percent}%"
                 ></div>
 
             </div>
@@ -893,36 +578,25 @@ function createMetricHTML(
 }
 
 
-// =========================================
-// METRIC EDITOR
-// =========================================
+// ========================================
+// EDITOR
+// ========================================
 
-function openMetricEditor(
-    category,
-    metricId,
-    page
-) {
+function openEditor(category, metricId) {
 
     const metric =
-        lifeData.categories[
-            category
-        ].metrics.find(
-            item =>
-                item.id === metricId
+        data[category].find(
+            item => item.id === metricId
         );
 
 
     if (!metric) {
-
         return;
-
     }
 
 
     const overlay =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     overlay.className =
@@ -961,9 +635,8 @@ function openMetricEditor(
             </label>
 
             <input
-                id="currentValue"
+                class="current-input"
                 type="number"
-                inputmode="decimal"
                 value="${metric.current}"
             >
 
@@ -973,9 +646,8 @@ function openMetricEditor(
             </label>
 
             <input
-                id="targetValue"
+                class="target-input"
                 type="number"
-                inputmode="decimal"
                 value="${metric.target}"
             >
 
@@ -986,8 +658,8 @@ function openMetricEditor(
                     Новый прогресс
                 </span>
 
-                <strong id="editorProgress">
-                    ${calculateProgress(
+                <strong class="editor-progress">
+                    ${progress(
                         metric.current,
                         metric.target
                     )}%
@@ -1008,44 +680,27 @@ function openMetricEditor(
     `;
 
 
-    document.body.appendChild(
-        overlay
-    );
+    document.body.appendChild(overlay);
 
 
     const currentInput =
-        overlay.querySelector(
-            "#currentValue"
-        );
+        overlay.querySelector(".current-input");
+
 
     const targetInput =
-        overlay.querySelector(
-            "#targetValue"
-        );
+        overlay.querySelector(".target-input");
+
 
     const progressElement =
-        overlay.querySelector(
-            "#editorProgress"
-        );
+        overlay.querySelector(".editor-progress");
 
 
     function updatePreview() {
 
-        const current =
-            Number(
-                currentInput.value
-            ) || 0;
-
-        const target =
-            Number(
-                targetInput.value
-            ) || 0;
-
-
         progressElement.textContent =
-            `${calculateProgress(
-                current,
-                target
+            `${progress(
+                currentInput.value,
+                targetInput.value
             )}%`;
 
     }
@@ -1064,202 +719,167 @@ function openMetricEditor(
 
 
     overlay
-        .querySelector(
-            ".editor-close"
-        )
-        .addEventListener(
-            "click",
-            () => {
+        .querySelector(".editor-close")
+        .addEventListener("click", function() {
 
-                overlay.remove();
+            overlay.remove();
 
-            }
-        );
+        });
 
 
-    overlay.addEventListener(
-        "click",
-        event => {
+    overlay.addEventListener("click", function(event) {
 
-            if (
-                event.target === overlay
-            ) {
+        if (event.target === overlay) {
 
-                overlay.remove();
-
-            }
+            overlay.remove();
 
         }
-    );
+
+    });
 
 
     overlay
-        .querySelector(
-            ".save-button"
-        )
-        .addEventListener(
-            "click",
-            () => {
+        .querySelector(".save-button")
+        .addEventListener("click", function() {
 
-                metric.current =
-                    Number(
-                        currentInput.value
-                    ) || 0;
-
-                metric.target =
-                    Number(
-                        targetInput.value
-                    ) || 0;
+            metric.current =
+                Number(currentInput.value) || 0;
 
 
-                saveData();
+            metric.target =
+                Number(targetInput.value) || 0;
 
 
-                overlay.remove();
+            saveData();
 
 
-                page.remove();
-
-                document.body.classList.remove(
-                    "page-open"
-                );
+            overlay.remove();
 
 
-                renderCategoryPage(
-                    category
-                );
+            closePage();
 
 
-                showMessage(
-                    "Цель сохранена"
-                );
+            openCategory(category);
 
-            }
-        );
+
+            showToast(
+                "Цель сохранена"
+            );
+
+        });
 
 }
 
 
-// =========================================
-// QUEST
-// =========================================
+// ========================================
+// CLOSE PAGE
+// ========================================
 
-function initializeQuest() {
+function closePage() {
 
-    const button =
-        document.querySelector(
-            ".quest-button"
-        );
+    const page =
+        document.querySelector(".category-page");
 
 
-    if (!button) {
+    if (page) {
 
-        return;
+        page.remove();
 
     }
 
+}
 
-    button.addEventListener(
-        "click",
-        () => {
 
-            showMessage(
-                "Daily Quest появится здесь"
-            );
+// ========================================
+// HOME NAV
+// ========================================
 
-        }
-    );
+function activateHome() {
+
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(button => {
+
+            button.classList.remove("active");
+
+        });
+
+
+    const home =
+        document.querySelector(".nav-item:first-child");
+
+
+    if (home) {
+
+        home.classList.add("active");
+
+    }
 
 }
 
 
-// =========================================
-// NUMBER FORMAT
-// =========================================
+// ========================================
+// TOAST
+// ========================================
 
-function formatNumber(
-    value
-) {
+function showToast(message) {
+
+    const old =
+        document.querySelector(".life-message");
+
+
+    if (old) {
+        old.remove();
+    }
+
+
+    const toast =
+        document.createElement("div");
+
+
+    toast.className =
+        "life-message";
+
+
+    toast.textContent =
+        message;
+
+
+    document.body.appendChild(toast);
+
+
+    requestAnimationFrame(() => {
+
+        toast.classList.add("show");
+
+    });
+
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+        setTimeout(() => {
+
+            toast.remove();
+
+        }, 250);
+
+    }, 1800);
+
+}
+
+
+// ========================================
+// FORMAT
+// ========================================
+
+function formatNumber(value) {
 
     return new Intl.NumberFormat(
         "ru-RU"
     ).format(
         Number(value) || 0
-    );
-
-}
-
-
-// =========================================
-// MESSAGE
-// =========================================
-
-function showMessage(
-    message
-) {
-
-    const existing =
-        document.querySelector(
-            ".life-message"
-        );
-
-
-    if (existing) {
-
-        existing.remove();
-
-    }
-
-
-    const element =
-        document.createElement(
-            "div"
-        );
-
-
-    element.className =
-        "life-message";
-
-
-    element.textContent =
-        message;
-
-
-    document.body.appendChild(
-        element
-    );
-
-
-    requestAnimationFrame(
-        () => {
-
-            element.classList.add(
-                "show"
-            );
-
-        }
-    );
-
-
-    setTimeout(
-        () => {
-
-            element.classList.remove(
-                "show"
-            );
-
-
-            setTimeout(
-                () => {
-
-                    element.remove();
-
-                },
-                200
-            );
-
-        },
-        1800
     );
 
 }
