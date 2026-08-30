@@ -1,6 +1,6 @@
-<\> JavaScript
-
+```javascript
 const STORAGE_KEY = "life_game_data_v1";
+const EXPENSES_KEY = "life_game_expenses_v1";
 
 const DEFAULT_DATA = {
     finance: [
@@ -25,8 +25,8 @@ const DEFAULT_DATA = {
     ]
 };
 
-
 let data = loadData();
+let expenses = loadExpenses();
 
 
 // ========================================
@@ -34,7 +34,6 @@ let data = loadData();
 // ========================================
 
 document.addEventListener("DOMContentLoaded", init);
-
 
 function init() {
 
@@ -45,7 +44,6 @@ function init() {
     bindQuest();
 
     renderHome();
-
 }
 
 
@@ -103,6 +101,44 @@ function saveData() {
     localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(data)
+    );
+
+}
+
+
+// ========================================
+// EXPENSES DATA
+// ========================================
+
+function loadExpenses() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(EXPENSES_KEY);
+
+        if (saved) {
+            return JSON.parse(saved);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "LIFE GAME expenses storage error:",
+            error
+        );
+
+    }
+
+    return [];
+}
+
+
+function saveExpenses() {
+
+    localStorage.setItem(
+        EXPENSES_KEY,
+        JSON.stringify(expenses)
     );
 
 }
@@ -177,9 +213,6 @@ function renderHome() {
         return;
     }
 
-
-    // Update overall progress
-
     const overall = overallProgress();
 
     const overallValue =
@@ -188,14 +221,12 @@ function renderHome() {
     const overallFill =
         document.querySelector(".overall-fill");
 
-
     if (overallValue) {
 
         overallValue.innerHTML =
             `${overall}<span>%</span>`;
 
     }
-
 
     if (overallFill) {
 
@@ -204,8 +235,6 @@ function renderHome() {
 
     }
 
-
-    // Update categories
 
     ["finance", "health", "development"].forEach(category => {
 
@@ -218,18 +247,14 @@ function renderHome() {
             return;
         }
 
-
         const percent =
             categoryProgress(category);
-
 
         const percentElement =
             card.querySelector(".category-percent");
 
-
         const fill =
             card.querySelector(".progress-fill");
-
 
         if (percentElement) {
 
@@ -237,7 +262,6 @@ function renderHome() {
                 `${percent}%`;
 
         }
-
 
         if (fill) {
 
@@ -260,12 +284,10 @@ function bindNavigation() {
     const buttons =
         document.querySelectorAll(".nav-item");
 
-
     console.log(
         "LIFE GAME: navigation buttons:",
         buttons.length
     );
-
 
     buttons.forEach(button => {
 
@@ -274,16 +296,8 @@ function bindNavigation() {
             event.preventDefault();
             event.stopPropagation();
 
-
             const section =
                 this.dataset.section;
-
-
-            console.log(
-                "LIFE GAME navigation:",
-                section || "home"
-            );
-
 
             buttons.forEach(item => {
 
@@ -291,9 +305,7 @@ function bindNavigation() {
 
             });
 
-
             this.classList.add("active");
-
 
             if (!section) {
 
@@ -303,7 +315,6 @@ function bindNavigation() {
                 return;
 
             }
-
 
             openCategory(section);
 
@@ -323,14 +334,12 @@ function bindCategoryCards() {
     const cards =
         document.querySelectorAll(".category-card");
 
-
     cards.forEach(card => {
 
         card.addEventListener("click", function() {
 
             const category =
                 this.dataset.category;
-
 
             openCategory(category);
 
@@ -350,11 +359,9 @@ function bindQuest() {
     const button =
         document.querySelector(".quest-button");
 
-
     if (!button) {
         return;
     }
-
 
     button.addEventListener("click", function() {
 
@@ -377,17 +384,13 @@ function openCategory(category) {
         return;
     }
 
-
     closePage();
-
 
     const page =
         document.createElement("div");
 
-
     page.className =
         "category-page";
-
 
     const categoryNames = {
 
@@ -399,14 +402,11 @@ function openCategory(category) {
 
     };
 
-
     const metrics =
         data[category];
 
-
     const categoryPercent =
         categoryProgress(category);
-
 
     page.innerHTML = `
 
@@ -464,11 +464,8 @@ function openCategory(category) {
 
     `;
 
-
     document.body.appendChild(page);
 
-
-    // Back button
 
     page
         .querySelector(".back-button")
@@ -483,17 +480,29 @@ function openCategory(category) {
         });
 
 
-    // Edit buttons
-
     page
         .querySelectorAll(".metric-edit")
         .forEach(button => {
 
             button.addEventListener("click", function() {
 
+                const metricId =
+                    this.dataset.metric;
+
+                if (
+                    category === "finance" &&
+                    metricId === "mandatory_expenses"
+                ) {
+
+                    openExpenses();
+
+                    return;
+
+                }
+
                 openEditor(
                     category,
-                    this.dataset.metric
+                    metricId
                 );
 
             });
@@ -515,10 +524,16 @@ function metricHTML(metric) {
             metric.target
         );
 
+    const isExpenses =
+        metric.id === "mandatory_expenses";
 
     return `
 
-        <div class="metric-card">
+        <div
+            class="metric-card ${
+                isExpenses ? "clickable-expenses" : ""
+            }"
+        >
 
             <div class="metric-top">
 
@@ -569,7 +584,11 @@ function metricHTML(metric) {
                 type="button"
                 data-metric="${metric.id}"
             >
-                ✎ ИЗМЕНИТЬ
+                ${
+                    isExpenses
+                        ? "ОТКРЫТЬ РАСХОДЫ →"
+                        : "✎ ИЗМЕНИТЬ"
+                }
             </button>
 
         </div>
@@ -580,7 +599,506 @@ function metricHTML(metric) {
 
 
 // ========================================
-// EDITOR
+// EXPENSES PAGE
+// ========================================
+
+function openExpenses() {
+
+    closePage();
+
+    const page =
+        document.createElement("div");
+
+    page.className =
+        "category-page expenses-page";
+
+
+    const incomeMetric =
+        data.finance.find(
+            item => item.id === "monthly_income"
+        );
+
+    const income =
+        Number(incomeMetric?.current) || 0;
+
+
+    const total =
+        getExpensesTotal();
+
+
+    const percent =
+        income > 0
+            ? Math.round((total / income) * 100)
+            : 0;
+
+
+    page.innerHTML = `
+
+        <div class="category-page-header">
+
+            <button
+                class="back-button"
+                type="button"
+            >
+                ←
+            </button>
+
+            <div>
+
+                <div class="page-eyebrow">
+                    FINANCE
+                </div>
+
+                <h2>
+                    📉 Обязательные расходы
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="category-summary">
+
+            <div class="summary-label">
+                РАСХОДЫ ОТ ДОХОДА
+            </div>
+
+            <div class="summary-value expenses-percent">
+                ${percent}%
+            </div>
+
+            <div class="summary-bar">
+
+                <div
+                    class="summary-fill expenses-fill"
+                    style="width:${Math.min(percent, 100)}%"
+                ></div>
+
+            </div>
+
+            <div class="expenses-income-info">
+                ${formatNumber(total)} ₽
+                из
+                ${formatNumber(income)} ₽
+            </div>
+
+        </div>
+
+
+        <div class="expenses-list">
+
+            ${expenses.map(expenseHTML).join("")}
+
+        </div>
+
+
+        <button
+            class="add-expense-button"
+            type="button"
+        >
+            ＋ ДОБАВИТЬ РАСХОД
+        </button>
+
+
+        <div class="expenses-total">
+
+            <span>
+                ИТОГО
+            </span>
+
+            <strong>
+                ${formatNumber(total)} ₽
+            </strong>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(page);
+
+
+    page
+        .querySelector(".back-button")
+        .addEventListener("click", function() {
+
+            closePage();
+
+            renderHome();
+
+            activateHome();
+
+        });
+
+
+    page
+        .querySelector(".add-expense-button")
+        .addEventListener("click", function() {
+
+            openExpenseEditor();
+
+        });
+
+
+    page
+        .querySelectorAll(".expense-edit")
+        .forEach(button => {
+
+            button.addEventListener("click", function() {
+
+                openExpenseEditor(
+                    this.dataset.expense
+                );
+
+            });
+
+        });
+
+
+    page
+        .querySelectorAll(".expense-delete")
+        .forEach(button => {
+
+            button.addEventListener("click", function() {
+
+                deleteExpense(
+                    this.dataset.expense
+                );
+
+            });
+
+        });
+
+}
+
+
+// ========================================
+// EXPENSE CARD
+// ========================================
+
+function expenseHTML(expense) {
+
+    return `
+
+        <div class="expense-card">
+
+            <div class="expense-info">
+
+                <span class="expense-name">
+                    ${escapeHTML(expense.name)}
+                </span>
+
+                <strong>
+                    ${formatNumber(expense.amount)} ₽
+                </strong>
+
+            </div>
+
+            <div class="expense-actions">
+
+                <button
+                    class="expense-edit"
+                    type="button"
+                    data-expense="${expense.id}"
+                >
+                    ✎
+                </button>
+
+                <button
+                    class="expense-delete"
+                    type="button"
+                    data-expense="${expense.id}"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ========================================
+// EXPENSE EDITOR
+// ========================================
+
+function openExpenseEditor(expenseId = null) {
+
+    const expense =
+        expenses.find(
+            item => item.id === expenseId
+        );
+
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.className =
+        "editor-overlay";
+
+
+    overlay.innerHTML = `
+
+        <div class="editor">
+
+            <button
+                class="editor-close"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <div class="editor-icon">
+                📉
+            </div>
+
+
+            <div class="editor-eyebrow">
+                ${expense ? "EDIT EXPENSE" : "NEW EXPENSE"}
+            </div>
+
+
+            <h3>
+                ${expense ? "Изменить расход" : "Добавить расход"}
+            </h3>
+
+
+            <label>
+                Название расхода
+            </label>
+
+            <input
+                class="expense-name-input"
+                type="text"
+                placeholder="Например: Аренда"
+                value="${
+                    expense
+                        ? escapeAttribute(expense.name)
+                        : ""
+                }"
+            >
+
+
+            <label>
+                Сумма
+            </label>
+
+            <input
+                class="expense-amount-input"
+                type="number"
+                min="0"
+                placeholder="0"
+                value="${
+                    expense
+                        ? expense.amount
+                        : ""
+                }"
+            >
+
+
+            <button
+                class="save-button"
+                type="button"
+            >
+                СОХРАНИТЬ
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(overlay);
+
+
+    const nameInput =
+        overlay.querySelector(
+            ".expense-name-input"
+        );
+
+    const amountInput =
+        overlay.querySelector(
+            ".expense-amount-input"
+        );
+
+
+    overlay
+        .querySelector(".editor-close")
+        .addEventListener("click", function() {
+
+            overlay.remove();
+
+        });
+
+
+    overlay.addEventListener("click", function(event) {
+
+        if (event.target === overlay) {
+
+            overlay.remove();
+
+        }
+
+    });
+
+
+    overlay
+        .querySelector(".save-button")
+        .addEventListener("click", function() {
+
+            const name =
+                nameInput.value.trim();
+
+            const amount =
+                Number(amountInput.value) || 0;
+
+
+            if (!name) {
+
+                showToast(
+                    "Введите название расхода"
+                );
+
+                return;
+
+            }
+
+
+            if (amount <= 0) {
+
+                showToast(
+                    "Введите сумму расхода"
+                );
+
+                return;
+
+            }
+
+
+            if (expense) {
+
+                expense.name =
+                    name;
+
+                expense.amount =
+                    amount;
+
+            } else {
+
+                expenses.push({
+
+                    id:
+                        Date.now().toString(),
+
+                    name:
+                        name,
+
+                    amount:
+                        amount
+
+                });
+
+            }
+
+
+            saveExpenses();
+
+            updateMandatoryExpensesMetric();
+
+            overlay.remove();
+
+            openExpenses();
+
+            showToast(
+                "Расход сохранён"
+            );
+
+        });
+
+}
+
+
+// ========================================
+// DELETE EXPENSE
+// ========================================
+
+function deleteExpense(expenseId) {
+
+    expenses =
+        expenses.filter(
+            expense =>
+                expense.id !== expenseId
+        );
+
+    saveExpenses();
+
+    updateMandatoryExpensesMetric();
+
+    openExpenses();
+
+    showToast(
+        "Расход удалён"
+    );
+
+}
+
+
+// ========================================
+// UPDATE MANDATORY EXPENSES
+// ========================================
+
+function updateMandatoryExpensesMetric() {
+
+    const metric =
+        data.finance.find(
+            item =>
+                item.id === "mandatory_expenses"
+        );
+
+    if (!metric) {
+        return;
+    }
+
+
+    const total =
+        getExpensesTotal();
+
+
+    metric.current =
+        total;
+
+
+    saveData();
+
+}
+
+
+// ========================================
+// TOTAL EXPENSES
+// ========================================
+
+function getExpensesTotal() {
+
+    return expenses.reduce(
+        (total, expense) => {
+
+            return total +
+                (Number(expense.amount) || 0);
+
+        },
+        0
+    );
+
+}
+
+
+// ========================================
+// STANDARD EDITOR
 // ========================================
 
 function openEditor(category, metricId) {
@@ -598,7 +1116,6 @@ function openEditor(category, metricId) {
 
     const overlay =
         document.createElement("div");
-
 
     overlay.className =
         "editor-overlay";
@@ -660,10 +1177,12 @@ function openEditor(category, metricId) {
                 </span>
 
                 <strong class="editor-progress">
-                    ${progress(
-                        metric.current,
-                        metric.target
-                    )}%
+                    ${
+                        progress(
+                            metric.current,
+                            metric.target
+                        )
+                    }%
                 </strong>
 
             </div>
@@ -687,10 +1206,8 @@ function openEditor(category, metricId) {
     const currentInput =
         overlay.querySelector(".current-input");
 
-
     const targetInput =
         overlay.querySelector(".target-input");
-
 
     const progressElement =
         overlay.querySelector(".editor-progress");
@@ -711,7 +1228,6 @@ function openEditor(category, metricId) {
         "input",
         updatePreview
     );
-
 
     targetInput.addEventListener(
         "input",
@@ -746,22 +1262,16 @@ function openEditor(category, metricId) {
             metric.current =
                 Number(currentInput.value) || 0;
 
-
             metric.target =
                 Number(targetInput.value) || 0;
 
-
             saveData();
-
 
             overlay.remove();
 
-
             closePage();
 
-
             openCategory(category);
-
 
             showToast(
                 "Цель сохранена"
@@ -780,7 +1290,6 @@ function closePage() {
 
     const page =
         document.querySelector(".category-page");
-
 
     if (page) {
 
@@ -807,8 +1316,9 @@ function activateHome() {
 
 
     const home =
-        document.querySelector(".nav-item:first-child");
-
+        document.querySelector(
+            ".nav-item:first-child"
+        );
 
     if (home) {
 
@@ -828,7 +1338,6 @@ function showToast(message) {
     const old =
         document.querySelector(".life-message");
 
-
     if (old) {
         old.remove();
     }
@@ -837,10 +1346,8 @@ function showToast(message) {
     const toast =
         document.createElement("div");
 
-
     toast.className =
         "life-message";
-
 
     toast.textContent =
         message;
@@ -882,6 +1389,29 @@ function formatNumber(value) {
     ).format(
         Number(value) || 0
     );
+
+}
+
+
+// ========================================
+// SECURITY HELPERS
+// ========================================
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function escapeAttribute(value) {
+
+    return escapeHTML(value);
 
 }
 ```
