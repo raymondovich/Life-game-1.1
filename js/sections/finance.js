@@ -1,1581 +1,926 @@
-```javascript
-// LIFE GAME
-// FINANCE MODULE
-// Финансовая система
-//
-// Состав:
-// 1. Заработано за месяц
-// 2. Цель за месяц
-// 3. Обязательные расходы
-// 4. Финансовая подушка
-// 5. Финансовое состояние
-//
-// Расходы:
-// - открываются свайпом вправо по блоку
-// - удаляются свайпом влево по конкретному расходу
-//
-// Storage:
-// life_game_expenses_v3
-//
-// State:
-// state.categories.finance
-// ================================================================
+(function () {
+
+'use strict';
 
 
-import {
-    num,
-    clamp,
-    fmt,
-    esc,
-    percent
-} from './utils.js';
-
-import {
-    xpWithStreak
-} from './xp.js';
+/* ============================================================
+   LIFE GAME — FINANCE MODULE
+   ============================================================ */
 
 
-// ================================================================
-// STORAGE KEY
-// ================================================================
+/* ============================================================
+   HELPERS
+   ============================================================ */
 
-const EXPENSES_KEY =
-    'life_game_expenses_v3';
+function number(value) {
 
+    const n = Number(value);
 
-// ================================================================
-// INTERNAL HELPERS
-// ================================================================
-
-function financeState(state) {
-
-    if (!state.categories) {
-        state.categories = {};
-    }
-
-    if (!state.categories.finance) {
-        state.categories.finance = {
-            xp: 0,
-            level: 1,
-            streak: 0,
-            bestStreak: 0,
-            monthlyIncome: 0,
-            monthlyGoal: 100000,
-            yearlyGoal: 1200000,
-            savings: 0
-        };
-    }
-
-    const finance =
-        state.categories.finance;
-
-
-    // Защита от старых/неполных данных
-
-    finance.xp =
-        num(finance.xp);
-
-    finance.level =
-        Math.max(
-            1,
-            num(finance.level) || 1
-        );
-
-    finance.streak =
-        Math.max(
-            0,
-            num(finance.streak)
-        );
-
-    finance.bestStreak =
-        Math.max(
-            0,
-            num(finance.bestStreak)
-        );
-
-    finance.monthlyIncome =
-        Math.max(
-            0,
-            num(finance.monthlyIncome)
-        );
-
-    finance.monthlyGoal =
-        Math.max(
-            0,
-            num(finance.monthlyGoal)
-        );
-
-    finance.yearlyGoal =
-        Math.max(
-            0,
-            num(finance.yearlyGoal)
-        );
-
-    finance.savings =
-        Math.max(
-            0,
-            num(finance.savings)
-        );
-
-
-    return finance;
+    return Number.isFinite(n)
+        ? n
+        : 0;
 
 }
 
 
-// ================================================================
-// EXPENSES
-// ================================================================
+function money(value) {
 
-function loadExpenses() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                EXPENSES_KEY
-            );
-
-        const data =
-            JSON.parse(
-                raw || '[]'
-            );
-
-        if (!Array.isArray(data)) {
-            return [];
+    return new Intl.NumberFormat(
+        'ru-RU',
+        {
+            maximumFractionDigits: 0
         }
-
-        return data
-            .map(expense => ({
-
-                id: String(
-                    expense.id ||
-                    (
-                        Date.now() +
-                        Math.random()
-                    )
-                ),
-
-                name: String(
-                    expense.name || ''
-                ),
-
-                amount: Math.max(
-                    0,
-                    num(expense.amount)
-                )
-
-            }))
-            .filter(expense =>
-                expense.name &&
-                expense.amount > 0
-            );
-
-    } catch (error) {
-
-        console.error(
-            'LIFE GAME: failed to load finance expenses',
-            error
-        );
-
-        return [];
-
-    }
-
-}
-
-
-function saveExpenses(expenses) {
-
-    localStorage.setItem(
-        EXPENSES_KEY,
-        JSON.stringify(expenses)
+    ).format(
+        Math.round(number(value))
     );
 
 }
 
 
-// ================================================================
-// TOTAL EXPENSES
-// ================================================================
-
-function totalExpenses() {
-
-    return loadExpenses()
-        .reduce(
-            (
-                total,
-                expense
-            ) =>
-                total +
-                num(expense.amount),
-            0
-        );
-
-}
-
-
-// ================================================================
-// EXPENSE PERCENT
-// ================================================================
-
-function expensePercent(
-    income,
-    expenses
+function clamp(
+    value,
+    min,
+    max
 ) {
 
-    if (income <= 0) {
-        return 0;
-    }
-
-    return Math.max(
-        0,
-        Math.round(
-            expenses /
-            income *
-            100
-        )
+    return Math.min(
+        Math.max(
+            number(value),
+            min
+        ),
+        max
     );
 
 }
 
 
-// ================================================================
-// SAVINGS PERCENT
-// ================================================================
-
-function savingsPercent(
-    income,
-    savings
-) {
-
-    if (income <= 0) {
-        return 0;
-    }
-
-    return Math.max(
-        0,
-        Math.round(
-            savings /
-            income *
-            100
-        )
-    );
-
-}
-
-
-// ================================================================
-// FINANCIAL HEALTH
-//
-// Чем:
-// + больше доход
-// + больше накопления
-// - меньше расходы
-//
-// тем выше результат.
-//
-// Базовая модель:
-// 40% — выполнение цели
-// 30% — уровень накоплений
-// 30% — низкий уровень расходов
-// ================================================================
-
-function financialHealth(
-    income,
-    goal,
-    expenses,
-    savings
+function safePercent(
+    value
 ) {
 
     if (
-        income <= 0 &&
-        goal <= 0 &&
-        expenses <= 0 &&
-        savings <= 0
+        !Number.isFinite(value) ||
+        value < 0
     ) {
+
         return 0;
+
     }
 
+    return Math.round(
+        value * 10
+    ) / 10;
 
-    const goalScore =
-        goal > 0
-            ? clamp(
-                Math.round(
-                    income /
-                    goal *
-                    100
-                ),
-                0,
-                100
-            )
-            : income > 0
-                ? 100
-                : 0;
+}
 
 
-    const savingsScore =
-        income > 0
-            ? clamp(
-                Math.round(
-                    savings /
-                    income *
-                    100
-                ),
-                0,
-                100
-            )
-            : 0;
+/* ============================================================
+   FINANCE OBJECT
+   ============================================================ */
+
+const Finance = {
 
 
-    const expenseRatio =
-        income > 0
-            ? expenses /
-              income
-            : 1;
+    /* ==========================================================
+       PROGRESS
+       ========================================================== */
+
+    progress: function (state) {
+
+        const finance =
+            state &&
+            state.categories &&
+            state.categories.finance
+                ? state.categories.finance
+                : {};
 
 
-    const expenseScore =
-        clamp(
+        const income =
+            number(
+                finance.monthlyIncome
+            );
+
+
+        const goal =
+            number(
+                finance.monthlyGoal
+            );
+
+
+        if (goal <= 0) {
+
+            return 0;
+
+        }
+
+
+        return clamp(
             Math.round(
-                (
-                    1 -
-                    expenseRatio
-                ) *
+                income /
+                goal *
                 100
             ),
             0,
             100
         );
 
-
-    return clamp(
-        Math.round(
-            goalScore * 0.4 +
-            savingsScore * 0.3 +
-            expenseScore * 0.3
-        ),
-        0,
-        100
-    );
-
-}
+    },
 
 
-// ================================================================
-// ADD XP
-// ================================================================
+    /* ==========================================================
+       CALCULATIONS
+       ========================================================== */
 
-function addFinanceXP(
-    state,
-    baseXP = 5
-) {
+    calculations: function (state) {
 
-    const finance =
-        financeState(state);
+        const finance =
+            state &&
+            state.categories &&
+            state.categories.finance
+                ? state.categories.finance
+                : {};
 
 
-    const gained =
-        xpWithStreak(
-            baseXP,
-            finance.streak
+        const income =
+            Math.max(
+                0,
+                number(
+                    finance.monthlyIncome
+                )
+            );
+
+
+        const goal =
+            Math.max(
+                0,
+                number(
+                    finance.monthlyGoal
+                )
+            );
+
+
+        const expenses =
+            Math.max(
+                0,
+                number(
+                    finance.mandatoryExpenses
+                )
+            );
+
+
+        const reserve =
+            Math.max(
+                0,
+                number(
+                    finance.financialReserve
+                )
+            );
+
+
+        const incomeProgress =
+            goal > 0
+                ? safePercent(
+                    income /
+                    goal *
+                    100
+                )
+                : 0;
+
+
+        const expensePercent =
+            income > 0
+                ? safePercent(
+                    expenses /
+                    income *
+                    100
+                )
+                : 0;
+
+
+        const freeMoney =
+            income -
+            expenses -
+            reserve;
+
+
+        return {
+
+            income,
+
+            goal,
+
+            expenses,
+
+            reserve,
+
+            incomeProgress,
+
+            expensePercent,
+
+            freeMoney
+
+        };
+
+    },
+
+
+    /* ==========================================================
+       CAN EDIT
+       ========================================================== */
+
+    canEdit: function (id) {
+
+        return [
+
+            'monthlyIncome',
+
+            'monthlyGoal',
+
+            'mandatoryExpenses',
+
+            'financialReserve'
+
+        ].includes(
+            id
         );
 
-
-    finance.xp +=
-        gained;
+    },
 
 
-    // Уровень пересчитывается
-    // через общий XP-механизм приложения,
-    // если он доступен.
+    /* ==========================================================
+       LABELS
+       ========================================================== */
 
-    if (
-        typeof window !== 'undefined' &&
-        typeof window.updateLevels === 'function'
+    labels: {
+
+        monthlyIncome:
+            'Заработано за месяц',
+
+        monthlyGoal:
+            'Цель на месяц',
+
+        mandatoryExpenses:
+            'Обязательные траты',
+
+        financialReserve:
+            'Финансовая подушка'
+
+    },
+
+
+    /* ==========================================================
+       EDIT
+       ========================================================== */
+
+    edit: function (
+        state,
+        id
     ) {
 
-        window.updateLevels(
-            state
-        );
+        if (
+            !this.canEdit(id)
+        ) {
 
-    }
+            return false;
 
+        }
 
-    return gained;
 
-}
+        const finance =
+            state.categories.finance;
 
 
-// ================================================================
-// UPDATE
-// ================================================================
+        const current =
+            number(
+                finance[id]
+            );
 
-function updateFinance(
-    state
-) {
 
-    const finance =
-        financeState(state);
+        let title =
+            this.labels[id];
 
-    const expenses =
-        totalExpenses();
 
+        let message =
+            title +
+            '\n\nВведите сумму в ₽:';
 
-    finance.expenses =
-        expenses;
 
+        const value =
+            window.prompt(
+                message,
+                String(
+                    Math.round(
+                        current
+                    )
+                )
+            );
 
-    finance.expensesPercent =
-        expensePercent(
-            finance.monthlyIncome,
-            expenses
-        );
 
+        if (
+            value === null
+        ) {
 
-    finance.savingsPercent =
-        savingsPercent(
-            finance.monthlyIncome,
-            finance.savings
-        );
+            return false;
 
+        }
 
-    finance.financialHealth =
-        financialHealth(
-            finance.monthlyIncome,
-            finance.monthlyGoal,
-            expenses,
-            finance.savings
-        );
 
+        const cleaned =
+            String(value)
+                .replace(
+                    /\s/g,
+                    ''
+                )
+                .replace(
+                    ',',
+                    '.'
+                );
 
-    return finance;
 
-}
+        const parsed =
+            Number(
+                cleaned
+            );
 
 
-// ================================================================
-// METRIC HTML
-// ================================================================
+        if (
+            !Number.isFinite(parsed) ||
+            parsed < 0
+        ) {
 
-function metric(
-    icon,
-    title,
-    value,
-    target,
-    progress,
-    id,
-    extra = ''
-) {
+            if (
+                typeof window.showToast ===
+                'function'
+            ) {
 
-    return `
+                window.showToast(
+                    '⚠️ Введите корректную сумму'
+                );
 
-        <div
-            class="metric finance-metric"
-            data-finance-id="${esc(id)}"
-        >
+            }
 
-            <div class="metric-icon">
-                ${icon}
-            </div>
 
+            return false;
 
-            <div class="metric-content">
+        }
 
-                <div class="metric-head">
 
-                    <strong>
-                        ${esc(title)}
-                    </strong>
+        finance[id] =
+            Math.round(
+                parsed
+            );
 
-                    <span class="metric-percent">
-                        ${progress}%
-                    </span>
 
-                </div>
+        return true;
 
+    },
 
-                <div class="metric-text">
 
-                    <span>
-                        ${esc(value)}
-                        ${extra}
-                    </span>
+    /* ==========================================================
+       PAGE
+       ========================================================== */
 
-                    <small>
-                        ${esc(target)}
-                    </small>
+    page: function (
+        state,
+        helpers
+    ) {
 
-                </div>
+        const calc =
+            this.calculations(
+                state
+            );
 
 
-                <div class="metric-bar">
+        const progress =
+            calc.incomeProgress;
 
-                    <i
-                        style="width:${clamp(
-                            progress,
-                            0,
-                            100
-                        )}%"
-                    ></i>
 
-                </div>
+        const expensePercent =
+            calc.expensePercent;
 
-            </div>
 
-        </div>
+        const freeMoney =
+            calc.freeMoney;
 
-    `;
 
-}
+        const freeMoneyClass =
+            freeMoney < 0
+                ? 'negative'
+                : 'positive';
 
 
-// ================================================================
-// EXPENSES BLOCK
-// ================================================================
+        return `
 
-function expensesHTML(
-    income
-) {
+        <div class="finance-page">
 
-    const expenses =
-        loadExpenses();
 
-    const total =
-        expenses.reduce(
-            (
-                sum,
-                expense
-            ) =>
-                sum +
-                num(expense.amount),
-            0
-        );
+            <!-- =================================================
+                 1. EARNED THIS MONTH
+                 ================================================= -->
 
-
-    const p =
-        expensePercent(
-            income,
-            total
-        );
-
-
-    const rows =
-        expenses.length
-
-            ? expenses.map(
-                expense => `
-
-                    <div
-                        class="finance-expense-row"
-                        data-expense-id="${esc(
-                            expense.id
-                        )}"
-                    >
-
-                        <div
-                            class="finance-expense-swipe"
-                        >
-
-                            <div class="finance-expense-info">
-
-                                <strong>
-                                    ${esc(
-                                        expense.name
-                                    )}
-                                </strong>
-
-                                <span>
-                                    ${fmt(
-                                        expense.amount
-                                    )} ₽
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                `
-            ).join('')
-
-            : `
-
-                <div class="finance-expenses-empty">
-
-                    Обязательных расходов пока нет
-
-                </div>
-
-            `;
-
-
-    return `
-
-        <div
-            class="finance-expenses"
-            id="financeExpenses"
-        >
-
-            <div
-                class="finance-expenses-header"
+            <section
+                class="
+                    finance-card
+                    finance-income-card
+                "
             >
 
-                <div>
+                <div class="finance-card-top">
 
-                    <div class="finance-expenses-title">
-                        ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
-                    </div>
+                    <div>
 
-                    <div class="finance-expenses-subtitle">
-                        ${fmt(total)} ₽
+                        <div class="finance-eyebrow">
+                            FINANCE
+                        </div>
+
+                        <h3>
+                            Заработано за месяц
+                        </h3>
+
                     </div>
 
                 </div>
 
 
                 <div
-                    class="finance-expenses-percent"
+                    class="
+                        finance-main-value
+                    "
                 >
-                    ${p}%
-                </div>
 
-            </div>
+                    ${money(
+                        calc.income
+                    )}
 
-
-            <div
-                class="finance-expenses-list"
-            >
-
-                ${rows}
-
-            </div>
-
-
-            <button
-                type="button"
-                class="finance-add-expense"
-                onclick="window.addFinanceExpense()"
-            >
-                + Добавить расход
-            </button>
-
-        </div>
-
-    `;
-
-}
-
-
-// ================================================================
-// PAGE
-// ================================================================
-
-function page(
-    state,
-    helpers
-) {
-
-    const finance =
-        updateFinance(state);
-
-
-    const income =
-        finance.monthlyIncome;
-
-    const goal =
-        finance.monthlyGoal;
-
-    const expenses =
-        finance.expenses;
-
-    const savings =
-        finance.savings;
-
-
-    const incomeProgress =
-        goal > 0
-            ? clamp(
-                Math.round(
-                    income /
-                    goal *
-                    100
-                ),
-                0,
-                100
-            )
-            : 0;
-
-
-    const expenseProgress =
-        finance.expensesPercent;
-
-
-    const savingsProgress =
-        finance.savingsPercent;
-
-
-    const health =
-        finance.financialHealth;
-
-
-    const creatorHTML =
-        helpers &&
-        typeof helpers.creatorHTML === 'function'
-            ? helpers.creatorHTML()
-            : '';
-
-
-    return `
-
-        <div class="summary">
-
-            <div class="section-label">
-                FINANCE
-                LEVEL ${finance.level}
-            </div>
-
-
-            <div class="summary-number">
-                ${health}%
-            </div>
-
-
-            <div class="progress">
-
-                <i
-                    style="width:${health}%"
-                ></i>
-
-            </div>
-
-
-            <div class="finance-box">
-
-                <div class="finance-line">
-
-                    <span>
-                        FINANCIAL STATE
-                    </span>
-
-                    <strong>
-                        ${health}%
-                    </strong>
+                    <span>₽</span>
 
                 </div>
 
 
-                <div class="finance-line">
+                <button
+                    type="button"
+                    class="finance-edit"
+                    data-edit="monthlyIncome"
+                >
+                    ✎ ИЗМЕНИТЬ
+                </button>
 
-                    <span>
-                        FINANCE XP
-                    </span>
 
-                    <strong>
-                        ${fmt(finance.xp)} XP
-                    </strong>
-
+                <div class="finance-divider">
                 </div>
 
 
-                <div class="finance-line">
-
-                    <span>
-                        STREAK
-                    </span>
-
-                    <strong>
-                        🔥 ${finance.streak}
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="cards">
-
-
-            <!-- =========================================
-                 ЗАРАБОТАНО
-            ========================================== -->
-
-            ${metric(
-                '💵',
-                'Заработано за месяц',
-                fmt(income) + ' ₽',
-                'Изменить доход',
-                incomeProgress,
-                'monthlyIncome'
-            )}
-
-
-            <!-- =========================================
-                 ЦЕЛЬ
-            ========================================== -->
-
-            ${metric(
-                '🎯',
-                'Цель за месяц',
-                fmt(goal) + ' ₽',
-                'Месячная финансовая цель',
-                incomeProgress,
-                'monthlyGoal'
-            )}
-
-
-            <!-- =========================================
-                 ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
-            ========================================== -->
-
-            ${expensesHTML(
-                income
-            )}
-
-
-            <!-- =========================================
-                 ФИНАНСОВАЯ ПОДУШКА
-            ========================================== -->
-
-            ${metric(
-                '🛡️',
-                'Финансовая подушка',
-                fmt(savings) + ' ₽',
-                'Накопления',
-                savingsProgress,
-                'savings'
-            )}
-
-
-            <!-- =========================================
-                 ФИНАНСОВОЕ СОСТОЯНИЕ
-            ========================================== -->
-
-            <div
-                class="finance-status-card"
-                data-finance-status="true"
-            >
-
-                <div class="finance-status-header">
+                <div class="finance-goal-row">
 
                     <div>
 
-                        <div class="finance-status-label">
-                            ФИНАНСОВОЕ СОСТОЯНИЕ
-                        </div>
+                        <span
+                            class="
+                                finance-small-label
+                            "
+                        >
+                            Цель на месяц
+                        </span>
 
-                        <div class="finance-status-title">
-                            ${health}%
-                        </div>
+                        <strong>
+
+                            ${money(
+                                calc.goal
+                            )}
+
+                            ₽
+
+                        </strong>
 
                     </div>
 
 
-                    <div class="finance-status-icon">
-                        ${health >= 80
-                            ? '💎'
-                            : health >= 60
-                                ? '📈'
-                                : health >= 30
-                                    ? '⚠️'
-                                    : '🔴'
-                        }
-                    </div>
+                    <button
+                        type="button"
+                        class="finance-edit finance-edit-small"
+                        data-edit="monthlyGoal"
+                    >
+                        ✎
+                    </button>
 
                 </div>
 
 
-                <div class="finance-status-bar">
+                <div class="finance-progress-header">
+
+                    <span>
+                        Выполнение плана
+                    </span>
+
+                    <strong>
+                        ${progress}%
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="
+                        finance-progress
+                    "
+                >
 
                     <i
-                        style="width:${health}%"
+                        style="
+                            width:
+                            ${Math.min(
+                                progress,
+                                100
+                            )}%;
+                        "
                     ></i>
 
                 </div>
 
 
-                <div class="finance-status-description">
+            </section>
 
-                    Чем больше заработано,
-                    меньше обязательных расходов
-                    и больше накоплений —
-                    тем выше финансовое состояние.
+
+
+            <!-- =================================================
+                 2. MANDATORY EXPENSES
+                 ================================================= -->
+
+            <section
+                class="
+                    finance-card
+                    finance-expenses-card
+                "
+            >
+
+                <div class="finance-card-title">
+
+                    <div
+                        class="
+                            finance-card-icon
+                        "
+                    >
+                        🧾
+                    </div>
+
+
+                    <div>
+
+                        <div
+                            class="
+                                finance-eyebrow
+                            "
+                        >
+                            EXPENSES
+                        </div>
+
+                        <h3>
+                            Обязательные траты
+                        </h3>
+
+                    </div>
 
                 </div>
 
-            </div>
+
+                <div
+                    class="
+                        finance-main-value
+                    "
+                >
+
+                    ${money(
+                        calc.expenses
+                    )}
+
+                    <span>₽</span>
+
+                </div>
 
 
-            <div class="notice">
-
-                Финансовый прогресс
-                сохраняется автоматически.
-
-                Процент расходов считается
-                от заработанного за месяц.
-
-                Процент финансовой подушки
-                также считается от заработанного
-                за месяц.
-
-            </div>
+                <button
+                    type="button"
+                    class="finance-edit"
+                    data-edit="mandatoryExpenses"
+                >
+                    ✎ ИЗМЕНИТЬ
+                </button>
 
 
-            ${creatorHTML}
+                <div
+                    class="
+                        finance-expense-percent
+                    "
+                >
+
+                    <div>
+
+                        <span>
+                            От заработанного
+                        </span>
+
+                        <strong>
+                            ${expensePercent}%
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            finance-mini-bar
+                        "
+                    >
+
+                        <i
+                            style="
+                                width:
+                                ${Math.min(
+                                    expensePercent,
+                                    100
+                                )}%;
+                            "
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 3. FINANCIAL RESERVE
+                 ================================================= -->
+
+            <section
+                class="
+                    finance-card
+                    finance-reserve-card
+                "
+            >
+
+                <div class="finance-card-title">
+
+                    <div
+                        class="
+                            finance-card-icon
+                        "
+                    >
+                        🛡
+                    </div>
+
+
+                    <div>
+
+                        <div
+                            class="
+                                finance-eyebrow
+                            "
+                        >
+                            RESERVE
+                        </div>
+
+                        <h3>
+                            Финансовая подушка
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="
+                        finance-main-value
+                    "
+                >
+
+                    ${money(
+                        calc.reserve
+                    )}
+
+                    <span>₽</span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="finance-edit"
+                    data-edit="financialReserve"
+                >
+                    ✎ ИЗМЕНИТЬ
+                </button>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 4. FINANCIAL STATE
+                 ================================================= -->
+
+            <section
+                class="
+                    finance-card
+                    finance-state-card
+                    ${freeMoneyClass}
+                "
+            >
+
+                <div class="finance-card-title">
+
+                    <div
+                        class="
+                            finance-card-icon
+                        "
+                    >
+                        ◆
+                    </div>
+
+
+                    <div>
+
+                        <div
+                            class="
+                                finance-eyebrow
+                            "
+                        >
+                            FINANCIAL STATE
+                        </div>
+
+                        <h3>
+                            Финансовое состояние
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="
+                        finance-free-value
+                    "
+                >
+
+                    ${money(
+                        freeMoney
+                    )}
+
+                    <span>₽</span>
+
+                </div>
+
+
+                <div
+                    class="
+                        finance-free-label
+                    "
+                >
+
+                    ${
+                        freeMoney >= 0
+                            ? 'Свободные деньги'
+                            : 'Дефицит'
+                    }
+
+                </div>
+
+
+                <div
+                    class="
+                        finance-breakdown
+                    "
+                >
+
+                    <div
+                        class="
+                            finance-breakdown-row
+                        "
+                    >
+
+                        <span>
+                            Заработано
+                        </span>
+
+                        <strong>
+                            ${money(
+                                calc.income
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            finance-breakdown-row
+                        "
+                    >
+
+                        <span>
+                            Обязательные траты
+                        </span>
+
+                        <strong>
+                            − ${money(
+                                calc.expenses
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            finance-breakdown-row
+                        "
+                    >
+
+                        <span>
+                            Финансовая подушка
+                        </span>
+
+                        <strong>
+                            − ${money(
+                                calc.reserve
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            finance-breakdown-line
+                        "
+                    ></div>
+
+
+                    <div
+                        class="
+                            finance-breakdown-row
+                            finance-breakdown-total
+                        "
+                    >
+
+                        <span>
+                            Свободно
+                        </span>
+
+                        <strong>
+                            ${money(
+                                freeMoney
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
 
         </div>
 
-    `;
+        `;
 
-}
+    },
 
 
-// ================================================================
-// EDITOR LABELS
-// ================================================================
+    /* ==========================================================
+       SWIPE PLACEHOLDER
+       ========================================================== */
 
-const labels = {
+    initExpenseSwipe: function () {
 
-    monthlyIncome:
-        'Заработано за месяц',
+        /*
+         * Оставлено для совместимости
+         * с текущим app.js.
+         *
+         * На данном этапе отдельные
+         * расходы не используются.
+         */
 
-    monthlyGoal:
-        'Цель за месяц',
+        return;
 
-    savings:
-        'Финансовая подушка'
+    }
 
 };
 
 
-// ================================================================
-// CAN EDIT
-// ================================================================
+/* ============================================================
+   GLOBAL EXPORT
+   ============================================================ */
 
-function canEdit(id) {
+window.LifeGameFinance =
+    Finance;
 
-    return Object.prototype.hasOwnProperty.call(
-        labels,
-        id
-    );
 
-}
-
-
-// ================================================================
-// EDIT
-// ================================================================
-
-function edit(
-    state,
-    id
-) {
-
-    if (!canEdit(id)) {
-        return false;
-    }
-
-
-    const finance =
-        financeState(state);
-
-
-    const current =
-        num(
-            finance[id]
-        );
-
-
-    const title =
-        labels[id];
-
-
-    const value =
-        prompt(
-            `Введите значение: ${title}`,
-            String(current)
-        );
-
-
-    if (
-        value === null ||
-        value.trim() === ''
-    ) {
-        return false;
-    }
-
-
-    const number =
-        Number(
-            value.replace(
-                /\s/g,
-                ''
-            )
-        );
-
-
-    if (
-        !Number.isFinite(number) ||
-        number < 0
-    ) {
-
-        if (
-            typeof window.showToast ===
-            'function'
-        ) {
-
-            window.showToast(
-                '⚠️ Введите корректное значение'
-            );
-
-        }
-
-        return false;
-
-    }
-
-
-    finance[id] =
-        Math.round(number);
-
-
-    addFinanceXP(
-        state,
-        5
-    );
-
-
-    updateFinance(
-        state
-    );
-
-
-    return true;
-
-}
-
-
-// ================================================================
-// ADD EXPENSE
-// ================================================================
-
-function addExpense() {
-
-    const name =
-        prompt(
-            'Название обязательного расхода:'
-        );
-
-
-    if (
-        name === null ||
-        !name.trim()
-    ) {
-        return;
-    }
-
-
-    const amountInput =
-        prompt(
-            'Сумма расхода в ₽:'
-        );
-
-
-    if (
-        amountInput === null
-    ) {
-        return;
-    }
-
-
-    const amount =
-        Number(
-            amountInput.replace(
-                /\s/g,
-                ''
-            )
-        );
-
-
-    if (
-        !Number.isFinite(amount) ||
-        amount <= 0
-    ) {
-
-        if (
-            typeof window.showToast ===
-            'function'
-        ) {
-
-            window.showToast(
-                '⚠️ Введите корректную сумму'
-            );
-
-        }
-
-        return;
-
-    }
-
-
-    const expenses =
-        loadExpenses();
-
-
-    expenses.push({
-
-        id:
-            String(
-                Date.now() +
-                Math.random()
-            ),
-
-        name:
-            name.trim(),
-
-        amount:
-            Math.round(amount)
-
-    });
-
-
-    saveExpenses(
-        expenses
-    );
-
-
-    if (
-        typeof window.showToast ===
-        'function'
-    ) {
-
-        window.showToast(
-            '💸 Расход добавлен'
-        );
-
-    }
-
-
-    refreshPage();
-
-}
-
-
-// ================================================================
-// DELETE EXPENSE
-// ================================================================
-
-function deleteExpense(
-    id
-) {
-
-    const expenses =
-        loadExpenses();
-
-
-    const filtered =
-        expenses.filter(
-            expense =>
-                String(expense.id) !==
-                String(id)
-        );
-
-
-    if (
-        filtered.length ===
-        expenses.length
-    ) {
-        return;
-    }
-
-
-    saveExpenses(
-        filtered
-    );
-
-
-    if (
-        typeof window.showToast ===
-        'function'
-    ) {
-
-        window.showToast(
-            '🗑️ Расход удалён'
-        );
-
-    }
-
-
-    refreshPage();
-
-}
-
-
-// ================================================================
-// REFRESH
-// ================================================================
-
-function refreshPage() {
-
-    if (
-        typeof window.openCategoryPage ===
-        'function'
-    ) {
-
-        window.openCategoryPage(
-            'finance'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        typeof window.renderApp ===
-        'function'
-    ) {
-
-        window.renderApp();
-
-    }
-
-}
-
-
-// ================================================================
-// EXPENSE SWIPE
-// ================================================================
-//
-// iPhone-style interaction:
-//
-// свайп вправо:
-// раскрытие блока расходов
-//
-// свайп влево:
-// удаление конкретного расхода
-// ================================================================
-
-function initExpenseSwipe() {
-
-    const container =
-        document.getElementById(
-            'financeExpenses'
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    let startX = 0;
-    let startY = 0;
-    let currentRow = null;
-
-
-    container.addEventListener(
-        'touchstart',
-        event => {
-
-            const touch =
-                event.touches[0];
-
-            startX =
-                touch.clientX;
-
-            startY =
-                touch.clientY;
-
-
-            currentRow =
-                event.target.closest(
-                    '.finance-expense-row'
-                );
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    container.addEventListener(
-        'touchend',
-        event => {
-
-            if (!currentRow) {
-                return;
-            }
-
-
-            const touch =
-                event.changedTouches[0];
-
-
-            const deltaX =
-                touch.clientX -
-                startX;
-
-
-            const deltaY =
-                touch.clientY -
-                startY;
-
-
-            // Не реагируем на вертикальный скролл
-
-            if (
-                Math.abs(deltaY) >
-                Math.abs(deltaX)
-            ) {
-
-                currentRow = null;
-                return;
-
-            }
-
-
-            // Минимальная длина свайпа
-
-            if (
-                Math.abs(deltaX) <
-                60
-            ) {
-
-                currentRow = null;
-                return;
-
-            }
-
-
-            const id =
-                currentRow.dataset.expenseId;
-
-
-            // Свайп влево = удалить
-
-            if (
-                deltaX < -60
-            ) {
-
-                deleteExpense(
-                    id
-                );
-
-            }
-
-
-            currentRow = null;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    // ------------------------------------------------
-    // Свайп по самому блоку расходов
-    // вправо открывает список
-    // ------------------------------------------------
-
-    let blockStartX = 0;
-    let blockStartY = 0;
-
-
-    container.addEventListener(
-        'touchstart',
-        event => {
-
-            if (
-                event.target.closest(
-                    '.finance-expense-row'
-                )
-            ) {
-                return;
-            }
-
-            const touch =
-                event.touches[0];
-
-            blockStartX =
-                touch.clientX;
-
-            blockStartY =
-                touch.clientY;
-
-        },
-        {
-            passive: true
-        }
-    );
-
-
-    container.addEventListener(
-        'touchend',
-        event => {
-
-            const touch =
-                event.changedTouches[0];
-
-
-            const deltaX =
-                touch.clientX -
-                blockStartX;
-
-
-            const deltaY =
-                touch.clientY -
-                blockStartY;
-
-
-            if (
-                Math.abs(deltaY) >
-                Math.abs(deltaX)
-            ) {
-                return;
-            }
-
-
-            if (
-                deltaX > 60
-            ) {
-
-                container.classList.add(
-                    'is-open'
-                );
-
-            }
-
-        },
-        {
-            passive: true
-        }
-    );
-
-}
-
-
-// ================================================================
-// GLOBAL EDIT HANDLER
-// ================================================================
-
-window.handleFinanceEdit =
-    function(
-        id
-    ) {
-
-        if (
-            typeof window.lifeGameState ===
-            'undefined'
-        ) {
-            return;
-        }
-
-
-        const state =
-            window.lifeGameState;
-
-
-        if (
-            edit(
-                state,
-                id
-            )
-        ) {
-
-            refreshPage();
-
-        }
-
-    };
-
-
-// ================================================================
-// GLOBAL ADD EXPENSE
-// ================================================================
-
-window.addFinanceExpense =
-    function() {
-
-        addExpense();
-
-    };
-
-
-// ================================================================
-// GLOBAL DELETE EXPENSE
-// ================================================================
-
-window.deleteFinanceExpense =
-    function(id) {
-
-        deleteExpense(
-            id
-        );
-
-    };
-
-
-// ================================================================
-// INIT
-// ================================================================
-
-function init() {
-
-    initExpenseSwipe();
-
-}
-
-
-document.addEventListener(
-    'DOMContentLoaded',
-    init
-);
-
-
-// ================================================================
-// PUBLIC MODULE
-// ================================================================
-
-window.LifeGameFinance = {
-
-    page,
-
-    labels,
-
-    canEdit,
-
-    edit,
-
-    loadExpenses,
-
-    saveExpenses,
-
-    totalExpenses,
-
-    expensePercent,
-
-    savingsPercent,
-
-    financialHealth,
-
-    updateFinance,
-
-    addExpense,
-
-    deleteExpense,
-
-    initExpenseSwipe
-
-};
-
-
-console.log(
-    'LIFE GAME: finance.js loaded'
-);
-```
+})();
