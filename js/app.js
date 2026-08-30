@@ -1,554 +1,1841 @@
+```javascript
 // ==========================================
-// APP.JS - Главный файл управления приложением
-// ==========================================
-
-// ==========================================
-// 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ СОСТОЯНИЯ
-// ==========================================
-
-// Основные переменные (будут использоваться во всех модулях)
-let health = 50;
-let money = 1000;
-let development = 30;
-let level = 1;
-let xp = 0;
-let xpToNextLevel = 100;
-
-// История доходов/расходов
-let incomeHistory = [];
-let expenseHistory = [];
-
-// ==========================================
-// 2. ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+// LIFE GAME
+// APP.JS
+// Главный файл приложения
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 LIFE GAME 1.1 - Приложение запущено');
-    
-    // Загружаем сохраненные данные
-    loadGameData();
-    
-    // Обновляем весь UI
-    updateAllUI();
-    
-    // Настраиваем обработчики событий
-    setupEventListeners();
-    
-    // Настраиваем навигацию
-    setupNavigation();
-});
+'use strict';
+
 
 // ==========================================
-// 3. ЗАГРУЗКА / СОХРАНЕНИЕ ДАННЫХ
+// 1. CORE STATE
 // ==========================================
+
+let state = {
+    finance: {
+        monthlyIncome: 0,
+        monthlyGoal: 100000,
+        expenses: [],
+        savings: 0
+    },
+
+    health: {
+        health: 50,
+        routine: 50,
+        nutrition: 50,
+        steps: 5000,
+        workouts: 0,
+        monthlyTarget: 12,
+        level: 1
+    },
+
+    development: {
+        books: 0,
+        languageMinutes: 0,
+        meditationMinutes: 0,
+        xp: 0,
+        level: 1,
+        streak: 0
+    },
+
+    player: {
+        xp: 0,
+        level: 1
+    }
+};
+
+
+// ==========================================
+// 2. LOCAL STORAGE
+// ==========================================
+
+const STORAGE_KEY = 'life_game_data_v4';
+
 
 function loadGameData() {
-    const saved = localStorage.getItem('lifeGameData');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            health = data.health || 50;
-            money = data.money || 1000;
-            development = data.development || 30;
-            level = data.level || 1;
-            xp = data.xp || 0;
-            xpToNextLevel = data.xpToNextLevel || 100;
-            incomeHistory = data.incomeHistory || [];
-            expenseHistory = data.expenseHistory || [];
-            console.log('💾 Данные загружены');
-        } catch (e) {
-            console.warn('Ошибка загрузки данных, используем значения по умолчанию');
+
+    try {
+
+        const saved =
+            localStorage.getItem(STORAGE_KEY);
+
+        if (!saved) {
+            return;
         }
+
+        const data =
+            JSON.parse(saved);
+
+        if (data.finance) {
+
+            state.finance = {
+                ...state.finance,
+                ...data.finance
+            };
+
+        }
+
+        if (data.health) {
+
+            state.health = {
+                ...state.health,
+                ...data.health
+            };
+
+        }
+
+        if (data.development) {
+
+            state.development = {
+                ...state.development,
+                ...data.development
+            };
+
+        }
+
+        if (data.player) {
+
+            state.player = {
+                ...state.player,
+                ...data.player
+            };
+
+        }
+
+        console.log(
+            '💾 LIFE GAME: данные загружены'
+        );
+
+    } catch (error) {
+
+        console.error(
+            'LIFE GAME: ошибка загрузки данных',
+            error
+        );
+
     }
+
 }
+
 
 function saveGameData() {
-    const data = {
-        health,
-        money,
-        development,
-        level,
-        xp,
-        xpToNextLevel,
-        incomeHistory,
-        expenseHistory
-    };
-    localStorage.setItem('lifeGameData', JSON.stringify(data));
+
+    try {
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(state)
+        );
+
+    } catch (error) {
+
+        console.error(
+            'LIFE GAME: ошибка сохранения',
+            error
+        );
+
+    }
+
 }
 
+
 // ==========================================
-// 4. ОБНОВЛЕНИЕ ВСЕГО UI
+// 3. HELPERS
+// ==========================================
+
+function clamp(
+    value,
+    min = 0,
+    max = 100
+) {
+
+    return Math.min(
+        max,
+        Math.max(
+            min,
+            Number(value) || 0
+        )
+    );
+
+}
+
+
+function fmt(value) {
+
+    return new Intl.NumberFormat(
+        'ru-RU'
+    ).format(
+        Number(value) || 0
+    );
+
+}
+
+
+function esc(value) {
+
+    return String(value)
+        .replace(
+            /[&<>"']/g,
+            character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[character])
+        );
+
+}
+
+
+// ==========================================
+// 4. FINANCE CALCULATIONS
+// ==========================================
+
+function getTotalExpenses() {
+
+    return state.finance.expenses.reduce(
+        (sum, expense) =>
+            sum + (
+                Number(expense.amount) || 0
+            ),
+        0
+    );
+
+}
+
+
+function getExpensePercent() {
+
+    const income =
+        Number(
+            state.finance.monthlyIncome
+        ) || 0;
+
+    if (income <= 0) {
+        return 0;
+    }
+
+    return clamp(
+        Math.round(
+            getTotalExpenses() /
+            income *
+            100
+        )
+    );
+
+}
+
+
+function getSavingsPercent() {
+
+    const income =
+        Number(
+            state.finance.monthlyIncome
+        ) || 0;
+
+    if (income <= 0) {
+        return 0;
+    }
+
+    return clamp(
+        Math.round(
+            state.finance.savings /
+            income *
+            100
+        )
+    );
+
+}
+
+
+function getFinanceState() {
+
+    const income =
+        Number(
+            state.finance.monthlyIncome
+        ) || 0;
+
+    const expenses =
+        getTotalExpenses();
+
+    const savings =
+        Number(
+            state.finance.savings
+        ) || 0;
+
+    if (income <= 0) {
+        return 0;
+    }
+
+    /*
+     * Финансовое состояние:
+     *
+     * 50% — способность зарабатывать
+     * 25% — контроль обязательных расходов
+     * 25% — финансовая подушка
+     */
+
+    const incomeScore =
+        clamp(
+            Math.round(
+                income /
+                Math.max(
+                    1,
+                    state.finance.monthlyGoal
+                ) *
+                100
+            )
+        );
+
+    const expenseScore =
+        clamp(
+            100 -
+            Math.round(
+                expenses /
+                income *
+                100
+            )
+        );
+
+    const savingsScore =
+        clamp(
+            Math.round(
+                savings /
+                income *
+                100
+            )
+        );
+
+    return clamp(
+        Math.round(
+            incomeScore * 0.5 +
+            expenseScore * 0.25 +
+            savingsScore * 0.25
+        )
+    );
+
+}
+
+
+// ==========================================
+// 5. PLAYER XP
+// ==========================================
+
+function addXP(amount) {
+
+    const value =
+        Math.max(
+            0,
+            Number(amount) || 0
+        );
+
+    state.player.xp += value;
+
+    while (
+        state.player.xp >=
+        state.player.level * 100
+    ) {
+
+        state.player.xp -=
+            state.player.level * 100;
+
+        state.player.level++;
+
+        showToast(
+            '🎉 УРОВЕНЬ ПОВЫШЕН! LVL ' +
+            state.player.level
+        );
+
+    }
+
+    saveGameData();
+    updateAllUI();
+
+}
+
+
+// ==========================================
+// 6. HOME UI
+// ==========================================
+
+function updateHealthUI() {
+
+    const value =
+        clamp(
+            state.health.health
+        );
+
+    const percent =
+        document.getElementById(
+            'healthPercent'
+        );
+
+    const fill =
+        document.getElementById(
+            'healthFill'
+        );
+
+    if (percent) {
+        percent.textContent =
+            value + '%';
+    }
+
+    if (fill) {
+        fill.style.width =
+            value + '%';
+    }
+
+}
+
+
+function updateFinanceUI() {
+
+    const financeState =
+        getFinanceState();
+
+    const percent =
+        document.getElementById(
+            'financePercent'
+        );
+
+    const fill =
+        document.getElementById(
+            'financeFill'
+        );
+
+    if (percent) {
+
+        percent.textContent =
+            financeState + '%';
+
+    }
+
+    if (fill) {
+
+        fill.style.width =
+            financeState + '%';
+
+    }
+
+}
+
+
+function updateDevelopmentUI() {
+
+    const x =
+        state.development;
+
+    const books =
+        clamp(
+            Math.round(
+                x.books / 2 * 100
+            )
+        );
+
+    const language =
+        clamp(
+            Math.round(
+                x.languageMinutes /
+                30 *
+                100
+            )
+        );
+
+    const meditation =
+        clamp(
+            Math.round(
+                x.meditationMinutes /
+                15 *
+                100
+            )
+        );
+
+    const development =
+        Math.round(
+            (
+                books +
+                language +
+                meditation
+            ) / 3
+        );
+
+    const percent =
+        document.getElementById(
+            'developmentPercent'
+        );
+
+    const fill =
+        document.getElementById(
+            'developmentFill'
+        );
+
+    if (percent) {
+
+        percent.textContent =
+            development + '%';
+
+    }
+
+    if (fill) {
+
+        fill.style.width =
+            development + '%';
+
+    }
+
+}
+
+
+function updateLevelUI() {
+
+    const level =
+        document.getElementById(
+            'playerLevel'
+        );
+
+    const xp =
+        document.getElementById(
+            'playerXP'
+        );
+
+    const fill =
+        document.getElementById(
+            'playerXPFill'
+        );
+
+    const next =
+        document.getElementById(
+            'xpNext'
+        );
+
+    if (!level) {
+        return;
+    }
+
+    const currentLevel =
+        state.player.level;
+
+    const currentXP =
+        state.player.xp;
+
+    const requiredXP =
+        currentLevel * 100;
+
+    level.textContent =
+        'LVL ' + currentLevel;
+
+    if (xp) {
+
+        xp.textContent =
+            currentXP + ' XP';
+
+    }
+
+    if (fill) {
+
+        fill.style.width =
+            Math.min(
+                100,
+                currentXP /
+                requiredXP *
+                100
+            ) + '%';
+
+    }
+
+    if (next) {
+
+        next.textContent =
+            Math.max(
+                0,
+                requiredXP - currentXP
+            ) +
+            ' XP TO NEXT LEVEL';
+
+    }
+
+    const rank =
+        document.getElementById(
+            'playerRank'
+        );
+
+    if (rank) {
+
+        const ranks = [
+            'BEGINNER',
+            'EXPLORER',
+            'ADVENTURER',
+            'HERO',
+            'LEGEND'
+        ];
+
+        const index =
+            Math.min(
+                Math.floor(
+                    currentLevel / 3
+                ),
+                ranks.length - 1
+            );
+
+        rank.textContent =
+            ranks[index];
+
+    }
+
+}
+
+
+function getDevelopmentProgress() {
+
+    const x =
+        state.development;
+
+    const books =
+        clamp(
+            Math.round(
+                x.books / 2 * 100
+            )
+        );
+
+    const language =
+        clamp(
+            Math.round(
+                x.languageMinutes /
+                30 *
+                100
+            )
+        );
+
+    const meditation =
+        clamp(
+            Math.round(
+                x.meditationMinutes /
+                15 *
+                100
+            )
+        );
+
+    return Math.round(
+        (
+            books +
+            language +
+            meditation
+        ) / 3
+    );
+
+}
+
+
+function updateLifeProgressUI() {
+
+    const healthProgress =
+        clamp(
+            state.health.health
+        );
+
+    const financeProgress =
+        getFinanceState();
+
+    const developmentProgress =
+        getDevelopmentProgress();
+
+    const progress =
+        Math.round(
+            (
+                healthProgress +
+                financeProgress +
+                developmentProgress
+            ) / 3
+        );
+
+    const lifeProgress =
+        document.getElementById(
+            'lifeProgress'
+        );
+
+    const lifeFill =
+        document.getElementById(
+            'lifeFill'
+        );
+
+    if (lifeProgress) {
+
+        lifeProgress.innerHTML =
+            progress +
+            '<span>%</span>';
+
+    }
+
+    if (lifeFill) {
+
+        lifeFill.style.width =
+            progress + '%';
+
+    }
+
+}
+
+
+// ==========================================
+// 7. ALL UI
 // ==========================================
 
 function updateAllUI() {
+
     updateHealthUI();
     updateFinanceUI();
     updateDevelopmentUI();
     updateLevelUI();
     updateLifeProgressUI();
-    saveGameData();
-}
 
-// Обновление интерфейса здоровья
-function updateHealthUI() {
-    const percent = Math.min(100, Math.max(0, health));
-    document.getElementById('healthPercent').textContent = percent + '%';
-    document.getElementById('healthFill').style.width = percent + '%';
-    
-    // Обновляем жизнь на главном экране
-    updateLifeProgressUI();
-}
+    /*
+     * Если открыта страница финансов,
+     * обновляем её содержимое через
+     * finance.js.
+     */
 
-// Обновление интерфейса финансов
-function updateFinanceUI() {
-    const percent = Math.min(100, Math.max(0, money / 20));
-    document.getElementById('financePercent').textContent = Math.round(percent) + '%';
-    document.getElementById('financeFill').style.width = Math.min(100, percent) + '%';
-}
+    if (
+        currentPage === 'finance' &&
+        window.LifeGameFinance &&
+        typeof window.LifeGameFinance.refresh ===
+        'function'
+    ) {
 
-// Обновление интерфейса развития
-function updateDevelopmentUI() {
-    const percent = Math.min(100, Math.max(0, development));
-    document.getElementById('developmentPercent').textContent = percent + '%';
-    document.getElementById('developmentFill').style.width = percent + '%';
-}
+        window.LifeGameFinance.refresh(
+            state,
+            getFinanceHelpers()
+        );
 
-// Обновление уровня и XP
-function updateLevelUI() {
-    document.getElementById('playerLevel').textContent = 'LVL ' + level;
-    document.getElementById('playerXP').textContent = xp + ' XP';
-    
-    const xpPercent = (xp / xpToNextLevel) * 100;
-    document.getElementById('playerXPFill').style.width = Math.min(100, xpPercent) + '%';
-    document.getElementById('xpNext').textContent = (xpToNextLevel - xp) + ' XP TO NEXT LEVEL';
-    
-    // Обновляем ранг
-    const ranks = ['BEGINNER', 'EXPLORER', 'ADVENTURER', 'HERO', 'LEGEND'];
-    const rankIndex = Math.min(Math.floor(level / 3), ranks.length - 1);
-    document.getElementById('playerRank').textContent = ranks[rankIndex];
-}
-
-// Обновление общего прогресса жизни
-function updateLifeProgressUI() {
-    const avgProgress = (health + development + (money / 20)) / 3;
-    const progress = Math.min(100, Math.round(avgProgress));
-    document.getElementById('lifeProgress').innerHTML = progress + '<span>%</span>';
-    document.getElementById('lifeFill').style.width = progress + '%';
-}
-
-// ==========================================
-// 5. МЕХАНИКИ ИГРЫ
-// ==========================================
-
-// --- Механики Здоровья ---
-function increaseHealth() {
-    const oldHealth = health;
-    health = Math.min(100, health + 5);
-    if (health !== oldHealth) {
-        addXP(15);
-        showToast('❤️ +5 здоровья');
-        updateAllUI();
-    } else {
-        showToast('⚠️ Здоровье уже максимальное');
     }
+
+    saveGameData();
+
 }
+
+
+// ==========================================
+// 8. FINANCE HELPERS
+// ==========================================
+
+function getFinanceHelpers() {
+
+    return {
+
+        fmt,
+        clamp,
+        esc,
+
+        getTotalExpenses,
+        getExpensePercent,
+        getSavingsPercent,
+        getFinanceState,
+
+        save: saveGameData,
+
+        toast: showToast,
+
+        update: updateAllUI
+
+    };
+
+}
+
+
+// ==========================================
+// 9. HEALTH MECHANICS
+// ==========================================
+
+function increaseHealth() {
+
+    const old =
+        state.health.health;
+
+    state.health.health =
+        clamp(
+            state.health.health + 5
+        );
+
+    if (
+        state.health.health !== old
+    ) {
+
+        addXP(15);
+
+        showToast(
+            '❤️ +5 здоровья'
+        );
+
+    } else {
+
+        showToast(
+            '⚠️ Здоровье уже максимальное'
+        );
+
+    }
+
+}
+
 
 function decreaseHealth() {
-    const oldHealth = health;
-    health = Math.max(0, health - 5);
-    if (health !== oldHealth) {
-        showToast('💔 -5 здоровья');
+
+    const old =
+        state.health.health;
+
+    state.health.health =
+        Math.max(
+            0,
+            state.health.health - 5
+        );
+
+    if (
+        state.health.health !== old
+    ) {
+
+        showToast(
+            '💔 -5 здоровья'
+        );
+
         updateAllUI();
+
     } else {
-        showToast('⚠️ Здоровье уже минимальное');
+
+        showToast(
+            '⚠️ Здоровье уже минимальное'
+        );
+
     }
+
 }
 
-// --- Механики Финансов ---
-function addMoney() {
-    const amount = 100;
-    const oldMoney = money;
-    money += amount;
-    if (money !== oldMoney) {
-        incomeHistory.push({ amount: amount, date: new Date().toLocaleString() });
-        addXP(10);
-        showToast('💰 +' + amount + ' монет');
-        updateAllUI();
-    }
-}
-
-function spendMoney() {
-    const amount = 50;
-    const oldMoney = money;
-    money = Math.max(0, money - amount);
-    if (money !== oldMoney) {
-        expenseHistory.push({ amount: amount, date: new Date().toLocaleString() });
-        showToast('💸 -' + amount + ' монет');
-        updateAllUI();
-    } else {
-        showToast('⚠️ Недостаточно средств');
-    }
-}
-
-// --- Механики Развития ---
-function levelUp() {
-    const oldDevelopment = development;
-    development = Math.min(100, development + 3);
-    if (development !== oldDevelopment) {
-        addXP(20);
-        showToast('🧠 +3 к развитию');
-        updateAllUI();
-    } else {
-        showToast('⚠️ Развитие уже максимальное');
-    }
-}
-
-// --- Система XP ---
-function addXP(amount) {
-    xp += amount;
-    while (xp >= xpToNextLevel) {
-        xp -= xpToNextLevel;
-        level++;
-        xpToNextLevel = Math.floor(xpToNextLevel * 1.5) + 10;
-        showToast('🎉 УРОВЕНЬ ПОВЫШЕН! Уровень ' + level);
-    }
-    updateAllUI();
-}
 
 // ==========================================
-// 6. ЕЖЕДНЕВНЫЙ КВЕСТ
+// 10. DEVELOPMENT MECHANICS
+// ==========================================
+
+function levelUp() {
+
+    const old =
+        getDevelopmentProgress();
+
+    if (old >= 100) {
+
+        showToast(
+            '⚠️ Развитие уже максимальное'
+        );
+
+        return;
+
+    }
+
+    state.development.meditationMinutes += 1;
+
+    addXP(20);
+
+    showToast(
+        '🧠 +1 к развитию'
+    );
+
+}
+
+
+// ==========================================
+// 11. DAILY QUEST
 // ==========================================
 
 function completeDailyQuest() {
+
     const rewards = [
-        { health: 10, text: '💪 +10 здоровья' },
-        { money: 200, text: '💰 +200 монет' },
-        { development: 5, text: '🧠 +5 развития' }
+
+        {
+            type: 'health',
+            value: 10,
+            text: '💪 +10 здоровья'
+        },
+
+        {
+            type: 'income',
+            value: 200,
+            text: '💰 +200 ₽'
+        },
+
+        {
+            type: 'development',
+            value: 5,
+            text: '🧠 +5 развития'
+        }
+
     ];
-    
-    const reward = rewards[Math.floor(Math.random() * rewards.length)];
-    
-    if (reward.health) {
-        health = Math.min(100, health + reward.health);
-    } else if (reward.money) {
-        money += reward.money;
-    } else if (reward.development) {
-        development = Math.min(100, development + reward.development);
+
+    const reward =
+        rewards[
+            Math.floor(
+                Math.random() *
+                rewards.length
+            )
+        ];
+
+    if (
+        reward.type ===
+        'health'
+    ) {
+
+        state.health.health =
+            clamp(
+                state.health.health +
+                reward.value
+            );
+
     }
-    
+
+    if (
+        reward.type ===
+        'income'
+    ) {
+
+        state.finance.monthlyIncome +=
+            reward.value;
+
+    }
+
+    if (
+        reward.type ===
+        'development'
+    ) {
+
+        state.development.books +=
+            reward.value;
+
+    }
+
     addXP(50);
-    showToast('⚡ Квест выполнен! ' + reward.text);
+
+    showToast(
+        '⚡ Квест выполнен! ' +
+        reward.text
+    );
+
+    const button =
+        document.getElementById(
+            'dailyQuest'
+        );
+
+    if (button) {
+
+        button.textContent =
+            '✅ КВЕСТ ВЫПОЛНЕН';
+
+        button.disabled =
+            true;
+
+        button.style.opacity =
+            '0.5';
+
+        setTimeout(
+            () => {
+
+                button.textContent =
+                    '⚡ DAILY QUEST';
+
+                button.disabled =
+                    false;
+
+                button.style.opacity =
+                    '1';
+
+            },
+            30000
+        );
+
+    }
+
     updateAllUI();
-    document.getElementById('dailyQuest').textContent = '✅ КВЕСТ ВЫПОЛНЕН';
-    document.getElementById('dailyQuest').disabled = true;
-    document.getElementById('dailyQuest').style.opacity = '0.5';
-    
-    // Возвращаем квест через 30 секунд
-    setTimeout(() => {
-        document.getElementById('dailyQuest').textContent = '⚡ DAILY QUEST';
-        document.getElementById('dailyQuest').disabled = false;
-        document.getElementById('dailyQuest').style.opacity = '1';
-    }, 30000);
+
 }
 
+
 // ==========================================
-// 7. НАВИГАЦИЯ
+// 12. PAGE NAVIGATION
 // ==========================================
 
-let currentPage = 'home';
+let currentPage =
+    'home';
+
+
+const pageCreators = {
+
+    home:
+        createHomePage,
+
+    finance:
+        createFinancePage,
+
+    health:
+        createHealthPage,
+
+    development:
+        createDevelopmentPage
+
+};
+
 
 function setupNavigation() {
-    const navButtons = document.querySelectorAll('.nav button');
-    const pages = {
-        home: createHomePage,
-        finance: createFinancePage,
-        health: createHealthPage,
-        development: createDevelopmentPage
-    };
-    
-    navButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const page = this.dataset.nav;
-            if (page && pages[page]) {
-                openPage(page);
-            }
-        });
-    });
+
+    const buttons =
+        document.querySelectorAll(
+            '.nav button'
+        );
+
+    buttons.forEach(
+        button => {
+
+            button.addEventListener(
+                'click',
+                function() {
+
+                    const page =
+                        this.dataset.nav;
+
+                    if (
+                        page &&
+                        pageCreators[page]
+                    ) {
+
+                        openPage(page);
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
 }
+
 
 function openPage(pageName) {
-    // Убираем старую страницу
-    const oldPage = document.querySelector('.page');
+
+    const oldPage =
+        document.querySelector(
+            '.page'
+        );
+
     if (oldPage) {
+
         oldPage.remove();
+
     }
-    
-    // Обновляем активную кнопку
-    document.querySelectorAll('.nav button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.nav === pageName);
-    });
-    
-    // Создаем новую страницу
-    const pageCreators = {
-        home: createHomePage,
-        finance: createFinancePage,
-        health: createHealthPage,
-        development: createDevelopmentPage
-    };
-    
-    if (pageCreators[pageName]) {
-        const pageHTML = pageCreators[pageName]();
-        const pageDiv = document.createElement('div');
-        pageDiv.className = 'page';
-        pageDiv.innerHTML = pageHTML;
-        document.body.appendChild(pageDiv);
-        
-        // Настраиваем обработчики для новой страницы
-        setupPageHandlers(pageName);
+
+    document
+        .querySelectorAll(
+            '.nav button'
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    'active',
+                    button.dataset.nav ===
+                    pageName
+                );
+
+            }
+        );
+
+    const creator =
+        pageCreators[pageName];
+
+    if (!creator) {
+        return;
     }
-    
-    currentPage = pageName;
-    document.body.classList.add('locked');
+
+    const html =
+        creator();
+
+    const page =
+        document.createElement(
+            'div'
+        );
+
+    page.className =
+        'page';
+
+    page.innerHTML =
+        html;
+
+    document.body.appendChild(
+        page
+    );
+
+    currentPage =
+        pageName;
+
+    document.body.classList.add(
+        'locked'
+    );
+
+
+    /*
+     * Передаём управление
+     * специализированным модулям.
+     */
+
+    if (
+        pageName === 'finance' &&
+        window.LifeGameFinance &&
+        typeof window.LifeGameFinance.init ===
+        'function'
+    ) {
+
+        window.LifeGameFinance.init(
+            state,
+            getFinanceHelpers()
+        );
+
+    }
+
+    if (
+        pageName === 'health' &&
+        window.LifeGameHealth &&
+        typeof window.LifeGameHealth.init ===
+        'function'
+    ) {
+
+        window.LifeGameHealth.init(
+            state,
+            getFinanceHelpers()
+        );
+
+    }
+
+    if (
+        pageName === 'development' &&
+        window.LifeGameDevelopment &&
+        typeof window.LifeGameDevelopment.init ===
+        'function'
+    ) {
+
+        window.LifeGameDevelopment.init(
+            state,
+            getFinanceHelpers()
+        );
+
+    }
+
 }
+
 
 function closePage() {
-    const page = document.querySelector('.page');
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
     if (page) {
+
         page.remove();
+
     }
-    document.body.classList.remove('locked');
+
+    currentPage =
+        'home';
+
+    document.body.classList.remove(
+        'locked'
+    );
+
 }
 
-// --- Создание страниц ---
-function createHomePage() {
-    return `
-        <div class="page-inner">
-            <div class="page-head">
-                <button class="back" onclick="closePage()">←</button>
-                <h2>Главная</h2>
-            </div>
-            
-            <div class="summary">
-                <div class="section-label">ОБЩИЙ ПРОГРЕСС</div>
-                <div class="summary-number" id="homeProgress">${Math.round((health + development + (money / 20)) / 3)}%</div>
-                <div class="progress">
-                    <i id="homeProgressFill" style="width: ${Math.round((health + development + (money / 20)) / 3)}%"></i>
-                </div>
-            </div>
-            
-            <div class="cards">
-                <div class="metric">
-                    <div class="metric-head">
-                        <div class="metric-left">
-                            <div class="metric-icon">❤️</div>
-                            <div class="metric-text">
-                                <strong>Здоровье</strong>
-                                <span>${Math.round(health)}%</span>
-                            </div>
-                        </div>
-                        <div class="metric-percent">${Math.round(health)}%</div>
-                    </div>
-                    <div class="metric-bar">
-                        <i style="width: ${Math.round(health)}%"></i>
-                    </div>
-                </div>
-                
-                <div class="metric">
-                    <div class="metric-head">
-                        <div class="metric-left">
-                            <div class="metric-icon">💰</div>
-                            <div class="metric-text">
-                                <strong>Финансы</strong>
-                                <span>${money} монет</span>
-                            </div>
-                        </div>
-                        <div class="metric-percent">${Math.round(money / 20)}%</div>
-                    </div>
-                    <div class="metric-bar">
-                        <i style="width: ${Math.min(100, Math.round(money / 20))}%"></i>
-                    </div>
-                </div>
-                
-                <div class="metric">
-                    <div class="metric-head">
-                        <div class="metric-left">
-                            <div class="metric-icon">🧠</div>
-                            <div class="metric-text">
-                                <strong>Развитие</strong>
-                                <span>${Math.round(development)}%</span>
-                            </div>
-                        </div>
-                        <div class="metric-percent">${Math.round(development)}%</div>
-                    </div>
-                    <div class="metric-bar">
-                        <i style="width: ${Math.round(development)}%"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function createFinancePage() {
-    return `
-        <div class="page-inner">
-            <div class="page-head">
-                <button class="back" onclick="closePage()">←</button>
-                <h2>Финансы</h2>
-            </div>
-            
-            <div class="summary">
-                <div class="section-label">БАЛАНС</div>
-                <div class="summary-number">${money} ₽</div>
-                <div class="finance-box">
-                    <div class="finance-line">
-                        <span>ДОХОДЫ</span>
-                        <strong style="color: #4CAF50;">+${incomeHistory.reduce((sum, i) => sum + i.amount, 0)} ₽</strong>
-                    </div>
-                    <div class="finance-line">
-                        <span>РАСХОДЫ</span>
-                        <strong style="color: #ff6b6b;">-${expenseHistory.reduce((sum, i) => sum + i.amount, 0)} ₽</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button class="edit" onclick="addMoney()">💵 ПОЛУЧИТЬ ДОХОД</button>
-                <button class="edit" onclick="spendMoney()">💳 СОВЕРШИТЬ РАСХОД</button>
-            </div>
-            
-            <div class="notice">
-                💡 Совет: Увеличивайте доходы и контролируйте расходы для финансового роста!
-            </div>
-        </div>
-    `;
-}
-
-function createHealthPage() {
-    return `
-        <div class="page-inner">
-            <div class="page-head">
-                <button class="back" onclick="closePage()">←</button>
-                <h2>Здоровье</h2>
-            </div>
-            
-            <div class="summary">
-                <div class="section-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div>
-                <div class="summary-number" style="color: ${health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b'}">${Math.round(health)}%</div>
-                <div class="progress">
-                    <i style="width: ${Math.round(health)}%; background: ${health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b'}"></i>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button class="edit" onclick="increaseHealth()">❤️ УЛУЧШИТЬ ЗДОРОВЬЕ</button>
-                <button class="edit" onclick="decreaseHealth()">💔 УХУДШИТЬ ЗДОРОВЬЕ</button>
-            </div>
-            
-            <div class="notice">
-                🏃 Рекомендация: Регулярные тренировки и правильное питание улучшают здоровье!
-            </div>
-        </div>
-    `;
-}
-
-function createDevelopmentPage() {
-    return `
-        <div class="page-inner">
-            <div class="page-head">
-                <button class="back" onclick="closePage()">←</button>
-                <h2>Развитие</h2>
-            </div>
-            
-            <div class="summary">
-                <div class="section-label">УРОВЕНЬ РАЗВИТИЯ</div>
-                <div class="summary-number">${Math.round(development)}%</div>
-                <div class="progress">
-                    <i style="width: ${Math.round(development)}%"></i>
-                </div>
-                <div class="finance-box">
-                    <div class="finance-line">
-                        <span>УРОВЕНЬ</span>
-                        <strong>${level}</strong>
-                    </div>
-                    <div class="finance-line">
-                        <span>ОПЫТ</span>
-                        <strong>${xp} / ${xpToNextLevel} XP</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="edit" onclick="levelUp()" style="margin-bottom: 15px;">🧠 ПОВЫСИТЬ УРОВЕНЬ РАЗВИТИЯ</button>
-            
-            <div class="notice">
-                📚 Читайте книги, изучайте новое и развивайте навыки для роста!
-            </div>
-        </div>
-    `;
-}
-
-function setupPageHandlers(pageName) {
-    // Можно добавить специфичные обработчики для каждой страницы
-    console.log('Страница открыта:', pageName);
-}
 
 // ==========================================
-// 8. ОБЩИЕ ОБРАБОТЧИКИ СОБЫТИЙ
+// 13. HOME PAGE
+// ==========================================
+
+function createHomePage() {
+
+    const health =
+        clamp(
+            state.health.health
+        );
+
+    const finance =
+        getFinanceState();
+
+    const development =
+        getDevelopmentProgress();
+
+    const total =
+        Math.round(
+            (
+                health +
+                finance +
+                development
+            ) / 3
+        );
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    onclick="closePage()"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Главная
+                </h2>
+
+            </div>
+
+
+            <div class="summary">
+
+                <div class="section-label">
+                    ОБЩИЙ ПРОГРЕСС
+                </div>
+
+                <div
+                    class="summary-number"
+                    id="homeProgress"
+                >
+                    ${total}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        id="homeProgressFill"
+                        style="
+                            width:${total}%
+                        "
+                    ></i>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                ❤️
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Здоровье
+                                </strong>
+
+                                <span>
+                                    ${health}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${health}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+                        <i
+                            style="
+                                width:${health}%
+                            "
+                        ></i>
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                💰
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Финансы
+                                </strong>
+
+                                <span>
+                                    ${fmt(
+                                        state.finance.monthlyIncome
+                                    )} ₽
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${finance}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="
+                                width:${finance}%
+                            "
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-head">
+
+                        <div class="metric-left">
+
+                            <div class="metric-icon">
+                                🧠
+                            </div>
+
+                            <div class="metric-text">
+
+                                <strong>
+                                    Развитие
+                                </strong>
+
+                                <span>
+                                    ${development}%
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="metric-percent">
+                            ${development}%
+                        </div>
+
+                    </div>
+
+                    <div class="metric-bar">
+
+                        <i
+                            style="
+                                width:${development}%
+                            "
+                        ></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ==========================================
+// 14. FINANCE PAGE
+// ==========================================
+
+function createFinancePage() {
+
+    /*
+     * ВАЖНО:
+     *
+     * Здесь больше НЕТ старого финансового
+     * интерфейса.
+     *
+     * finance.js полностью отвечает
+     * за содержимое страницы.
+     */
+
+    if (
+        window.LifeGameFinance &&
+        typeof window.LifeGameFinance.page ===
+        'function'
+    ) {
+
+        return `
+
+            <div class="page-inner">
+
+                <div class="page-head">
+
+                    <button
+                        class="back"
+                        onclick="closePage()"
+                    >
+                        ←
+                    </button>
+
+                    <h2>
+                        Финансы
+                    </h2>
+
+                </div>
+
+                <div id="financeModule">
+
+                    ${window.LifeGameFinance.page(
+                        state,
+                        getFinanceHelpers()
+                    )}
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    onclick="closePage()"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Финансы
+                </h2>
+
+            </div>
+
+            <div class="notice">
+
+                ⚠️ Модуль finance.js
+                не загружен.
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ==========================================
+// 15. HEALTH PAGE
+// ==========================================
+
+function createHealthPage() {
+
+    if (
+        window.LifeGameHealth &&
+        typeof window.LifeGameHealth.page ===
+        'function'
+    ) {
+
+        return `
+
+            <div class="page-inner">
+
+                <div class="page-head">
+
+                    <button
+                        class="back"
+                        onclick="closePage()"
+                    >
+                        ←
+                    </button>
+
+                    <h2>
+                        Здоровье
+                    </h2>
+
+                </div>
+
+                ${window.LifeGameHealth.page(
+                    state,
+                    getFinanceHelpers()
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    const health =
+        clamp(
+            state.health.health
+        );
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    onclick="closePage()"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Здоровье
+                </h2>
+
+            </div>
+
+            <div class="summary">
+
+                <div class="section-label">
+                    ТЕКУЩЕЕ СОСТОЯНИЕ
+                </div>
+
+                <div class="summary-number">
+                    ${health}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="
+                            width:${health}%
+                        "
+                    ></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ==========================================
+// 16. DEVELOPMENT PAGE
+// ==========================================
+
+function createDevelopmentPage() {
+
+    if (
+        window.LifeGameDevelopment &&
+        typeof window.LifeGameDevelopment.page ===
+        'function'
+    ) {
+
+        return `
+
+            <div class="page-inner">
+
+                <div class="page-head">
+
+                    <button
+                        class="back"
+                        onclick="closePage()"
+                    >
+                        ←
+                    </button>
+
+                    <h2>
+                        Развитие
+                    </h2>
+
+                </div>
+
+                ${window.LifeGameDevelopment.page(
+                    state,
+                    getFinanceHelpers()
+                )}
+
+            </div>
+
+        `;
+
+    }
+
+
+    const development =
+        getDevelopmentProgress();
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    onclick="closePage()"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    Развитие
+                </h2>
+
+            </div>
+
+            <div class="summary">
+
+                <div class="section-label">
+                    УРОВЕНЬ РАЗВИТИЯ
+                </div>
+
+                <div class="summary-number">
+                    ${development}%
+                </div>
+
+                <div class="progress">
+
+                    <i
+                        style="
+                            width:${development}%
+                        "
+                    ></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// ==========================================
+// 17. GLOBAL EVENTS
 // ==========================================
 
 function setupEventListeners() {
-    // Daily Quest
-    const questBtn = document.getElementById('dailyQuest');
-    if (questBtn) {
-        questBtn.addEventListener('click', completeDailyQuest);
+
+    const quest =
+        document.getElementById(
+            'dailyQuest'
+        );
+
+    if (quest) {
+
+        quest.addEventListener(
+            'click',
+            completeDailyQuest
+        );
+
     }
-    
-    // Закрытие страниц по клику вне модалки
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('page') || e.target.classList.contains('overlay')) {
-            closePage();
+
+
+    document.addEventListener(
+        'click',
+        function(event) {
+
+            if (
+                event.target.classList.contains(
+                    'page'
+                ) ||
+                event.target.classList.contains(
+                    'overlay'
+                )
+            ) {
+
+                closePage();
+
+            }
+
         }
-    });
-    
-    // Обработка нажатия Esc для закрытия
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closePage();
+    );
+
+
+    document.addEventListener(
+        'keydown',
+        function(event) {
+
+            if (
+                event.key ===
+                'Escape'
+            ) {
+
+                closePage();
+
+            }
+
         }
-    });
+    );
+
 }
 
+
 // ==========================================
-// 9. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// 18. TOAST
 // ==========================================
 
 function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast show';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }, 2500);
+
+    const toast =
+        document.createElement(
+            'div'
+        );
+
+    toast.className =
+        'toast show';
+
+    toast.textContent =
+        message;
+
+    document.body.appendChild(
+        toast
+    );
+
+    setTimeout(
+        () => {
+
+            toast.classList.remove(
+                'show'
+            );
+
+            setTimeout(
+                () => {
+
+                    toast.remove();
+
+                },
+                300
+            );
+
+        },
+        2500
+    );
+
 }
 
+
 // ==========================================
-// 10. ЭКСПОРТ ФУНКЦИЙ ДЛЯ ДРУГИХ МОДУЛЕЙ
+// 19. GLOBAL API
 // ==========================================
 
-// Делаем функции доступными глобально для использования в других скриптах
-window.increaseHealth = increaseHealth;
-window.decreaseHealth = decreaseHealth;
-window.addMoney = addMoney;
-window.spendMoney = spendMoney;
-window.levelUp = levelUp;
-window.completeDailyQuest = completeDailyQuest;
-window.closePage = closePage;
-window.updateAllUI = updateAllUI;
-window.showToast = showToast;
+window.lifeGameState =
+    state;
 
-console.log('✅ APP.JS загружен успешно');
+window.getLifeGameState =
+    () => state;
+
+window.saveGameData =
+    saveGameData;
+
+window.updateAllUI =
+    updateAllUI;
+
+window.updateFinanceUI =
+    updateFinanceUI;
+
+window.updateHealthUI =
+    updateHealthUI;
+
+window.updateDevelopmentUI =
+    updateDevelopmentUI;
+
+window.updateLifeProgressUI =
+    updateLifeProgressUI;
+
+window.addXP =
+    addXP;
+
+window.increaseHealth =
+    increaseHealth;
+
+window.decreaseHealth =
+    decreaseHealth;
+
+window.levelUp =
+    levelUp;
+
+window.completeDailyQuest =
+    completeDailyQuest;
+
+window.openPage =
+    openPage;
+
+window.closePage =
+    closePage;
+
+window.showToast =
+    showToast;
+
+window.getTotalExpenses =
+    getTotalExpenses;
+
+window.getExpensePercent =
+    getExpensePercent;
+
+window.getSavingsPercent =
+    getSavingsPercent;
+
+window.getFinanceState =
+    getFinanceState;
+
+
+// ==========================================
+// 20. INITIALIZATION
+// ==========================================
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        console.log(
+            '🚀 LIFE GAME — APP START'
+        );
+
+        loadGameData();
+
+        setupNavigation();
+
+        setupEventListeners();
+
+        updateAllUI();
+
+        console.log(
+            '✅ LIFE GAME — APP.JS READY'
+        );
+
+    }
+);
+```
