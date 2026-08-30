@@ -1,1417 +1,554 @@
-```javascript
-const STORAGE_KEY = "life_game_data_v1";
-const EXPENSES_KEY = "life_game_expenses_v1";
+// ==========================================
+// APP.JS - Главный файл управления приложением
+// ==========================================
 
-const DEFAULT_DATA = {
-    finance: [
-        ["monthly_income", "💵", "Заработано за месяц", "₽", 10000, 100000],
-        ["monthly_goal", "🎯", "Цель на месяц", "₽", 0, 100000],
-        ["yearly_goal", "🏆", "Цель на год", "₽", 0, 1200000],
-        ["mandatory_expenses", "📉", "Обязательные расходы", "₽", 0, 50000],
-        ["safety_cushion", "🛡️", "Подушка безопасности", "₽", 0, 300000]
-    ],
+// ==========================================
+// 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ СОСТОЯНИЯ
+// ==========================================
 
-    health: [
-        ["daily_routine", "⏰", "Режим дня", "%", 0, 100],
-        ["nutrition", "🍎", "Питание КБЖУ", "%", 0, 100],
-        ["workouts", "🏋️", "Программа тренировок", "тренировок", 0, 12],
-        ["daily_steps", "🚶", "Шаги в день", "шагов", 0, 10000]
-    ],
+// Основные переменные (будут использоваться во всех модулях)
+let health = 50;
+let money = 1000;
+let development = 30;
+let level = 1;
+let xp = 0;
+let xpToNextLevel = 100;
 
-    development: [
-        ["books", "📚", "Чтение книг", "книг", 0, 2],
-        ["language", "🌐", "Изучение языка", "минут", 0, 30],
-        ["meditation", "🧘", "Медитация", "минут", 0, 15]
-    ]
-};
+// История доходов/расходов
+let incomeHistory = [];
+let expenseHistory = [];
 
-let data = loadData();
-let expenses = loadExpenses();
+// ==========================================
+// 2. ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+// ==========================================
 
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 LIFE GAME 1.1 - Приложение запущено');
+    
+    // Загружаем сохраненные данные
+    loadGameData();
+    
+    // Обновляем весь UI
+    updateAllUI();
+    
+    // Настраиваем обработчики событий
+    setupEventListeners();
+    
+    // Настраиваем навигацию
+    setupNavigation();
+});
 
-// ========================================
-// START
-// ========================================
+// ==========================================
+// 3. ЗАГРУЗКА / СОХРАНЕНИЕ ДАННЫХ
+// ==========================================
 
-document.addEventListener("DOMContentLoaded", init);
-
-function init() {
-
-    console.log("LIFE GAME: JavaScript loaded");
-
-    bindNavigation();
-    bindCategoryCards();
-    bindQuest();
-
-    renderHome();
-}
-
-
-// ========================================
-// DATA
-// ========================================
-
-function loadData() {
-
-    try {
-
-        const saved = localStorage.getItem(STORAGE_KEY);
-
-        if (saved) {
-            return JSON.parse(saved);
+function loadGameData() {
+    const saved = localStorage.getItem('lifeGameData');
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            health = data.health || 50;
+            money = data.money || 1000;
+            development = data.development || 30;
+            level = data.level || 1;
+            xp = data.xp || 0;
+            xpToNextLevel = data.xpToNextLevel || 100;
+            incomeHistory = data.incomeHistory || [];
+            expenseHistory = data.expenseHistory || [];
+            console.log('💾 Данные загружены');
+        } catch (e) {
+            console.warn('Ошибка загрузки данных, используем значения по умолчанию');
         }
-
-    } catch (error) {
-
-        console.error("LIFE GAME storage error:", error);
-
     }
-
-    return createDefaultData();
 }
 
-
-function createDefaultData() {
-
-    const result = {};
-
-    Object.keys(DEFAULT_DATA).forEach(category => {
-
-        result[category] = DEFAULT_DATA[category].map(item => {
-
-            return {
-                id: item[0],
-                icon: item[1],
-                name: item[2],
-                unit: item[3],
-                current: item[4],
-                target: item[5]
-            };
-
-        });
-
-    });
-
-    return result;
-}
-
-
-function saveData() {
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
-
-}
-
-
-// ========================================
-// EXPENSES DATA
-// ========================================
-
-function loadExpenses() {
-
-    try {
-
-        const saved =
-            localStorage.getItem(EXPENSES_KEY);
-
-        if (saved) {
-            return JSON.parse(saved);
-        }
-
-    } catch (error) {
-
-        console.error(
-            "LIFE GAME expenses storage error:",
-            error
-        );
-
-    }
-
-    return [];
-}
-
-
-function saveExpenses() {
-
-    localStorage.setItem(
-        EXPENSES_KEY,
-        JSON.stringify(expenses)
-    );
-
-}
-
-
-// ========================================
-// PROGRESS
-// ========================================
-
-function progress(current, target) {
-
-    current = Number(current) || 0;
-    target = Number(target) || 0;
-
-    if (target <= 0) {
-        return 0;
-    }
-
-    return Math.min(
-        Math.round((current / target) * 100),
-        100
-    );
-
-}
-
-
-function categoryProgress(category) {
-
-    const items = data[category];
-
-    if (!items || items.length === 0) {
-        return 0;
-    }
-
-    const total = items.reduce((sum, item) => {
-
-        return sum + progress(
-            item.current,
-            item.target
-        );
-
-    }, 0);
-
-    return Math.round(total / items.length);
-
-}
-
-
-function overallProgress() {
-
-    return Math.round(
-        (
-            categoryProgress("finance") +
-            categoryProgress("health") +
-            categoryProgress("development")
-        ) / 3
-    );
-
-}
-
-
-// ========================================
-// HOME
-// ========================================
-
-function renderHome() {
-
-    const app = document.querySelector(".app");
-
-    if (!app) {
-        console.error("LIFE GAME: .app not found");
-        return;
-    }
-
-    const overall = overallProgress();
-
-    const overallValue =
-        document.querySelector(".overall-value");
-
-    const overallFill =
-        document.querySelector(".overall-fill");
-
-    if (overallValue) {
-
-        overallValue.innerHTML =
-            `${overall}<span>%</span>`;
-
-    }
-
-    if (overallFill) {
-
-        overallFill.style.width =
-            `${overall}%`;
-
-    }
-
-
-    ["finance", "health", "development"].forEach(category => {
-
-        const card =
-            document.querySelector(
-                `[data-category="${category}"]`
-            );
-
-        if (!card) {
-            return;
-        }
-
-        const percent =
-            categoryProgress(category);
-
-        const percentElement =
-            card.querySelector(".category-percent");
-
-        const fill =
-            card.querySelector(".progress-fill");
-
-        if (percentElement) {
-
-            percentElement.textContent =
-                `${percent}%`;
-
-        }
-
-        if (fill) {
-
-            fill.style.width =
-                `${percent}%`;
-
-        }
-
-    });
-
-}
-
-
-// ========================================
-// NAVIGATION
-// ========================================
-
-function bindNavigation() {
-
-    const buttons =
-        document.querySelectorAll(".nav-item");
-
-    console.log(
-        "LIFE GAME: navigation buttons:",
-        buttons.length
-    );
-
-    buttons.forEach(button => {
-
-        button.addEventListener("click", function(event) {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            const section =
-                this.dataset.section;
-
-            buttons.forEach(item => {
-
-                item.classList.remove("active");
-
-            });
-
-            this.classList.add("active");
-
-            if (!section) {
-
-                closePage();
-                renderHome();
-
-                return;
-
-            }
-
-            openCategory(section);
-
-        });
-
-    });
-
-}
-
-
-// ========================================
-// CATEGORY CARDS
-// ========================================
-
-function bindCategoryCards() {
-
-    const cards =
-        document.querySelectorAll(".category-card");
-
-    cards.forEach(card => {
-
-        card.addEventListener("click", function() {
-
-            const category =
-                this.dataset.category;
-
-            openCategory(category);
-
-        });
-
-    });
-
-}
-
-
-// ========================================
-// QUEST
-// ========================================
-
-function bindQuest() {
-
-    const button =
-        document.querySelector(".quest-button");
-
-    if (!button) {
-        return;
-    }
-
-    button.addEventListener("click", function() {
-
-        showToast(
-            "Daily Quest будет добавлен следующим этапом"
-        );
-
-    });
-
-}
-
-
-// ========================================
-// OPEN CATEGORY
-// ========================================
-
-function openCategory(category) {
-
-    if (!data[category]) {
-        return;
-    }
-
-    closePage();
-
-    const page =
-        document.createElement("div");
-
-    page.className =
-        "category-page";
-
-    const categoryNames = {
-
-        finance: "💰 Финансы",
-
-        health: "❤️ Здоровье",
-
-        development: "🧠 Развитие"
-
+function saveGameData() {
+    const data = {
+        health,
+        money,
+        development,
+        level,
+        xp,
+        xpToNextLevel,
+        incomeHistory,
+        expenseHistory
     };
-
-    const metrics =
-        data[category];
-
-    const categoryPercent =
-        categoryProgress(category);
-
-    page.innerHTML = `
-
-        <div class="category-page-header">
-
-            <button
-                class="back-button"
-                type="button"
-            >
-                ←
-            </button>
-
-            <div>
-
-                <div class="page-eyebrow">
-                    LIFE GAME
-                </div>
-
-                <h2>
-                    ${categoryNames[category]}
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="category-summary">
-
-            <div class="summary-label">
-                CATEGORY PROGRESS
-            </div>
-
-            <div class="summary-value">
-                ${categoryPercent}%
-            </div>
-
-            <div class="summary-bar">
-
-                <div
-                    class="summary-fill"
-                    style="width:${categoryPercent}%"
-                ></div>
-
-            </div>
-
-        </div>
-
-
-        <div class="metrics-list">
-
-            ${metrics.map(metricHTML).join("")}
-
-        </div>
-
-    `;
-
-    document.body.appendChild(page);
-
-
-    page
-        .querySelector(".back-button")
-        .addEventListener("click", function() {
-
-            closePage();
-
-            renderHome();
-
-            activateHome();
-
-        });
-
-
-    page
-        .querySelectorAll(".metric-edit")
-        .forEach(button => {
-
-            button.addEventListener("click", function() {
-
-                const metricId =
-                    this.dataset.metric;
-
-                if (
-                    category === "finance" &&
-                    metricId === "mandatory_expenses"
-                ) {
-
-                    openExpenses();
-
-                    return;
-
-                }
-
-                openEditor(
-                    category,
-                    metricId
-                );
-
-            });
-
-        });
-
+    localStorage.setItem('lifeGameData', JSON.stringify(data));
 }
 
+// ==========================================
+// 4. ОБНОВЛЕНИЕ ВСЕГО UI
+// ==========================================
 
-// ========================================
-// METRIC CARD
-// ========================================
-
-function metricHTML(metric) {
-
-    const percent =
-        progress(
-            metric.current,
-            metric.target
-        );
-
-    const isExpenses =
-        metric.id === "mandatory_expenses";
-
-    return `
-
-        <div
-            class="metric-card ${
-                isExpenses ? "clickable-expenses" : ""
-            }"
-        >
-
-            <div class="metric-top">
-
-                <div class="metric-title">
-
-                    <div class="metric-icon">
-                        ${metric.icon}
-                    </div>
-
-                    <div>
-
-                        <strong>
-                            ${metric.name}
-                        </strong>
-
-                        <span>
-                            ${formatNumber(metric.current)}
-                            ${metric.unit}
-                            /
-                            ${formatNumber(metric.target)}
-                            ${metric.unit}
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="metric-percent">
-                    ${percent}%
-                </div>
-
-            </div>
-
-
-            <div class="metric-progress">
-
-                <div
-                    class="metric-progress-fill"
-                    style="width:${percent}%"
-                ></div>
-
-            </div>
-
-
-            <button
-                class="metric-edit"
-                type="button"
-                data-metric="${metric.id}"
-            >
-                ${
-                    isExpenses
-                        ? "ОТКРЫТЬ РАСХОДЫ →"
-                        : "✎ ИЗМЕНИТЬ"
-                }
-            </button>
-
-        </div>
-
-    `;
-
+function updateAllUI() {
+    updateHealthUI();
+    updateFinanceUI();
+    updateDevelopmentUI();
+    updateLevelUI();
+    updateLifeProgressUI();
+    saveGameData();
 }
 
-
-// ========================================
-// EXPENSES PAGE
-// ========================================
-
-function openExpenses() {
-
-    closePage();
-
-    const page =
-        document.createElement("div");
-
-    page.className =
-        "category-page expenses-page";
-
-
-    const incomeMetric =
-        data.finance.find(
-            item => item.id === "monthly_income"
-        );
-
-    const income =
-        Number(incomeMetric?.current) || 0;
-
-
-    const total =
-        getExpensesTotal();
-
-
-    const percent =
-        income > 0
-            ? Math.round((total / income) * 100)
-            : 0;
-
-
-    page.innerHTML = `
-
-        <div class="category-page-header">
-
-            <button
-                class="back-button"
-                type="button"
-            >
-                ←
-            </button>
-
-            <div>
-
-                <div class="page-eyebrow">
-                    FINANCE
-                </div>
-
-                <h2>
-                    📉 Обязательные расходы
-                </h2>
-
-            </div>
-
-        </div>
-
-
-        <div class="category-summary">
-
-            <div class="summary-label">
-                РАСХОДЫ ОТ ДОХОДА
-            </div>
-
-            <div class="summary-value expenses-percent">
-                ${percent}%
-            </div>
-
-            <div class="summary-bar">
-
-                <div
-                    class="summary-fill expenses-fill"
-                    style="width:${Math.min(percent, 100)}%"
-                ></div>
-
-            </div>
-
-            <div class="expenses-income-info">
-                ${formatNumber(total)} ₽
-                из
-                ${formatNumber(income)} ₽
-            </div>
-
-        </div>
-
-
-        <div class="expenses-list">
-
-            ${expenses.map(expenseHTML).join("")}
-
-        </div>
-
-
-        <button
-            class="add-expense-button"
-            type="button"
-        >
-            ＋ ДОБАВИТЬ РАСХОД
-        </button>
-
-
-        <div class="expenses-total">
-
-            <span>
-                ИТОГО
-            </span>
-
-            <strong>
-                ${formatNumber(total)} ₽
-            </strong>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(page);
-
-
-    page
-        .querySelector(".back-button")
-        .addEventListener("click", function() {
-
-            closePage();
-
-            renderHome();
-
-            activateHome();
-
-        });
-
-
-    page
-        .querySelector(".add-expense-button")
-        .addEventListener("click", function() {
-
-            openExpenseEditor();
-
-        });
-
-
-    page
-        .querySelectorAll(".expense-edit")
-        .forEach(button => {
-
-            button.addEventListener("click", function() {
-
-                openExpenseEditor(
-                    this.dataset.expense
-                );
-
-            });
-
-        });
-
-
-    page
-        .querySelectorAll(".expense-delete")
-        .forEach(button => {
-
-            button.addEventListener("click", function() {
-
-                deleteExpense(
-                    this.dataset.expense
-                );
-
-            });
-
-        });
-
+// Обновление интерфейса здоровья
+function updateHealthUI() {
+    const percent = Math.min(100, Math.max(0, health));
+    document.getElementById('healthPercent').textContent = percent + '%';
+    document.getElementById('healthFill').style.width = percent + '%';
+    
+    // Обновляем жизнь на главном экране
+    updateLifeProgressUI();
 }
 
-
-// ========================================
-// EXPENSE CARD
-// ========================================
-
-function expenseHTML(expense) {
-
-    return `
-
-        <div class="expense-card">
-
-            <div class="expense-info">
-
-                <span class="expense-name">
-                    ${escapeHTML(expense.name)}
-                </span>
-
-                <strong>
-                    ${formatNumber(expense.amount)} ₽
-                </strong>
-
-            </div>
-
-            <div class="expense-actions">
-
-                <button
-                    class="expense-edit"
-                    type="button"
-                    data-expense="${expense.id}"
-                >
-                    ✎
-                </button>
-
-                <button
-                    class="expense-delete"
-                    type="button"
-                    data-expense="${expense.id}"
-                >
-                    ×
-                </button>
-
-            </div>
-
-        </div>
-
-    `;
-
+// Обновление интерфейса финансов
+function updateFinanceUI() {
+    const percent = Math.min(100, Math.max(0, money / 20));
+    document.getElementById('financePercent').textContent = Math.round(percent) + '%';
+    document.getElementById('financeFill').style.width = Math.min(100, percent) + '%';
 }
 
+// Обновление интерфейса развития
+function updateDevelopmentUI() {
+    const percent = Math.min(100, Math.max(0, development));
+    document.getElementById('developmentPercent').textContent = percent + '%';
+    document.getElementById('developmentFill').style.width = percent + '%';
+}
 
-// ========================================
-// EXPENSE EDITOR
-// ========================================
+// Обновление уровня и XP
+function updateLevelUI() {
+    document.getElementById('playerLevel').textContent = 'LVL ' + level;
+    document.getElementById('playerXP').textContent = xp + ' XP';
+    
+    const xpPercent = (xp / xpToNextLevel) * 100;
+    document.getElementById('playerXPFill').style.width = Math.min(100, xpPercent) + '%';
+    document.getElementById('xpNext').textContent = (xpToNextLevel - xp) + ' XP TO NEXT LEVEL';
+    
+    // Обновляем ранг
+    const ranks = ['BEGINNER', 'EXPLORER', 'ADVENTURER', 'HERO', 'LEGEND'];
+    const rankIndex = Math.min(Math.floor(level / 3), ranks.length - 1);
+    document.getElementById('playerRank').textContent = ranks[rankIndex];
+}
 
-function openExpenseEditor(expenseId = null) {
+// Обновление общего прогресса жизни
+function updateLifeProgressUI() {
+    const avgProgress = (health + development + (money / 20)) / 3;
+    const progress = Math.min(100, Math.round(avgProgress));
+    document.getElementById('lifeProgress').innerHTML = progress + '<span>%</span>';
+    document.getElementById('lifeFill').style.width = progress + '%';
+}
 
-    const expense =
-        expenses.find(
-            item => item.id === expenseId
-        );
+// ==========================================
+// 5. МЕХАНИКИ ИГРЫ
+// ==========================================
 
+// --- Механики Здоровья ---
+function increaseHealth() {
+    const oldHealth = health;
+    health = Math.min(100, health + 5);
+    if (health !== oldHealth) {
+        addXP(15);
+        showToast('❤️ +5 здоровья');
+        updateAllUI();
+    } else {
+        showToast('⚠️ Здоровье уже максимальное');
+    }
+}
 
-    const overlay =
-        document.createElement("div");
+function decreaseHealth() {
+    const oldHealth = health;
+    health = Math.max(0, health - 5);
+    if (health !== oldHealth) {
+        showToast('💔 -5 здоровья');
+        updateAllUI();
+    } else {
+        showToast('⚠️ Здоровье уже минимальное');
+    }
+}
 
-    overlay.className =
-        "editor-overlay";
+// --- Механики Финансов ---
+function addMoney() {
+    const amount = 100;
+    const oldMoney = money;
+    money += amount;
+    if (money !== oldMoney) {
+        incomeHistory.push({ amount: amount, date: new Date().toLocaleString() });
+        addXP(10);
+        showToast('💰 +' + amount + ' монет');
+        updateAllUI();
+    }
+}
 
+function spendMoney() {
+    const amount = 50;
+    const oldMoney = money;
+    money = Math.max(0, money - amount);
+    if (money !== oldMoney) {
+        expenseHistory.push({ amount: amount, date: new Date().toLocaleString() });
+        showToast('💸 -' + amount + ' монет');
+        updateAllUI();
+    } else {
+        showToast('⚠️ Недостаточно средств');
+    }
+}
 
-    overlay.innerHTML = `
+// --- Механики Развития ---
+function levelUp() {
+    const oldDevelopment = development;
+    development = Math.min(100, development + 3);
+    if (development !== oldDevelopment) {
+        addXP(20);
+        showToast('🧠 +3 к развитию');
+        updateAllUI();
+    } else {
+        showToast('⚠️ Развитие уже максимальное');
+    }
+}
 
-        <div class="editor">
+// --- Система XP ---
+function addXP(amount) {
+    xp += amount;
+    while (xp >= xpToNextLevel) {
+        xp -= xpToNextLevel;
+        level++;
+        xpToNextLevel = Math.floor(xpToNextLevel * 1.5) + 10;
+        showToast('🎉 УРОВЕНЬ ПОВЫШЕН! Уровень ' + level);
+    }
+    updateAllUI();
+}
 
-            <button
-                class="editor-close"
-                type="button"
-            >
-                ×
-            </button>
+// ==========================================
+// 6. ЕЖЕДНЕВНЫЙ КВЕСТ
+// ==========================================
 
+function completeDailyQuest() {
+    const rewards = [
+        { health: 10, text: '💪 +10 здоровья' },
+        { money: 200, text: '💰 +200 монет' },
+        { development: 5, text: '🧠 +5 развития' }
+    ];
+    
+    const reward = rewards[Math.floor(Math.random() * rewards.length)];
+    
+    if (reward.health) {
+        health = Math.min(100, health + reward.health);
+    } else if (reward.money) {
+        money += reward.money;
+    } else if (reward.development) {
+        development = Math.min(100, development + reward.development);
+    }
+    
+    addXP(50);
+    showToast('⚡ Квест выполнен! ' + reward.text);
+    updateAllUI();
+    document.getElementById('dailyQuest').textContent = '✅ КВЕСТ ВЫПОЛНЕН';
+    document.getElementById('dailyQuest').disabled = true;
+    document.getElementById('dailyQuest').style.opacity = '0.5';
+    
+    // Возвращаем квест через 30 секунд
+    setTimeout(() => {
+        document.getElementById('dailyQuest').textContent = '⚡ DAILY QUEST';
+        document.getElementById('dailyQuest').disabled = false;
+        document.getElementById('dailyQuest').style.opacity = '1';
+    }, 30000);
+}
 
-            <div class="editor-icon">
-                📉
-            </div>
+// ==========================================
+// 7. НАВИГАЦИЯ
+// ==========================================
 
+let currentPage = 'home';
 
-            <div class="editor-eyebrow">
-                ${expense ? "EDIT EXPENSE" : "NEW EXPENSE"}
-            </div>
-
-
-            <h3>
-                ${expense ? "Изменить расход" : "Добавить расход"}
-            </h3>
-
-
-            <label>
-                Название расхода
-            </label>
-
-            <input
-                class="expense-name-input"
-                type="text"
-                placeholder="Например: Аренда"
-                value="${
-                    expense
-                        ? escapeAttribute(expense.name)
-                        : ""
-                }"
-            >
-
-
-            <label>
-                Сумма
-            </label>
-
-            <input
-                class="expense-amount-input"
-                type="number"
-                min="0"
-                placeholder="0"
-                value="${
-                    expense
-                        ? expense.amount
-                        : ""
-                }"
-            >
-
-
-            <button
-                class="save-button"
-                type="button"
-            >
-                СОХРАНИТЬ
-            </button>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(overlay);
-
-
-    const nameInput =
-        overlay.querySelector(
-            ".expense-name-input"
-        );
-
-    const amountInput =
-        overlay.querySelector(
-            ".expense-amount-input"
-        );
-
-
-    overlay
-        .querySelector(".editor-close")
-        .addEventListener("click", function() {
-
-            overlay.remove();
-
+function setupNavigation() {
+    const navButtons = document.querySelectorAll('.nav button');
+    const pages = {
+        home: createHomePage,
+        finance: createFinancePage,
+        health: createHealthPage,
+        development: createDevelopmentPage
+    };
+    
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const page = this.dataset.nav;
+            if (page && pages[page]) {
+                openPage(page);
+            }
         });
-
-
-    overlay.addEventListener("click", function(event) {
-
-        if (event.target === overlay) {
-
-            overlay.remove();
-
-        }
-
     });
-
-
-    overlay
-        .querySelector(".save-button")
-        .addEventListener("click", function() {
-
-            const name =
-                nameInput.value.trim();
-
-            const amount =
-                Number(amountInput.value) || 0;
-
-
-            if (!name) {
-
-                showToast(
-                    "Введите название расхода"
-                );
-
-                return;
-
-            }
-
-
-            if (amount <= 0) {
-
-                showToast(
-                    "Введите сумму расхода"
-                );
-
-                return;
-
-            }
-
-
-            if (expense) {
-
-                expense.name =
-                    name;
-
-                expense.amount =
-                    amount;
-
-            } else {
-
-                expenses.push({
-
-                    id:
-                        Date.now().toString(),
-
-                    name:
-                        name,
-
-                    amount:
-                        amount
-
-                });
-
-            }
-
-
-            saveExpenses();
-
-            updateMandatoryExpensesMetric();
-
-            overlay.remove();
-
-            openExpenses();
-
-            showToast(
-                "Расход сохранён"
-            );
-
-        });
-
 }
 
-
-// ========================================
-// DELETE EXPENSE
-// ========================================
-
-function deleteExpense(expenseId) {
-
-    expenses =
-        expenses.filter(
-            expense =>
-                expense.id !== expenseId
-        );
-
-    saveExpenses();
-
-    updateMandatoryExpensesMetric();
-
-    openExpenses();
-
-    showToast(
-        "Расход удалён"
-    );
-
-}
-
-
-// ========================================
-// UPDATE MANDATORY EXPENSES
-// ========================================
-
-function updateMandatoryExpensesMetric() {
-
-    const metric =
-        data.finance.find(
-            item =>
-                item.id === "mandatory_expenses"
-        );
-
-    if (!metric) {
-        return;
+function openPage(pageName) {
+    // Убираем старую страницу
+    const oldPage = document.querySelector('.page');
+    if (oldPage) {
+        oldPage.remove();
     }
-
-
-    const total =
-        getExpensesTotal();
-
-
-    metric.current =
-        total;
-
-
-    saveData();
-
-}
-
-
-// ========================================
-// TOTAL EXPENSES
-// ========================================
-
-function getExpensesTotal() {
-
-    return expenses.reduce(
-        (total, expense) => {
-
-            return total +
-                (Number(expense.amount) || 0);
-
-        },
-        0
-    );
-
-}
-
-
-// ========================================
-// STANDARD EDITOR
-// ========================================
-
-function openEditor(category, metricId) {
-
-    const metric =
-        data[category].find(
-            item => item.id === metricId
-        );
-
-
-    if (!metric) {
-        return;
-    }
-
-
-    const overlay =
-        document.createElement("div");
-
-    overlay.className =
-        "editor-overlay";
-
-
-    overlay.innerHTML = `
-
-        <div class="editor">
-
-            <button
-                class="editor-close"
-                type="button"
-            >
-                ×
-            </button>
-
-
-            <div class="editor-icon">
-                ${metric.icon}
-            </div>
-
-
-            <div class="editor-eyebrow">
-                EDIT GOAL
-            </div>
-
-
-            <h3>
-                ${metric.name}
-            </h3>
-
-
-            <label>
-                Текущее значение
-            </label>
-
-            <input
-                class="current-input"
-                type="number"
-                value="${metric.current}"
-            >
-
-
-            <label>
-                Цель
-            </label>
-
-            <input
-                class="target-input"
-                type="number"
-                value="${metric.target}"
-            >
-
-
-            <div class="editor-preview">
-
-                <span>
-                    Новый прогресс
-                </span>
-
-                <strong class="editor-progress">
-                    ${
-                        progress(
-                            metric.current,
-                            metric.target
-                        )
-                    }%
-                </strong>
-
-            </div>
-
-
-            <button
-                class="save-button"
-                type="button"
-            >
-                СОХРАНИТЬ
-            </button>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(overlay);
-
-
-    const currentInput =
-        overlay.querySelector(".current-input");
-
-    const targetInput =
-        overlay.querySelector(".target-input");
-
-    const progressElement =
-        overlay.querySelector(".editor-progress");
-
-
-    function updatePreview() {
-
-        progressElement.textContent =
-            `${progress(
-                currentInput.value,
-                targetInput.value
-            )}%`;
-
-    }
-
-
-    currentInput.addEventListener(
-        "input",
-        updatePreview
-    );
-
-    targetInput.addEventListener(
-        "input",
-        updatePreview
-    );
-
-
-    overlay
-        .querySelector(".editor-close")
-        .addEventListener("click", function() {
-
-            overlay.remove();
-
-        });
-
-
-    overlay.addEventListener("click", function(event) {
-
-        if (event.target === overlay) {
-
-            overlay.remove();
-
-        }
-
+    
+    // Обновляем активную кнопку
+    document.querySelectorAll('.nav button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.nav === pageName);
     });
-
-
-    overlay
-        .querySelector(".save-button")
-        .addEventListener("click", function() {
-
-            metric.current =
-                Number(currentInput.value) || 0;
-
-            metric.target =
-                Number(targetInput.value) || 0;
-
-            saveData();
-
-            overlay.remove();
-
-            closePage();
-
-            openCategory(category);
-
-            showToast(
-                "Цель сохранена"
-            );
-
-        });
-
+    
+    // Создаем новую страницу
+    const pageCreators = {
+        home: createHomePage,
+        finance: createFinancePage,
+        health: createHealthPage,
+        development: createDevelopmentPage
+    };
+    
+    if (pageCreators[pageName]) {
+        const pageHTML = pageCreators[pageName]();
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'page';
+        pageDiv.innerHTML = pageHTML;
+        document.body.appendChild(pageDiv);
+        
+        // Настраиваем обработчики для новой страницы
+        setupPageHandlers(pageName);
+    }
+    
+    currentPage = pageName;
+    document.body.classList.add('locked');
 }
-
-
-// ========================================
-// CLOSE PAGE
-// ========================================
 
 function closePage() {
-
-    const page =
-        document.querySelector(".category-page");
-
+    const page = document.querySelector('.page');
     if (page) {
-
         page.remove();
-
     }
-
+    document.body.classList.remove('locked');
 }
 
-
-// ========================================
-// HOME NAV
-// ========================================
-
-function activateHome() {
-
-    document
-        .querySelectorAll(".nav-item")
-        .forEach(button => {
-
-            button.classList.remove("active");
-
-        });
-
-
-    const home =
-        document.querySelector(
-            ".nav-item:first-child"
-        );
-
-    if (home) {
-
-        home.classList.add("active");
-
-    }
-
+// --- Создание страниц ---
+function createHomePage() {
+    return `
+        <div class="page-inner">
+            <div class="page-head">
+                <button class="back" onclick="closePage()">←</button>
+                <h2>Главная</h2>
+            </div>
+            
+            <div class="summary">
+                <div class="section-label">ОБЩИЙ ПРОГРЕСС</div>
+                <div class="summary-number" id="homeProgress">${Math.round((health + development + (money / 20)) / 3)}%</div>
+                <div class="progress">
+                    <i id="homeProgressFill" style="width: ${Math.round((health + development + (money / 20)) / 3)}%"></i>
+                </div>
+            </div>
+            
+            <div class="cards">
+                <div class="metric">
+                    <div class="metric-head">
+                        <div class="metric-left">
+                            <div class="metric-icon">❤️</div>
+                            <div class="metric-text">
+                                <strong>Здоровье</strong>
+                                <span>${Math.round(health)}%</span>
+                            </div>
+                        </div>
+                        <div class="metric-percent">${Math.round(health)}%</div>
+                    </div>
+                    <div class="metric-bar">
+                        <i style="width: ${Math.round(health)}%"></i>
+                    </div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-head">
+                        <div class="metric-left">
+                            <div class="metric-icon">💰</div>
+                            <div class="metric-text">
+                                <strong>Финансы</strong>
+                                <span>${money} монет</span>
+                            </div>
+                        </div>
+                        <div class="metric-percent">${Math.round(money / 20)}%</div>
+                    </div>
+                    <div class="metric-bar">
+                        <i style="width: ${Math.min(100, Math.round(money / 20))}%"></i>
+                    </div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-head">
+                        <div class="metric-left">
+                            <div class="metric-icon">🧠</div>
+                            <div class="metric-text">
+                                <strong>Развитие</strong>
+                                <span>${Math.round(development)}%</span>
+                            </div>
+                        </div>
+                        <div class="metric-percent">${Math.round(development)}%</div>
+                    </div>
+                    <div class="metric-bar">
+                        <i style="width: ${Math.round(development)}%"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
+function createFinancePage() {
+    return `
+        <div class="page-inner">
+            <div class="page-head">
+                <button class="back" onclick="closePage()">←</button>
+                <h2>Финансы</h2>
+            </div>
+            
+            <div class="summary">
+                <div class="section-label">БАЛАНС</div>
+                <div class="summary-number">${money} ₽</div>
+                <div class="finance-box">
+                    <div class="finance-line">
+                        <span>ДОХОДЫ</span>
+                        <strong style="color: #4CAF50;">+${incomeHistory.reduce((sum, i) => sum + i.amount, 0)} ₽</strong>
+                    </div>
+                    <div class="finance-line">
+                        <span>РАСХОДЫ</span>
+                        <strong style="color: #ff6b6b;">-${expenseHistory.reduce((sum, i) => sum + i.amount, 0)} ₽</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="edit" onclick="addMoney()">💵 ПОЛУЧИТЬ ДОХОД</button>
+                <button class="edit" onclick="spendMoney()">💳 СОВЕРШИТЬ РАСХОД</button>
+            </div>
+            
+            <div class="notice">
+                💡 Совет: Увеличивайте доходы и контролируйте расходы для финансового роста!
+            </div>
+        </div>
+    `;
+}
 
-// ========================================
-// TOAST
-// ========================================
+function createHealthPage() {
+    return `
+        <div class="page-inner">
+            <div class="page-head">
+                <button class="back" onclick="closePage()">←</button>
+                <h2>Здоровье</h2>
+            </div>
+            
+            <div class="summary">
+                <div class="section-label">ТЕКУЩЕЕ СОСТОЯНИЕ</div>
+                <div class="summary-number" style="color: ${health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b'}">${Math.round(health)}%</div>
+                <div class="progress">
+                    <i style="width: ${Math.round(health)}%; background: ${health > 60 ? '#4CAF50' : health > 30 ? '#FFA726' : '#ff6b6b'}"></i>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="edit" onclick="increaseHealth()">❤️ УЛУЧШИТЬ ЗДОРОВЬЕ</button>
+                <button class="edit" onclick="decreaseHealth()">💔 УХУДШИТЬ ЗДОРОВЬЕ</button>
+            </div>
+            
+            <div class="notice">
+                🏃 Рекомендация: Регулярные тренировки и правильное питание улучшают здоровье!
+            </div>
+        </div>
+    `;
+}
+
+function createDevelopmentPage() {
+    return `
+        <div class="page-inner">
+            <div class="page-head">
+                <button class="back" onclick="closePage()">←</button>
+                <h2>Развитие</h2>
+            </div>
+            
+            <div class="summary">
+                <div class="section-label">УРОВЕНЬ РАЗВИТИЯ</div>
+                <div class="summary-number">${Math.round(development)}%</div>
+                <div class="progress">
+                    <i style="width: ${Math.round(development)}%"></i>
+                </div>
+                <div class="finance-box">
+                    <div class="finance-line">
+                        <span>УРОВЕНЬ</span>
+                        <strong>${level}</strong>
+                    </div>
+                    <div class="finance-line">
+                        <span>ОПЫТ</span>
+                        <strong>${xp} / ${xpToNextLevel} XP</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="edit" onclick="levelUp()" style="margin-bottom: 15px;">🧠 ПОВЫСИТЬ УРОВЕНЬ РАЗВИТИЯ</button>
+            
+            <div class="notice">
+                📚 Читайте книги, изучайте новое и развивайте навыки для роста!
+            </div>
+        </div>
+    `;
+}
+
+function setupPageHandlers(pageName) {
+    // Можно добавить специфичные обработчики для каждой страницы
+    console.log('Страница открыта:', pageName);
+}
+
+// ==========================================
+// 8. ОБЩИЕ ОБРАБОТЧИКИ СОБЫТИЙ
+// ==========================================
+
+function setupEventListeners() {
+    // Daily Quest
+    const questBtn = document.getElementById('dailyQuest');
+    if (questBtn) {
+        questBtn.addEventListener('click', completeDailyQuest);
+    }
+    
+    // Закрытие страниц по клику вне модалки
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('page') || e.target.classList.contains('overlay')) {
+            closePage();
+        }
+    });
+    
+    // Обработка нажатия Esc для закрытия
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePage();
+        }
+    });
+}
+
+// ==========================================
+// 9. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ==========================================
 
 function showToast(message) {
-
-    const old =
-        document.querySelector(".life-message");
-
-    if (old) {
-        old.remove();
-    }
-
-
-    const toast =
-        document.createElement("div");
-
-    toast.className =
-        "life-message";
-
-    toast.textContent =
-        message;
-
-
+    const toast = document.createElement('div');
+    toast.className = 'toast show';
+    toast.textContent = message;
     document.body.appendChild(toast);
-
-
-    requestAnimationFrame(() => {
-
-        toast.classList.add("show");
-
-    });
-
-
+    
     setTimeout(() => {
-
-        toast.classList.remove("show");
-
+        toast.classList.remove('show');
         setTimeout(() => {
-
             toast.remove();
-
-        }, 250);
-
-    }, 1800);
-
+        }, 300);
+    }, 2500);
 }
 
+// ==========================================
+// 10. ЭКСПОРТ ФУНКЦИЙ ДЛЯ ДРУГИХ МОДУЛЕЙ
+// ==========================================
 
-// ========================================
-// FORMAT
-// ========================================
+// Делаем функции доступными глобально для использования в других скриптах
+window.increaseHealth = increaseHealth;
+window.decreaseHealth = decreaseHealth;
+window.addMoney = addMoney;
+window.spendMoney = spendMoney;
+window.levelUp = levelUp;
+window.completeDailyQuest = completeDailyQuest;
+window.closePage = closePage;
+window.updateAllUI = updateAllUI;
+window.showToast = showToast;
 
-function formatNumber(value) {
-
-    return new Intl.NumberFormat(
-        "ru-RU"
-    ).format(
-        Number(value) || 0
-    );
-
-}
-
-
-// ========================================
-// SECURITY HELPERS
-// ========================================
-
-function escapeHTML(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-function escapeAttribute(value) {
-
-    return escapeHTML(value);
-
-}
-```
+console.log('✅ APP.JS загружен успешно');
