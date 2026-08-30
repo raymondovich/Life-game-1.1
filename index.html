@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -9,641 +8,1022 @@
 <title>LIFE GAME</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#050505;--card:#101010;--border:#252525;--text:#f5f5f5;--muted:#626262;--radius:22px}
-html,body{margin:0;padding:0;min-height:100%;background:#050505;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-body{overflow-x:hidden}
-.locked{overflow:hidden}
-button,input{font-family:inherit}
-button{border:0;cursor:pointer}
-button:active{transform:scale(.985)}
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent
+}
 
-.app{width:100%;max-width:560px;min-height:100vh;margin:auto;padding:24px 18px 115px}
+:root{
+    --bg:#050505;
+    --card:#101010;
+    --border:#252525;
+    --text:#f5f5f5;
+    --muted:#626262;
+    --radius:22px
+}
 
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}
-.eyebrow,.section-label,.page-eyebrow{color:#606060;font-size:8px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
-.eyebrow{margin-bottom:6px}
-.header h1{margin:0;font-size:27px;line-height:1;font-weight:800;letter-spacing:-1.2px}
+html,body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background:#050505;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased
+}
+
+body{
+    overflow-x:hidden
+}
+
+.locked{
+    overflow:hidden
+}
+
+button,input{
+    font-family:inherit
+}
+
+button{
+    border:0;
+    cursor:pointer
+}
+
+button:active{
+    transform:scale(.985)
+}
+
+.app{
+    width:100%;
+    max-width:560px;
+    min-height:100vh;
+    margin:auto;
+    padding:24px 18px 155px
+}
+
+.header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:25px
+}
+
+.eyebrow,
+.section-label,
+.page-eyebrow{
+    color:#606060;
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase
+}
+
+.eyebrow{
+    margin-bottom:6px
+}
+
+.header h1{
+    margin:0;
+    font-size:27px;
+    line-height:1;
+    font-weight:800;
+    letter-spacing:-1.2px
+}
 
 .avatar{
-width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-border:1px solid #2c2c2c;border-radius:50%;
-background:linear-gradient(145deg,#292929,#0b0b0b);
-font-size:14px;font-weight:800;
-box-shadow:0 12px 30px #0007,inset 0 1px #ffffff14
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #2c2c2c;
+    border-radius:50%;
+    background:linear-gradient(145deg,#292929,#0b0b0b);
+    font-size:14px;
+    font-weight:800;
+    box-shadow:0 12px 30px #0007,inset 0 1px #ffffff14
 }
 
 .hero{
-padding:22px;margin-bottom:25px;border:1px solid var(--border);
-border-radius:var(--radius);
-background:linear-gradient(145deg,#161616,#0a0a0a);
-box-shadow:0 25px 65px #0006,inset 0 1px #ffffff09
+    padding:22px;
+    margin-bottom:25px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:linear-gradient(145deg,#161616,#0a0a0a);
+    box-shadow:0 25px 65px #0006,inset 0 1px #ffffff09
 }
 
-.hero-top{display:flex;align-items:flex-end;justify-content:space-between}
-.label{display:block;margin-bottom:6px;color:#626262;font-size:8px;font-weight:700;letter-spacing:2px}
-.level{font-size:28px;font-weight:800;letter-spacing:-1px}
-.xp{color:#909090;font-size:11px;font-weight:700}
-.bar{height:4px;margin-top:18px;background:#242424;border-radius:20px;overflow:hidden}
-.fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#777,#fff);transition:width .65s cubic-bezier(.2,.8,.2,1)}
-.hero-bottom{display:flex;justify-content:space-between;margin-top:12px;color:#646464;font-size:9px;font-weight:600}
+.hero-top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between
+}
 
-.life{margin-bottom:25px}
-.life-number{font-size:58px;font-weight:800;line-height:.95;letter-spacing:-4px;margin:7px 0 12px}
-.life-number span{font-size:27px;color:#777;letter-spacing:-1px}
-.life-bar{height:3px;background:#1c1c1c;border-radius:20px;overflow:hidden}
+.label{
+    display:block;
+    margin-bottom:6px;
+    color:#626262;
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:2px
+}
 
-.categories{display:flex;flex-direction:column;gap:12px}
+.level{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:-1px
+}
+
+.xp{
+    color:#909090;
+    font-size:11px;
+    font-weight:700
+}
+
+.bar{
+    height:4px;
+    margin-top:18px;
+    background:#242424;
+    border-radius:20px;
+    overflow:hidden
+}
+
+.fill{
+    height:100%;
+    width:0;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#777,#fff);
+    transition:width .65s cubic-bezier(.2,.8,.2,1)
+}
+
+.hero-bottom{
+    display:flex;
+    justify-content:space-between;
+    margin-top:12px;
+    color:#646464;
+    font-size:9px;
+    font-weight:600
+}
+
+.life{
+    margin-bottom:25px
+}
+
+.life-number{
+    font-size:58px;
+    font-weight:800;
+    line-height:.95;
+    letter-spacing:-4px;
+    margin:7px 0 12px
+}
+
+.life-number span{
+    font-size:27px;
+    color:#777;
+    letter-spacing:-1px
+}
+
+.life-bar{
+    height:3px;
+    background:#1c1c1c;
+    border-radius:20px;
+    overflow:hidden
+}
+
+.categories{
+    display:flex;
+    flex-direction:column;
+    gap:12px
+}
 
 .category{
-padding:19px;border:1px solid var(--border);border-radius:var(--radius);
-background:linear-gradient(145deg,#131313,#0a0a0a);
-box-shadow:0 16px 40px #0004,inset 0 1px #ffffff06
+    padding:19px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:linear-gradient(145deg,#131313,#0a0a0a);
+    box-shadow:0 16px 40px #0004,inset 0 1px #ffffff06
 }
 
-.category-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
-.category-title{display:flex;align-items:center;gap:12px}
+.category-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:17px
+}
+
+.category-title{
+    display:flex;
+    align-items:center;
+    gap:12px
+}
 
 .icon{
-width:43px;height:43px;display:flex;align-items:center;justify-content:center;
-border:1px solid #292929;border-radius:14px;
-background:linear-gradient(145deg,#1b1b1b,#111);
-font-size:19px
+    width:43px;
+    height:43px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:linear-gradient(145deg,#1b1b1b,#111);
+    font-size:19px
 }
 
-.category-name strong{display:block;font-size:13px;font-weight:800;letter-spacing:1px}
-.category-name span{display:block;margin-top:6px;color:#606060;font-size:9px;font-weight:600}
-.percent{font-size:20px;font-weight:800}
+.category-name strong{
+    display:block;
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:1px
+}
 
-.progress{height:4px;background:#222;border-radius:20px;overflow:hidden}
+.category-name span{
+    display:block;
+    margin-top:6px;
+    color:#606060;
+    font-size:9px;
+    font-weight:600
+}
+
+.percent{
+    font-size:20px;
+    font-weight:800
+}
+
+.progress{
+    height:4px;
+    background:#222;
+    border-radius:20px;
+    overflow:hidden
+}
+
 .progress i{
-display:block;height:100%;width:0;
-background:linear-gradient(90deg,#777,#f5f5f5);
-border-radius:inherit;
-transition:width .65s cubic-bezier(.2,.8,.2,1)
+    display:block;
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,#777,#f5f5f5);
+    border-radius:inherit;
+    transition:width .65s cubic-bezier(.2,.8,.2,1)
 }
 
 .quest{
-width:100%;height:58px;margin-top:18px;
-border:1px solid #303030;border-radius:18px;
-background:linear-gradient(145deg,#eee,#bdbdbd);
-color:#080808;font-size:10px;font-weight:900;letter-spacing:2px
+    width:100%;
+    height:58px;
+    margin-top:18px;
+    border:1px solid #303030;
+    border-radius:18px;
+    background:linear-gradient(145deg,#eee,#bdbdbd);
+    color:#080808;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:2px
 }
 
+/* CREATOR */
+
+.creator{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:42px;
+    margin-top:16px;
+    border:1px solid #202020;
+    border-radius:14px;
+    background:#0b0b0b;
+    color:#686868;
+    text-decoration:none;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+    transition:.2s ease
+}
+
+.creator strong{
+    color:#aaa;
+    font-weight:800
+}
+
+.creator:active{
+    transform:scale(.985);
+    background:#111;
+}
+
+/* NAV */
+
 .nav{
-position:fixed;left:50%;bottom:12px;transform:translateX(-50%);
-width:calc(100% - 24px);max-width:530px;height:68px;
-display:flex;align-items:center;justify-content:space-around;
-padding:5px 6px;z-index:100;
-border:1px solid #242424;border-radius:23px;
-background:rgba(14,14,14,.96);
-backdrop-filter:blur(24px);
--webkit-backdrop-filter:blur(24px);
-box-shadow:0 20px 50px rgba(0,0,0,.65)
+    position:fixed;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    width:calc(100% - 24px);
+    max-width:530px;
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+    padding:5px 6px;
+    z-index:100;
+    border:1px solid #242424;
+    border-radius:23px;
+    background:rgba(14,14,14,.96)!important;
+    backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px);
+    box-shadow:0 20px 50px rgba(0,0,0,.65)!important
 }
 
 .nav button{
-min-width:58px;height:55px;
-display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-gap:4px;border-radius:16px;
-background:transparent!important;
-color:#555!important;
--webkit-appearance:none!important;
-appearance:none!important
+    min-width:58px;
+    height:55px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    border-radius:16px;
+    background:transparent!important;
+    color:#555!important;
+    -webkit-appearance:none!important;
+    appearance:none!important
 }
 
 .nav button.active{
-background:rgba(255,255,255,.055)!important;
-color:#fff!important
+    color:#fff!important;
+    background:rgba(255,255,255,.055)!important
 }
 
 .nav button:focus,
 .nav button:focus-visible{
-outline:none!important;
-box-shadow:none!important
+    outline:none!important;
+    box-shadow:none!important
 }
 
-.nav-icon{font-size:17px;line-height:1}
-.nav-label{font-size:7px;font-weight:600}
+.nav-icon{
+    font-size:17px;
+    line-height:1
+}
+
+.nav-label{
+    font-size:7px;
+    font-weight:600
+}
+
+/* PAGES */
 
 .page{
-position:fixed;inset:0;z-index:200;overflow-y:auto;
-padding:24px 18px 120px;
-background:radial-gradient(circle at 50% -10%,#ffffff12,transparent 38%),linear-gradient(180deg,#080808,#050505 60%,#030303);
-animation:pageIn .22s ease
+    position:fixed;
+    inset:0;
+    z-index:200;
+    overflow-y:auto;
+    padding:24px 18px 155px;
+    background:
+        radial-gradient(circle at 50% -10%,#ffffff12,transparent 38%),
+        linear-gradient(180deg,#080808,#050505 60%,#030303);
+    animation:pageIn .22s ease
 }
 
 @keyframes pageIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
+    from{
+        opacity:0;
+        transform:translateY(10px)
+    }
+    to{
+        opacity:1;
+        transform:translateY(0)
+    }
 }
 
-.page-inner{max-width:560px;margin:auto}
-.page-head{display:flex;align-items:center;gap:13px;margin-bottom:22px}
+.page-inner{
+    max-width:560px;
+    margin:auto
+}
+
+.page-head{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    margin-bottom:22px
+}
 
 .back{
-width:44px;height:44px;
-display:flex;align-items:center;justify-content:center;
-border:1px solid #292929;border-radius:14px;
-background:#111;color:#fff;font-size:20px
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#111;
+    color:#fff;
+    font-size:20px
 }
 
-.page h2{margin:0;font-size:25px;font-weight:800;letter-spacing:-.8px}
+.page h2{
+    margin:0;
+    font-size:25px;
+    font-weight:800;
+    letter-spacing:-.8px
+}
 
 .summary{
-padding:21px;margin-bottom:14px;
-border:1px solid #242424;border-radius:22px;
-background:linear-gradient(145deg,#151515,#0c0c0c);
-box-shadow:0 20px 50px #0006
+    padding:21px;
+    margin-bottom:14px;
+    border:1px solid #242424;
+    border-radius:22px;
+    background:linear-gradient(145deg,#151515,#0c0c0c);
+    box-shadow:0 20px 50px #0006
 }
 
 .summary-number{
-font-size:45px;font-weight:800;line-height:1;
-letter-spacing:-3px;margin:8px 0 15px
+    font-size:45px;
+    font-weight:800;
+    line-height:1;
+    letter-spacing:-3px;
+    margin:8px 0 15px
 }
 
-.cards{display:flex;flex-direction:column;gap:11px}
+.cards{
+    display:flex;
+    flex-direction:column;
+    gap:11px
+}
 
 .metric{
-padding:18px;
-border:1px solid #222;
-border-radius:20px;
-background:linear-gradient(145deg,#121212,#0a0a0a);
-box-shadow:0 14px 35px #0004
+    padding:18px;
+    border:1px solid #222;
+    border-radius:20px;
+    background:linear-gradient(145deg,#121212,#0a0a0a);
+    box-shadow:0 14px 35px #0004
 }
 
 .metric-head{
-display:flex;align-items:center;justify-content:space-between;
-gap:12px;margin-bottom:14px
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:14px
 }
 
-.metric-left{display:flex;align-items:center;gap:11px;min-width:0}
+.metric-left{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-width:0
+}
 
 .metric-icon{
-width:42px;height:42px;
-display:flex;align-items:center;justify-content:center;
-flex-shrink:0;
-border:1px solid #292929;border-radius:13px;
-background:#171717;font-size:18px
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    border:1px solid #292929;
+    border-radius:13px;
+    background:#171717;
+    font-size:18px
 }
 
 .metric-text strong{
-display:block;font-size:12px;font-weight:750;line-height:1.2
+    display:block;
+    font-size:12px;
+    font-weight:750;
+    line-height:1.2
 }
 
 .metric-text span{
-display:block;margin-top:5px;color:#666;font-size:9px;line-height:1.25
+    display:block;
+    margin-top:5px;
+    color:#666;
+    font-size:9px;
+    line-height:1.25
 }
 
 .metric-percent{
-font-size:19px;font-weight:800;white-space:nowrap
+    font-size:19px;
+    font-weight:800;
+    white-space:nowrap
 }
 
 .metric-bar{
-height:3px;margin-bottom:14px;
-background:#202020;border-radius:20px;overflow:hidden
+    height:3px;
+    margin-bottom:14px;
+    background:#202020;
+    border-radius:20px;
+    overflow:hidden
 }
 
 .metric-bar i{
-display:block;height:100%;
-background:linear-gradient(90deg,#666,#eee);
-border-radius:inherit
+    display:block;
+    height:100%;
+    background:linear-gradient(90deg,#666,#eee);
+    border-radius:inherit
 }
 
-.edit,.add{
-width:100%;height:38px;
-border:1px solid #292929;border-radius:12px;
-background:#111;color:#8d8d8d;
-font-size:8px;font-weight:800;letter-spacing:1.5px
+.edit,
+.add{
+    width:100%;
+    height:38px;
+    border:1px solid #292929;
+    border-radius:12px;
+    background:#111;
+    color:#8d8d8d;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:1.5px
 }
 
 .finance-box{
-margin-top:15px;padding-top:15px;
-border-top:1px solid #222
+    margin-top:15px;
+    padding-top:15px;
+    border-top:1px solid #222
 }
 
 .finance-line{
-display:flex;justify-content:space-between;
-align-items:center;margin-bottom:9px
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:9px
 }
 
-.finance-line:last-child{margin-bottom:0}
-.finance-line span{color:#666;font-size:8px;font-weight:700;letter-spacing:1.5px}
-.finance-line strong{font-size:13px;font-weight:800}
+.finance-line:last-child{
+    margin-bottom:0
+}
+
+.finance-line span{
+    color:#666;
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:1.5px
+}
+
+.finance-line strong{
+    font-size:13px;
+    font-weight:800
+}
+
+/* EXPENSES */
 
 .expenses{
-margin-top:15px;padding-top:15px;
-border-top:1px solid #222
+    margin-top:15px;
+    padding-top:15px;
+    border-top:1px solid #222
 }
 
 .expenses-title{
-display:flex;
-justify-content:space-between;
-align-items:center;
-width:100%;
-margin-bottom:11px;
-padding:0;
-cursor:pointer;
-user-select:none;
--webkit-appearance:none;
-appearance:none;
-border:0;
-color:inherit;
-background:transparent
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    margin-bottom:11px;
+    padding:0;
+    cursor:pointer;
+    user-select:none;
+    -webkit-appearance:none;
+    appearance:none;
+    border:0;
+    color:inherit;
+    background:transparent
 }
 
-.expenses-title:active{transform:none}
+.expenses-title:active{
+    transform:none
+}
 
 .expenses-title-left{
-display:flex;
-align-items:center;
-gap:8px;
-flex:1;
-min-width:0
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex:1;
+    min-width:0
 }
 
 .expenses-title span{
-color:#777;
-font-size:8px;
-font-weight:800;
-letter-spacing:1.6px
+    color:#777;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:1.6px
 }
 
 .expenses-title strong{
-font-size:12px;
-font-weight:800
+    font-size:12px;
+    font-weight:800
 }
 
-/* Стрелка полностью убрана */
+/* стрелка больше не используется */
+
 .collapse-chevron{
-display:none!important
+    display:none!important
+}
+
+.expenses.collapsed .collapse-chevron{
+    display:none!important
 }
 
 .expense-content{
-overflow:hidden;
-max-height:900px;
-transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease
+    overflow:hidden;
+    max-height:900px;
+    transition:max-height .28s cubic-bezier(.2,.8,.2,1),opacity .18s ease
 }
 
 .expenses.collapsed .expense-content{
-max-height:0;
-opacity:0
+    max-height:0;
+    opacity:0
 }
 
 .expense-list{
-display:flex;
-flex-direction:column;
-gap:7px
+    display:flex;
+    flex-direction:column;
+    gap:7px
 }
 
 .expense-swipe{
-position:relative;
-overflow:hidden;
-border-radius:13px;
-background:#ff3b30;
-touch-action:pan-y
+    position:relative;
+    overflow:hidden;
+    border-radius:13px;
+    background:#ff3b30;
+    touch-action:pan-y
 }
 
 .expense-delete-reveal{
-position:absolute;
-inset:0 0 0 auto;
-width:82px;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#ff3b30!important;
-color:#fff;
-font-size:0
+    position:absolute;
+    inset:0 0 0 auto;
+    width:82px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#ff3b30!important;
+    color:#fff;
+    font-size:0
 }
 
 .expense-delete-reveal::after{
-content:"×";
-font-size:24px;
-font-weight:300;
-line-height:1
+    content:"×";
+    font-size:24px;
+    font-weight:300;
+    line-height:1
 }
 
 .expense{
-position:relative;
-z-index:2;
-min-height:47px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-padding:8px 10px 8px 12px;
-border:1px solid #1f1f1f;
-border-radius:13px;
-background:#0c0c0c;
-transform:translateX(0);
-transition:transform .2s ease;
-will-change:transform
+    position:relative;
+    z-index:2;
+    min-height:47px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 10px 8px 12px;
+    border:1px solid #1f1f1f;
+    border-radius:13px;
+    background:#0c0c0c;
+    transform:translateX(0);
+    transition:transform .2s ease;
+    will-change:transform
 }
 
 .expense.swiped{
-transform:translateX(-76px);
-box-shadow:-8px 0 18px rgba(0,0,0,.18)
+    transform:translateX(-76px);
+    box-shadow:-8px 0 18px rgba(0,0,0,.18)
 }
 
-.expense-info{min-width:0}
+.expense-info{
+    min-width:0
+}
 
 .expense-name{
-overflow:hidden;
-text-overflow:ellipsis;
-white-space:nowrap;
-font-size:11px;
-font-weight:600
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:11px;
+    font-weight:600
 }
 
 .expense-amount{
-margin-top:3px;
-color:#777;
-font-size:10px;
-font-weight:700
+    margin-top:3px;
+    color:#777;
+    font-size:10px;
+    font-weight:700
 }
+
+/* старые кнопки удаления убраны */
 
 .expense-actions{
-display:flex;
-gap:5px
+    display:flex;
+    gap:5px
 }
 
-/* Кнопка удаления × удалена.
-   Кнопка редактирования сохранена. */
 .expense-delete{
-display:none!important
+    display:none!important
 }
 
 .small-btn{
-width:31px;height:31px;
-display:flex;
-align-items:center;
-justify-content:center;
-border:1px solid #262626;
-border-radius:9px;
-background:#141414;
-color:#777;
-font-size:14px
+    width:31px;
+    height:31px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #262626;
+    border-radius:9px;
+    background:#141414;
+    color:#777;
+    font-size:14px
 }
 
 .ratio{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-top:10px;
-padding:11px 12px;
-border-radius:12px;
-background:#141414
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:10px;
+    padding:11px 12px;
+    border-radius:12px;
+    background:#141414
 }
 
 .ratio span{
-color:#666;
-font-size:8px;
-font-weight:700
+    color:#666;
+    font-size:8px;
+    font-weight:700
 }
 
 .ratio strong{
-font-size:13px;
-font-weight:800
+    font-size:13px;
+    font-weight:800
 }
 
 .notice{
-padding:14px;
-margin-top:12px;
-border:1px solid #222;
-border-radius:14px;
-background:#0d0d0d;
-color:#666;
-font-size:9px;
-line-height:1.5
+    padding:14px;
+    margin-top:12px;
+    border:1px solid #222;
+    border-radius:14px;
+    background:#0d0d0d;
+    color:#666;
+    font-size:9px;
+    line-height:1.5
 }
 
+/* QUEST */
+
 .quest-card{
-padding:20px;
-border:1px solid #282828;
-border-radius:20px;
-background:linear-gradient(145deg,#171717,#0b0b0b)
+    padding:20px;
+    border:1px solid #282828;
+    border-radius:20px;
+    background:linear-gradient(145deg,#171717,#0b0b0b)
 }
 
 .quest-item{
-padding:14px;
-margin-top:9px;
-border:1px solid #222;
-border-radius:14px;
-background:#0d0d0d
+    padding:14px;
+    margin-top:9px;
+    border:1px solid #222;
+    border-radius:14px;
+    background:#0d0d0d
 }
 
-.quest-item:first-child{margin-top:0}
+.quest-item:first-child{
+    margin-top:0
+}
 
 .quest-row{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px
 }
 
 .quest-title{
-font-size:11px;
-font-weight:700
+    font-size:11px;
+    font-weight:700
 }
 
 .quest-xp{
-font-size:10px;
-color:#aaa;
-font-weight:800
+    font-size:10px;
+    color:#aaa;
+    font-weight:800
 }
 
 .complete{
-width:100%;
-height:37px;
-margin-top:10px;
-border:1px solid #292929;
-border-radius:11px;
-background:#151515;
-color:#bbb;
-font-size:8px;
-font-weight:800;
-letter-spacing:1px
+    width:100%;
+    height:37px;
+    margin-top:10px;
+    border:1px solid #292929;
+    border-radius:11px;
+    background:#151515;
+    color:#bbb;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:1px
 }
 
 .complete.done{
-background:#eee;
-color:#080808
+    background:#eee;
+    color:#080808
 }
 
+/* MODAL */
+
 .overlay{
-position:fixed;
-inset:0;
-z-index:500;
-display:flex;
-align-items:flex-end;
-justify-content:center;
-padding:14px;
-background:#000bd;
-backdrop-filter:blur(12px);
--webkit-backdrop-filter:blur(12px);
-animation:fade .18s ease
+    position:fixed;
+    inset:0;
+    z-index:500;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding:14px;
+    background:#000bd;
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    animation:fade .18s ease
 }
 
 @keyframes fade{
-from{opacity:0}
-to{opacity:1}
+    from{opacity:0}
+    to{opacity:1}
 }
 
 .modal{
-position:relative;
-width:100%;
-max-width:520px;
-max-height:88vh;
-overflow-y:auto;
-padding:25px 20px 21px;
-border:1px solid #292929;
-border-radius:26px 26px 20px 20px;
-background:linear-gradient(145deg,#171717,#0b0b0b);
-box-shadow:0 -10px 60px #0009;
-animation:modalIn .22s cubic-bezier(.2,.8,.2,1)
+    position:relative;
+    width:100%;
+    max-width:520px;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:25px 20px 21px;
+    border:1px solid #292929;
+    border-radius:26px 26px 20px 20px;
+    background:linear-gradient(145deg,#171717,#0b0b0b);
+    box-shadow:0 -10px 60px #0009;
+    animation:modalIn .22s cubic-bezier(.2,.8,.2,1)
 }
 
 @keyframes modalIn{
-from{transform:translateY(25px)}
-to{transform:translateY(0)}
+    from{transform:translateY(25px)}
+    to{transform:translateY(0)}
 }
 
 .close{
-position:absolute;
-right:15px;
-top:15px;
-width:34px;
-height:34px;
-border:1px solid #292929;
-border-radius:50%;
-background:#111;
-color:#777;
-font-size:20px
+    position:absolute;
+    right:15px;
+    top:15px;
+    width:34px;
+    height:34px;
+    border:1px solid #292929;
+    border-radius:50%;
+    background:#111;
+    color:#777;
+    font-size:20px
 }
 
 .modal-icon{
-width:48px;
-height:48px;
-display:flex;
-align-items:center;
-justify-content:center;
-margin-bottom:14px;
-border:1px solid #2a2a2a;
-border-radius:15px;
-background:#191919;
-font-size:21px
+    width:48px;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:14px;
+    border:1px solid #2a2a2a;
+    border-radius:15px;
+    background:#191919;
+    font-size:21px
 }
 
 .modal-label{
-margin-bottom:5px;
-color:#606060;
-font-size:8px;
-font-weight:800;
-letter-spacing:2px
+    margin-bottom:5px;
+    color:#606060;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:2px
 }
 
 .modal h3{
-margin:0 0 21px;
-padding-right:40px;
-font-size:21px;
-line-height:1.1;
-font-weight:800
+    margin:0 0 21px;
+    padding-right:40px;
+    font-size:21px;
+    line-height:1.1;
+    font-weight:800
 }
 
 .modal label{
-display:block;
-margin-bottom:7px;
-color:#777;
-font-size:9px;
-font-weight:600
+    display:block;
+    margin-bottom:7px;
+    color:#777;
+    font-size:9px;
+    font-weight:600
 }
 
 .modal input{
-width:100%;
-height:50px;
-margin-bottom:14px;
-padding:0 15px;
-border:1px solid #292929;
-border-radius:14px;
-outline:none;
-background:#0d0d0d;
-color:#f5f5f5;
-font-size:16px;
-font-weight:600
+    width:100%;
+    height:50px;
+    margin-bottom:14px;
+    padding:0 15px;
+    border:1px solid #292929;
+    border-radius:14px;
+    outline:none;
+    background:#0d0d0d;
+    color:#f5f5f5;
+    font-size:16px;
+    font-weight:600
 }
 
 .modal input:focus{
-border-color:#555;
-background:#111
+    border-color:#555;
+    background:#111
 }
 
 .modal-preview{
-display:flex;
-justify-content:space-between;
-padding:13px;
-margin:3px 0 16px;
-border:1px solid #242424;
-border-radius:14px;
-background:#0d0d0d
+    display:flex;
+    justify-content:space-between;
+    padding:13px;
+    margin:3px 0 16px;
+    border:1px solid #242424;
+    border-radius:14px;
+    background:#0d0d0d
 }
 
 .modal-preview span{
-color:#666;
-font-size:9px;
-font-weight:600
+    color:#666;
+    font-size:9px;
+    font-weight:600
 }
 
 .modal-preview strong{
-font-size:16px
+    font-size:16px
 }
 
 .primary{
-width:100%;
-height:52px;
-border-radius:15px;
-background:linear-gradient(145deg,#f1f1f1,#bdbdbd);
-color:#080808;
-font-size:9px;
-font-weight:900;
-letter-spacing:2px
+    width:100%;
+    height:52px;
+    border-radius:15px;
+    background:linear-gradient(145deg,#f1f1f1,#bdbdbd);
+    color:#080808;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:2px
 }
 
 .toast{
-position:fixed;
-left:50%;
-bottom:95px;
-z-index:1000;
-transform:translate(-50%,10px);
-padding:12px 18px;
-border:1px solid #303030;
-border-radius:14px;
-background:#141414f5;
-color:#fff;
-font-size:10px;
-font-weight:700;
-white-space:nowrap;
-opacity:0;
-pointer-events:none;
-transition:.2s
+    position:fixed;
+    left:50%;
+    bottom:95px;
+    z-index:1000;
+    transform:translate(-50%,10px);
+    padding:12px 18px;
+    border:1px solid #303030;
+    border-radius:14px;
+    background:#141414f5;
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:.2s
 }
 
 .toast.show{
-opacity:1;
-transform:translate(-50%,0)
+    opacity:1;
+    transform:translate(-50%,0)
+}
+
+/* TRAINING INSIDE HEALTH */
+
+.training-divider{
+    margin:4px 0 2px;
+    padding:12px 2px 4px;
+    color:#606060;
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:2px;
+    text-transform:uppercase
 }
 
 @media(max-width:360px){
-.app{padding-left:14px;padding-right:14px}
-.header h1{font-size:24px}
-.life-number{font-size:51px}
-.category{padding:17px}
-.nav-label{font-size:6px}
+    .app{
+        padding-left:14px;
+        padding-right:14px
+    }
+
+    .header h1{
+        font-size:24px
+    }
+
+    .life-number{
+        font-size:51px
+    }
+
+    .category{
+        padding:17px
+    }
+
+    .nav-label{
+        font-size:6px
+    }
 }
 
 @media(min-width:700px){
-.app{padding-top:45px}
-.page{padding-top:35px}
+    .app{
+        padding-top:45px
+    }
+
+    .page{
+        padding-top:35px
+    }
 }
 </style>
 </head>
@@ -653,2030 +1033,2938 @@ transform:translate(-50%,0)
 <div class="app">
 
 <header class="header">
-<div>
-<div class="eyebrow">YOUR LIFE</div>
-<h1>LIFE GAME</h1>
-</div>
-<div class="avatar">B</div>
+    <div>
+        <div class="eyebrow">YOUR LIFE</div>
+        <h1>LIFE GAME</h1>
+    </div>
+    <div class="avatar">B</div>
 </header>
 
 <section class="hero">
-<div class="hero-top">
-<div>
-<span class="label">PLAYER LEVEL</span>
-<div class="level" id="playerLevel">LVL 1</div>
-</div>
-<div class="xp" id="playerXP">0 XP</div>
-</div>
+    <div class="hero-top">
+        <div>
+            <span class="label">PLAYER LEVEL</span>
+            <div class="level" id="playerLevel">LVL 1</div>
+        </div>
+        <div class="xp" id="playerXP">0 XP</div>
+    </div>
 
-<div class="bar">
-<div class="fill" id="playerXPFill"></div>
-</div>
+    <div class="bar">
+        <div class="fill" id="playerXPFill"></div>
+    </div>
 
-<div class="hero-bottom">
-<span id="xpNext">100 XP TO NEXT LEVEL</span>
-<span id="playerRank">BEGINNER</span>
-</div>
+    <div class="hero-bottom">
+        <span id="xpNext">100 XP TO NEXT LEVEL</span>
+        <span id="playerRank">BEGINNER</span>
+    </div>
 </section>
 
 <section class="life">
-<div class="section-label">LIFE PROGRESS</div>
-<div class="life-number" id="lifeProgress">0<span>%</span></div>
-<div class="life-bar">
-<div class="fill" id="lifeFill"></div>
-</div>
+    <div class="section-label">LIFE PROGRESS</div>
+    <div class="life-number" id="lifeProgress">0<span>%</span></div>
+    <div class="life-bar">
+        <div class="fill" id="lifeFill"></div>
+    </div>
 </section>
 
 <main class="categories">
 
-<article class="category" data-category="finance">
-<div class="category-head">
-<div class="category-title">
-<div class="icon">💰</div>
-<div class="category-name">
-<strong>FINANCE</strong>
-<span>Финансы</span>
-</div>
-</div>
-<div class="percent" id="financePercent">0%</div>
-</div>
-<div class="progress"><i id="financeFill"></i></div>
-</article>
+    <article class="category" data-category="finance">
+        <div class="category-head">
+            <div class="category-title">
+                <div class="icon">💰</div>
+                <div class="category-name">
+                    <strong>FINANCE</strong>
+                    <span>Финансы</span>
+                </div>
+            </div>
+            <div class="percent" id="financePercent">0%</div>
+        </div>
+        <div class="progress">
+            <i id="financeFill"></i>
+        </div>
+    </article>
 
-<article class="category" data-category="training">
-<div class="category-head">
-<div class="category-title">
-<div class="icon">🏋️</div>
-<div class="category-name">
-<strong>TRAINING</strong>
-<span>Тренировки</span>
-</div>
-</div>
-<div class="percent" id="trainingPercent">0%</div>
-</div>
-<div class="progress"><i id="trainingFill"></i></div>
-</article>
+    <article class="category" data-category="development">
+        <div class="category-head">
+            <div class="category-title">
+                <div class="icon">🧠</div>
+                <div class="category-name">
+                    <strong>DEVELOPMENT</strong>
+                    <span>Развитие</span>
+                </div>
+            </div>
+            <div class="percent" id="developmentPercent">0%</div>
+        </div>
+        <div class="progress">
+            <i id="developmentFill"></i>
+        </div>
+    </article>
 
-<article class="category" data-category="development">
-<div class="category-head">
-<div class="category-title">
-<div class="icon">🧠</div>
-<div class="category-name">
-<strong>DEVELOPMENT</strong>
-<span>Развитие</span>
-</div>
-</div>
-<div class="percent" id="developmentPercent">0%</div>
-</div>
-<div class="progress"><i id="developmentFill"></i></div>
-</article>
-
-<article class="category" data-category="discipline">
-<div class="category-head">
-<div class="category-title">
-<div class="icon">⚡</div>
-<div class="category-name">
-<strong>DISCIPLINE</strong>
-<span>Дисциплина</span>
-</div>
-</div>
-<div class="percent" id="disciplinePercent">0%</div>
-</div>
-<div class="progress"><i id="disciplineFill"></i></div>
-</article>
-
-<article class="category" data-category="health">
-<div class="category-head">
-<div class="category-title">
-<div class="icon">❤️</div>
-<div class="category-name">
-<strong>HEALTH</strong>
-<span>Здоровье</span>
-</div>
-</div>
-<div class="percent" id="healthPercent">0%</div>
-</div>
-<div class="progress"><i id="healthFill"></i></div>
-</article>
+    <article class="category" data-category="health">
+        <div class="category-head">
+            <div class="category-title">
+                <div class="icon">❤️</div>
+                <div class="category-name">
+                    <strong>HEALTH</strong>
+                    <span>Здоровье · Тренировки</span>
+                </div>
+            </div>
+            <div class="percent" id="healthPercent">0%</div>
+        </div>
+        <div class="progress">
+            <i id="healthFill"></i>
+        </div>
+    </article>
 
 </main>
 
-<button class="quest" id="dailyQuest">⚡ DAILY QUEST</button>
+<button class="quest" id="dailyQuest">
+    ⚡ DAILY QUEST
+</button>
+
+<a class="creator"
+   href="https://t.me/shkeltinsh"
+   target="_blank"
+   rel="noopener noreferrer">
+    Created by <strong>&nbsp;@shkeltinsh</strong>
+</a>
 
 </div>
 
 <nav class="nav">
 
-<button class="active" data-nav="home">
-<span class="nav-icon">⌂</span>
-<span class="nav-label">Главная</span>
-</button>
+    <button class="active" data-nav="home">
+        <span class="nav-icon">⌂</span>
+        <span class="nav-label">Главная</span>
+    </button>
 
-<button data-nav="finance">
-<span class="nav-icon">💰</span>
-<span class="nav-label">Финансы</span>
-</button>
+    <button data-nav="finance">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Финансы</span>
+    </button>
 
-<button data-nav="training">
-<span class="nav-icon">🏋️</span>
-<span class="nav-label">Тренинг</span>
-</button>
+    <button data-nav="health">
+        <span class="nav-icon">❤️</span>
+        <span class="nav-label">Здоровье</span>
+    </button>
 
-<button data-nav="development">
-<span class="nav-icon">🧠</span>
-<span class="nav-label">Развитие</span>
-</button>
-
-<button data-nav="health">
-<span class="nav-icon">❤️</span>
-<span class="nav-label">Здоровье</span>
-</button>
+    <button data-nav="development">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-label">Развитие</span>
+    </button>
 
 </nav>
 
 <script>
-(()=>{'use strict';
+(()=>{
 
-const SK='life_game_core_v3',
-EK='life_game_expenses_v3',
-UK='life_game_ui_v1';
+'use strict';
+
+const SK='life_game_core_v3';
+const EK='life_game_expenses_v3';
+const UK='life_game_ui_v1';
 
 const META={
-finance:{icon:'💰',title:'Финансы'},
-training:{icon:'🏋️',title:'Тренировки'},
-development:{icon:'🧠',title:'Развитие'},
-discipline:{icon:'⚡',title:'Дисциплина'},
-health:{icon:'❤️',title:'Здоровье'}
+    finance:{
+        icon:'💰',
+        title:'Финансы'
+    },
+    development:{
+        icon:'🧠',
+        title:'Развитие'
+    },
+    health:{
+        icon:'❤️',
+        title:'Здоровье'
+    }
+};
+
+const XP={
+    financeBase:100,
+    trainingBase:80,
+    developmentAction:25,
+    healthAction:20,
+    streakMultiplier:.08,
+    penaltyMultiplier:.25
 };
 
 const DEFAULT={
-version:3,
-player:{
-xp:0,
-level:1,
-rating:0,
-premiumBonusXP:0
-},
-categories:{
-finance:{
-xp:0,
-level:1,
-streak:0,
-bestStreak:0,
-monthlyIncome:0,
-monthlyGoal:100000,
-yearlyGoal:1200000,
-savings:0
-},
-training:{
-xp:0,
-level:1,
-streak:0,
-bestStreak:0,
-workouts:0,
-monthlyTarget:12
-},
-development:{
-xp:0,
-level:1,
-streak:0,
-bestStreak:0,
-books:0,
-languageMinutes:0,
-meditationMinutes:0
-},
-discipline:{
-xp:0,
-level:1,
-streak:0,
-bestStreak:0,
-completed:0,
-failed:0
-},
-health:{
-xp:0,
-level:1,
-streak:0,
-bestStreak:0,
-routine:0,
-nutrition:0,
-steps:0
-}
-},
-simulator:{
-currentMonth:1,
-months:120,
-history:[]
-},
-quests:[
-{
-id:'finance_income',
-category:'finance',
-title:'Зафиксировать доход за месяц',
-xp:35,
-done:false
-},
-{
-id:'training',
-category:'training',
-title:'Выполнить тренировку',
-xp:30,
-done:false
-},
-{
-id:'development',
-category:'development',
-title:'30 минут развития',
-xp:25,
-done:false
-},
-{
-id:'discipline',
-category:'discipline',
-title:'Закрыть главное дело дня',
-xp:20,
-done:false
-},
-{
-id:'health',
-category:'health',
-title:'Выполнить полезную привычку',
-xp:20,
-done:false
-}
-]
+    version:3,
+
+    player:{
+        xp:0,
+        level:1,
+        rating:0,
+        premiumBonusXP:0
+    },
+
+    categories:{
+
+        finance:{
+            xp:0,
+            level:1,
+            streak:0,
+            bestStreak:0,
+            monthlyIncome:0,
+            monthlyGoal:100000,
+            yearlyGoal:1200000,
+            savings:0
+        },
+
+        /*
+         * TRAINING DATA INTENTIONALLY REMAINS IN STORAGE.
+         * This prevents loss of previous training progress.
+         * Training is now displayed inside HEALTH.
+         */
+        training:{
+            xp:0,
+            level:1,
+            streak:0,
+            bestStreak:0,
+            workouts:0,
+            monthlyTarget:12
+        },
+
+        development:{
+            xp:0,
+            level:1,
+            streak:0,
+            bestStreak:0,
+            books:0,
+            languageMinutes:0,
+            meditationMinutes:0
+        },
+
+        health:{
+            xp:0,
+            level:1,
+            streak:0,
+            bestStreak:0,
+            routine:0,
+            nutrition:0,
+            steps:0
+        },
+
+        /*
+         * Old discipline data is deliberately preserved
+         * for backward compatibility with existing storage,
+         * but it is no longer displayed or calculated.
+         */
+        discipline:{
+            xp:0,
+            level:1,
+            streak:0,
+            bestStreak:0,
+            completed:0,
+            failed:0
+        }
+    },
+
+    simulator:{
+        currentMonth:1,
+        months:120,
+        history:[]
+    },
+
+    quests:[
+        {
+            id:'finance_income',
+            category:'finance',
+            title:'Зафиксировать доход за месяц',
+            xp:35,
+            done:false
+        },
+        {
+            id:'training',
+            category:'training',
+            title:'Выполнить тренировку',
+            xp:30,
+            done:false
+        },
+        {
+            id:'development',
+            category:'development',
+            title:'30 минут развития',
+            xp:25,
+            done:false
+        },
+        {
+            id:'health',
+            category:'health',
+            title:'Выполнить полезную привычку',
+            xp:20,
+            done:false
+        }
+    ]
 };
 
 const clone=o=>JSON.parse(JSON.stringify(o));
 
-const num=v=>Number.isFinite(Number(v))?Number(v):0;
+const num=v=>
+    Number.isFinite(Number(v))
+        ? Number(v)
+        : 0;
 
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const clamp=(v,a,b)=>
+    Math.min(b,Math.max(a,v));
 
-const fmt=v=>new Intl.NumberFormat('ru-RU').format(num(v));
+const fmt=v=>
+    new Intl.NumberFormat('ru-RU').format(num(v));
 
-const esc=v=>String(v).replace(/[&<>"']/g,m=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#039;'
-}[m]));
+const esc=v=>
+    String(v).replace(
+        /[&<>"']/g,
+        m=>({
+            '&':'&amp;',
+            '<':'&lt;',
+            '>':'&gt;',
+            '"':'&quot;',
+            "'":'&#039;'
+        }[m])
+    );
+
 
 function loadState(){
 
-try{
-let r=localStorage.getItem(SK);
-return r?normalize(JSON.parse(r)):clone(DEFAULT);
-}catch(e){
-return clone(DEFAULT);
-}
+    try{
+
+        let r=localStorage.getItem(SK);
+
+        return r
+            ? normalize(JSON.parse(r))
+            : clone(DEFAULT);
+
+    }catch(e){
+
+        return clone(DEFAULT);
+
+    }
 
 }
+
 
 function normalize(s){
 
-let r=clone(DEFAULT);
+    let r=clone(DEFAULT);
 
-if(!s||typeof s!=='object')return r;
+    if(!s || typeof s!=='object')
+        return r;
 
-if(s.player)
-Object.keys(r.player).forEach(k=>{
-if(s.player[k]!==undefined)
-r.player[k]=Math.max(0,num(s.player[k]));
-});
+    if(s.player){
 
-Object.keys(r.categories).forEach(c=>{
+        Object.keys(r.player).forEach(k=>{
 
-if(s.categories?.[c])
-Object.keys(r.categories[c]).forEach(k=>{
-if(s.categories[c][k]!==undefined)
-r.categories[c][k]=s.categories[c][k];
-});
+            if(s.player[k]!==undefined){
 
-});
+                r.player[k]=Math.max(
+                    0,
+                    num(s.player[k])
+                );
 
-if(Array.isArray(s.quests))
-r.quests=s.quests.map(q=>({
-id:String(q.id||''),
-category:String(q.category||'discipline'),
-title:String(q.title||'Quest'),
-xp:Math.max(0,num(q.xp)),
-done:Boolean(q.done)
-}));
+            }
 
-return r;
+        });
+
+    }
+
+    Object.keys(r.categories).forEach(c=>{
+
+        if(s.categories?.[c]){
+
+            Object.keys(r.categories[c]).forEach(k=>{
+
+                if(s.categories[c][k]!==undefined){
+
+                    r.categories[c][k]=s.categories[c][k];
+
+                }
+
+            });
+
+        }
+
+    });
+
+    if(Array.isArray(s.quests)){
+
+        r.quests=s.quests.map(q=>({
+
+            id:String(q.id||''),
+
+            category:String(
+                q.category||'health'
+            ),
+
+            title:String(
+                q.title||'Quest'
+            ),
+
+            xp:Math.max(
+                0,
+                num(q.xp)
+            ),
+
+            done:Boolean(q.done)
+
+        }));
+
+    }
+
+    return r;
 
 }
+
 
 function loadExpenses(){
 
-try{
+    try{
 
-let r=JSON.parse(localStorage.getItem(EK)||'[]');
+        let r=JSON.parse(
+            localStorage.getItem(EK)||'[]'
+        );
 
-return Array.isArray(r)
-?r.map(e=>({
-id:String(e.id||Date.now()+Math.random()),
-name:String(e.name||''),
-amount:Math.max(0,num(e.amount))
-}))
-:[];
+        return Array.isArray(r)
+            ? r.map(e=>({
+                id:String(
+                    e.id||Date.now()+Math.random()
+                ),
+                name:String(e.name||''),
+                amount:Math.max(
+                    0,
+                    num(e.amount)
+                )
+            }))
+            : [];
 
-}catch(e){
-return[];
+    }catch(e){
+
+        return [];
+
+    }
+
 }
 
-}
 
 function loadUI(){
 
-try{
+    try{
 
-let r=JSON.parse(localStorage.getItem(UK)||'{}');
+        let r=JSON.parse(
+            localStorage.getItem(UK)||'{}'
+        );
 
-return{
-expensesCollapsed:Boolean(r.expensesCollapsed)
-};
+        return{
+            expensesCollapsed:Boolean(
+                r.expensesCollapsed
+            )
+        };
 
-}catch(e){
+    }catch(e){
 
-return{
-expensesCollapsed:false
-};
+        return{
+            expensesCollapsed:false
+        };
+
+    }
 
 }
 
-}
 
-let state=loadState(),
-expenses=loadExpenses(),
-ui=loadUI();
+let state=loadState();
+let expenses=loadExpenses();
+let ui=loadUI();
+
 
 function save(){
 
-localStorage.setItem(SK,JSON.stringify(state));
-localStorage.setItem(EK,JSON.stringify(expenses));
-localStorage.setItem(UK,JSON.stringify(ui));
+    localStorage.setItem(
+        SK,
+        JSON.stringify(state)
+    );
+
+    localStorage.setItem(
+        EK,
+        JSON.stringify(expenses)
+    );
+
+    localStorage.setItem(
+        UK,
+        JSON.stringify(ui)
+    );
 
 }
+
 
 function xpForLevel(l){
-return Math.round(100*Math.pow(Math.max(1,num(l)),1.42));
+
+    return Math.round(
+        100*Math.pow(
+            Math.max(1,num(l)),
+            1.42
+        )
+    );
+
 }
+
 
 function levelFromXP(x){
 
-let l=1;
+    let l=1;
 
-while(x>=xpForLevel(l+1)&&l<10000)l++;
+    while(
+        x>=xpForLevel(l+1) &&
+        l<10000
+    ){
 
-return l;
+        l++;
+
+    }
+
+    return l;
 
 }
+
 
 function updateLevels(){
 
-Object.keys(META).forEach(c=>{
-state.categories[c].level=
-levelFromXP(Math.max(0,num(state.categories[c].xp)));
-});
+    Object.keys(state.categories).forEach(c=>{
 
-state.player.level=
-levelFromXP(Math.max(0,num(state.player.xp)));
+        state.categories[c].level=
+            levelFromXP(
+                Math.max(
+                    0,
+                    num(state.categories[c].xp)
+                )
+            );
+
+    });
+
+    state.player.level=
+        levelFromXP(
+            Math.max(
+                0,
+                num(state.player.xp)
+            )
+        );
 
 }
+
 
 function addPlayerXP(a){
 
-state.player.xp=
-Math.max(0,num(state.player.xp)+Math.round(num(a)));
+    state.player.xp=Math.max(
+        0,
+        num(state.player.xp)+Math.round(num(a))
+    );
 
-state.player.level=
-levelFromXP(state.player.xp);
+    state.player.level=
+        levelFromXP(
+            state.player.xp
+        );
 
 }
+
 
 function addCatXP(c,a){
 
-let v=Math.max(0,Math.round(num(a)));
+    let v=Math.max(
+        0,
+        Math.round(num(a))
+    );
 
-state.categories[c].xp=
-Math.max(0,num(state.categories[c].xp)+v);
+    state.categories[c].xp=
+        Math.max(
+            0,
+            num(state.categories[c].xp)+v
+        );
 
-state.categories[c].level=
-levelFromXP(state.categories[c].xp);
+    state.categories[c].level=
+        levelFromXP(
+            state.categories[c].xp
+        );
 
-addPlayerXP(Math.round(v*.65));
+    addPlayerXP(
+        Math.round(v*.65)
+    );
 
-save();
+    save();
 
 }
+
 
 function removeCatXP(c,a){
 
-let v=Math.max(0,Math.round(num(a)));
+    let v=Math.max(
+        0,
+        Math.round(num(a))
+    );
 
-state.categories[c].xp=
-Math.max(0,state.categories[c].xp-v);
+    state.categories[c].xp=
+        Math.max(
+            0,
+            state.categories[c].xp-v
+        );
 
-state.categories[c].level=
-levelFromXP(state.categories[c].xp);
+    state.categories[c].level=
+        levelFromXP(
+            state.categories[c].xp
+        );
 
-state.player.xp=
-Math.max(0,state.player.xp-Math.round(v*.65));
+    state.player.xp=
+        Math.max(
+            0,
+            state.player.xp-
+            Math.round(v*.65)
+        );
 
-state.player.level=
-levelFromXP(state.player.xp);
+    state.player.level=
+        levelFromXP(
+            state.player.xp
+        );
 
-save();
+    save();
 
 }
+
 
 function incomeXP(v){
 
-let level=Math.max(1,state.categories.finance.level);
+    let level=Math.max(
+        1,
+        state.categories.finance.level
+    );
 
-return v>0
-?Math.max(1,Math.round(v/50000*100/Math.pow(level,.72)))
-:0;
+    return v>0
+        ? Math.max(
+            1,
+            Math.round(
+                v/50000*100/
+                Math.pow(level,.72)
+            )
+        )
+        : 0;
 
 }
+
 
 function applyIncome(oldV,newV){
 
-let d=Math.max(
-0,
-incomeXP(newV)-incomeXP(oldV)
-);
+    let d=Math.max(
+        0,
+        incomeXP(newV)-
+        incomeXP(oldV)
+    );
 
-if(d)addCatXP('finance',d);
-else save();
+    if(d)
+        addCatXP('finance',d);
+    else
+        save();
 
 }
+
 
 function expensesTotal(){
-return expenses.reduce((a,e)=>a+num(e.amount),0);
+
+    return expenses.reduce(
+        (a,e)=>a+num(e.amount),
+        0
+    );
+
 }
+
 
 function income(){
-return num(state.categories.finance.monthlyIncome);
+
+    return num(
+        state.categories.finance.monthlyIncome
+    );
+
 }
+
 
 function expensePct(){
-return income()
-?Math.round(expensesTotal()/income()*100)
-:0;
+
+    return income()
+        ? Math.round(
+            expensesTotal()/
+            income()*100
+        )
+        : 0;
+
 }
 
+
 function savings(){
-return Math.max(0,income()-expensesTotal());
+
+    return Math.max(
+        0,
+        income()-expensesTotal()
+    );
+
 }
+
 
 function mp(a,b,over100=false){
 
-let v=b>0
-?Math.round(num(a)/num(b)*100)
-:0;
+    let v=b>0
+        ? Math.round(
+            num(a)/num(b)*100
+        )
+        : 0;
 
-return over100
-?Math.max(0,v)
-:clamp(v,0,100);
+    return over100
+        ? Math.max(0,v)
+        : clamp(v,0,100);
 
 }
 
+
+/*
+ * Finance can exceed 100%.
+ * This is intentional.
+ */
 function financeProgress(){
 
-let c=state.categories.finance,
-i=income(),
-g=Math.max(1,num(c.monthlyGoal));
+    let c=state.categories.finance;
 
-return Math.round(
-(
-mp(i,g,true)+
-mp(i*12,c.yearlyGoal)+
-(i?clamp(Math.round(savings()/i*100),0,100):0)
-)/3
-);
+    let i=income();
+
+    let g=Math.max(
+        1,
+        num(c.monthlyGoal)
+    );
+
+    return Math.round(
+        (
+            mp(i,g,true)+
+            mp(i*12,c.yearlyGoal)+
+            (
+                i
+                    ? clamp(
+                        Math.round(
+                            savings()/i*100
+                        ),
+                        0,
+                        100
+                    )
+                    : 0
+            )
+        )/3
+    );
 
 }
+
+
+function healthProgress(){
+
+    let h=state.categories.health;
+
+    let training=
+        state.categories.training;
+
+    let healthPart=
+        (
+            clamp(
+                num(h.routine),
+                0,
+                100
+            )+
+            clamp(
+                num(h.nutrition),
+                0,
+                100
+            )+
+            mp(
+                h.steps,
+                10000
+            )
+        )/3;
+
+    let trainingPart=
+        mp(
+            training.workouts,
+            training.monthlyTarget
+        );
+
+    /*
+     * Training and health are now
+     * one combined category.
+     */
+    return Math.round(
+        (healthPart+trainingPart)/2
+    );
+
+}
+
 
 function progress(c){
 
-if(c==='finance')return financeProgress();
+    if(c==='finance')
+        return financeProgress();
 
-if(c==='training')
-return mp(
-state.categories.training.workouts,
-state.categories.training.monthlyTarget
-);
+    if(c==='development'){
 
-if(c==='development'){
+        let x=
+            state.categories.development;
 
-let x=state.categories.development;
+        return Math.round(
+            (
+                mp(x.books,2)+
+                mp(x.languageMinutes,30)+
+                mp(x.meditationMinutes,15)
+            )/3
+        );
 
-return Math.round(
-(
-mp(x.books,2)+
-mp(x.languageMinutes,30)+
-mp(x.meditationMinutes,15)
-)/3
-);
+    }
 
-}
+    if(c==='health')
+        return healthProgress();
 
-if(c==='discipline'){
-
-let x=state.categories.discipline,
-t=x.completed+x.failed;
-
-return t
-?clamp(Math.round(x.completed/t*100),0,100)
-:0;
+    return 0;
 
 }
 
-if(c==='health'){
-
-let x=state.categories.health;
-
-return Math.round(
-(
-clamp(num(x.routine),0,100)+
-clamp(num(x.nutrition),0,100)+
-mp(x.steps,10000)
-)/3
-);
-
-}
-
-return 0;
-
-}
 
 function totalProgress(){
 
-return Math.round(
-Object.keys(META).reduce(
-(a,c)=>a+progress(c),
-0
-)/5
-);
+    /*
+     * Only 3 active categories remain:
+     * Finance + Development + Health.
+     */
+    return Math.round(
+        (
+            progress('finance')+
+            progress('development')+
+            progress('health')
+        )/3
+    );
 
 }
+
 
 function rank(l){
 
-return l>=90?'LEGEND':
-l>=75?'ELITE':
-l>=60?'MASTER':
-l>=45?'VETERAN':
-l>=30?'ADVANCED':
-l>=15?'PLAYER':
-'BEGINNER';
+    return l>=90
+        ? 'LEGEND'
+        : l>=75
+        ? 'ELITE'
+        : l>=60
+        ? 'MASTER'
+        : l>=45
+        ? 'VETERAN'
+        : l>=30
+        ? 'ADVANCED'
+        : l>=15
+        ? 'PLAYER'
+        : 'BEGINNER';
 
 }
+
+
+function creatorHTML(){
+
+    return `
+        <a
+            class="creator"
+            href="https://t.me/shkeltinsh"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Created by <strong>&nbsp;@shkeltinsh</strong>
+        </a>
+    `;
+
+}
+
 
 function renderHome(){
 
-updateLevels();
+    updateLevels();
 
-document.getElementById('playerLevel').textContent=
-'LVL '+state.player.level;
+    document.getElementById(
+        'playerLevel'
+    ).textContent=
+        'LVL '+state.player.level;
 
-document.getElementById('playerXP').textContent=
-fmt(state.player.xp)+' XP';
+    document.getElementById(
+        'playerXP'
+    ).textContent=
+        fmt(state.player.xp)+' XP';
 
-let cur=xpForLevel(state.player.level),
-next=xpForLevel(state.player.level+1);
+    let cur=
+        xpForLevel(
+            state.player.level
+        );
 
-document.getElementById('playerXPFill').style.width=
-clamp(
-Math.round(
-(state.player.xp-cur)/
-Math.max(1,next-cur)*100
-),
-0,
-100
-)+'%';
+    let next=
+        xpForLevel(
+            state.player.level+1
+        );
 
-document.getElementById('xpNext').textContent=
-fmt(Math.max(0,next-state.player.xp))+
-' XP TO NEXT LEVEL';
+    document.getElementById(
+        'playerXPFill'
+    ).style.width=
+        clamp(
+            Math.round(
+                (
+                    state.player.xp-cur
+                )/
+                Math.max(
+                    1,
+                    next-cur
+                )*100
+            ),
+            0,
+            100
+        )+'%';
 
-document.getElementById('playerRank').textContent=
-rank(state.player.level);
+    document.getElementById(
+        'xpNext'
+    ).textContent=
+        fmt(
+            Math.max(
+                0,
+                next-state.player.xp
+            )
+        )+
+        ' XP TO NEXT LEVEL';
 
-let t=totalProgress();
+    document.getElementById(
+        'playerRank'
+    ).textContent=
+        rank(
+            state.player.level
+        );
 
-document.getElementById('lifeProgress').innerHTML=
-t+'<span>%</span>';
+    let t=totalProgress();
 
-document.getElementById('lifeFill').style.width=
-t+'%';
+    document.getElementById(
+        'lifeProgress'
+    ).innerHTML=
+        t+'<span>%</span>';
 
-Object.keys(META).forEach(c=>{
+    document.getElementById(
+        'lifeFill'
+    ).style.width=
+        clamp(t,0,100)+'%';
 
-let p=progress(c);
+    ['finance','development','health']
+    .forEach(c=>{
 
-document.getElementById(c+'Percent').textContent=
-p+'%';
+        let p=progress(c);
 
-document.getElementById(c+'Fill').style.width=
-Math.min(100,p)+'%';
+        document.getElementById(
+            c+'Percent'
+        ).textContent=
+            p+'%';
 
-});
+        document.getElementById(
+            c+'Fill'
+        ).style.width=
+            clamp(p,0,100)+'%';
+
+    });
 
 }
 
-function metric(icon,title,current,target,p,id){
 
-return `
-<div class="metric">
+function metric(
+    icon,
+    title,
+    current,
+    target,
+    p,
+    id
+){
 
-<div class="metric-head">
+    return `
+        <div class="metric">
 
-<div class="metric-left">
+            <div class="metric-head">
 
-<div class="metric-icon">${icon}</div>
+                <div class="metric-left">
 
-<div class="metric-text">
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
 
-<strong>${esc(title)}</strong>
+                    <div class="metric-text">
 
-<span>${esc(current)} / ${esc(target)}</span>
+                        <strong>
+                            ${esc(title)}
+                        </strong>
 
-</div>
+                        <span>
+                            ${esc(current)}
+                            /
+                            ${esc(target)}
+                        </span>
 
-</div>
+                    </div>
 
-<div class="metric-percent">${p}%</div>
+                </div>
 
-</div>
+                <div class="metric-percent">
+                    ${p}%
+                </div>
 
-<div class="metric-bar">
-<i style="width:${clamp(p,0,100)}%"></i>
-</div>
+            </div>
 
-${id
-?`<button class="edit" data-edit="${esc(id)}">✎ ИЗМЕНИТЬ</button>`
-:''}
+            <div class="metric-bar">
+                <i style="width:${clamp(p,0,100)}%"></i>
+            </div>
 
-</div>
-`;
+            ${
+                id
+                ? `
+                    <button
+                        class="edit"
+                        data-edit="${esc(id)}"
+                    >
+                        ✎ ИЗМЕНИТЬ
+                    </button>
+                `
+                : ''
+            }
+
+        </div>
+    `;
 
 }
+
 
 function expenseHTML(e){
 
-return `
-<div class="expense-swipe" data-swipe-id="${esc(e.id)}">
+    return `
+        <div
+            class="expense-swipe"
+            data-swipe-id="${esc(e.id)}"
+        >
 
-<div class="expense-delete-reveal"></div>
+            <div class="expense-delete-reveal">
+                УДАЛИТЬ
+            </div>
 
-<div class="expense">
+            <div class="expense">
 
-<div class="expense-info">
+                <div class="expense-info">
 
-<div class="expense-name">
-${esc(e.name)}
-</div>
+                    <div class="expense-name">
+                        ${esc(e.name)}
+                    </div>
 
-<div class="expense-amount">
-${fmt(e.amount)} ₽
-</div>
+                    <div class="expense-amount">
+                        ${fmt(e.amount)} ₽
+                    </div>
 
-</div>
+                </div>
 
-<div class="expense-actions">
+                <div class="expense-actions">
 
-<button
-class="small-btn expense-edit"
-data-id="${esc(e.id)}">
-✎
-</button>
+                    <button
+                        class="small-btn expense-edit"
+                        data-id="${esc(e.id)}"
+                    >
+                        ✎
+                    </button>
 
-</div>
+                    <!-- Delete button intentionally removed.
+                         Deletion is performed by swipe. -->
 
-</div>
+                </div>
 
-</div>
-`;
+            </div>
+
+        </div>
+    `;
 
 }
+
 
 function financePage(){
 
-let c=state.categories.finance,
-i=income(),
-et=expensesTotal(),
-ep=expensePct(),
-sv=savings(),
-collapsed=ui.expensesCollapsed;
+    let c=
+        state.categories.finance;
 
-return `
+    let i=income();
 
-<div class="summary">
+    let et=
+        expensesTotal();
 
-<div class="section-label">
-FINANCE LEVEL ${c.level}
-</div>
+    let ep=
+        expensePct();
 
-<div class="summary-number">
-${financeProgress()}%
-</div>
+    let sv=
+        savings();
 
-<div class="progress">
-<i style="width:${clamp(financeProgress(),0,100)}%"></i>
-</div>
+    let collapsed=
+        ui.expensesCollapsed;
 
-<div class="finance-box">
+    let fp=
+        financeProgress();
 
-<div class="finance-line">
-<span>FINANCE XP</span>
-<strong>${fmt(c.xp)} XP</strong>
-</div>
+    return `
 
-<div class="finance-line">
-<span>STREAK</span>
-<strong>🔥 ${c.streak}</strong>
-</div>
+        <div class="summary">
 
-</div>
+            <div class="section-label">
+                FINANCE LEVEL ${c.level}
+            </div>
 
-</div>
+            <div class="summary-number">
+                ${fp}%
+            </div>
 
-<div class="cards">
+            <div class="progress">
+                <i style="width:${clamp(fp,0,100)}%"></i>
+            </div>
 
-${metric(
-'💵',
-'Заработано за месяц',
-fmt(i)+' ₽',
-fmt(c.monthlyGoal)+' ₽',
-mp(i,c.monthlyGoal,true),
-'income'
-)}
+            <div class="finance-box">
 
-<div
-class="metric expenses-metric"
-id="expensesMetric"
->
+                <div class="finance-line">
+                    <span>FINANCE XP</span>
+                    <strong>
+                        ${fmt(c.xp)} XP
+                    </strong>
+                </div>
 
-<div class="metric-head">
+                <div class="finance-line">
+                    <span>STREAK</span>
+                    <strong>
+                        🔥 ${c.streak}
+                    </strong>
+                </div>
 
-<div class="metric-left">
+            </div>
 
-<div class="metric-icon">📉</div>
+        </div>
 
-<div class="metric-text">
+        <div class="cards">
 
-<strong>Обязательные расходы</strong>
+            ${metric(
+                '💵',
+                'Заработано за месяц',
+                fmt(i)+' ₽',
+                fmt(c.monthlyGoal)+' ₽',
+                mp(i,c.monthlyGoal,true),
+                'income'
+            )}
 
-<span>
-${fmt(et)} ₽ · ${ep}% от заработка
-</span>
+            <div
+                class="metric expenses-metric"
+                id="expensesMetric"
+            >
 
-</div>
+                <div class="metric-head">
 
-</div>
+                    <div class="metric-left">
 
-<div class="metric-percent">
-${ep}%
-</div>
+                        <div class="metric-icon">
+                            📉
+                        </div>
 
-</div>
+                        <div class="metric-text">
 
-<div class="metric-bar">
-<i style="width:${Math.min(ep,100)}%"></i>
-</div>
+                            <strong>
+                                Обязательные расходы
+                            </strong>
 
-<div class="expenses ${collapsed?'collapsed':''}">
+                            <span>
+                                ${fmt(et)} ₽ · ${ep}% от заработка
+                            </span>
 
-<button
-class="expenses-title"
-id="expensesToggle"
-type="button"
-aria-expanded="${!collapsed}"
->
+                        </div>
 
-<div class="expenses-title-left">
+                    </div>
 
-<span>
-МОИ ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
-</span>
+                    <div class="metric-percent">
+                        ${ep}%
+                    </div>
 
-</div>
+                </div>
 
-<strong>${fmt(et)} ₽</strong>
+                <div class="metric-bar">
+                    <i style="width:${Math.min(ep,100)}%"></i>
+                </div>
 
-</button>
+                <div
+                    class="expenses ${collapsed?'collapsed':''}"
+                >
 
-<div class="expense-content">
+                    <button
+                        class="expenses-title"
+                        id="expensesToggle"
+                        type="button"
+                        aria-expanded="${!collapsed}"
+                    >
 
-<div class="expense-list">
+                        <div class="expenses-title-left">
 
-${
-expenses.length
-?expenses.map(expenseHTML).join('')
-:'<div class="notice">Добавь обязательные расходы: аренда, коммунальные услуги, продукты, транспорт, связь и т.д.</div>'
+                            <span>
+                                МОИ ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
+                            </span>
+
+                        </div>
+
+                        <strong>
+                            ${fmt(et)} ₽
+                        </strong>
+
+                    </button>
+
+                    <div class="expense-content">
+
+                        <div class="expense-list">
+
+                            ${
+                                expenses.length
+                                ? expenses.map(expenseHTML).join('')
+                                : `
+                                    <div class="notice">
+                                        Добавь обязательные расходы:
+                                        аренда, коммунальные услуги,
+                                        продукты, транспорт, связь и т.д.
+                                    </div>
+                                `
+                            }
+
+                        </div>
+
+                        <button
+                            class="add"
+                            id="addExpense"
+                        >
+                            ＋ ДОБАВИТЬ РАСХОД
+                        </button>
+
+                        <div class="ratio">
+
+                            <span>
+                                РАСХОДЫ / ДОХОД
+                            </span>
+
+                            <strong>
+                                ${ep}%
+                            </strong>
+
+                        </div>
+
+                        <div class="ratio">
+
+                            <span>
+                                СВОБОДНЫЕ ДЕНЬГИ
+                            </span>
+
+                            <strong>
+                                ${fmt(sv)} ₽
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            ${metric(
+                '🏆',
+                'Цель на год',
+                fmt(i*12)+' ₽',
+                fmt(c.yearlyGoal)+' ₽',
+                mp(i*12,c.yearlyGoal),
+                'yearlyGoal'
+            )}
+
+            ${metric(
+                '🛡️',
+                'Финансовая эффективность',
+                ep<=0
+                    ? '—'
+                    : (100-ep)+'% свободного дохода',
+                '100%',
+                clamp(
+                    100-ep,
+                    0,
+                    100
+                ),
+                null
+            )}
+
+            <div class="notice">
+                💡 В «Заработано за месяц» можно
+                задать фактический доход и личную
+                цель на месяц.
+            </div>
+
+            ${creatorHTML()}
+
+        </div>
+    `;
+
 }
 
-</div>
 
-<button
-class="add"
-id="addExpense">
-＋ ДОБАВИТЬ РАСХОД
-</button>
+function healthPage(){
 
-<div class="ratio">
+    let h=
+        state.categories.health;
 
-<span>РАСХОДЫ / ДОХОД</span>
+    let t=
+        state.categories.training;
 
-<strong>${ep}%</strong>
+    let p=
+        healthProgress();
 
-</div>
+    let workoutXP=
+        Math.max(
+            5,
+            Math.round(
+                80/
+                Math.pow(
+                    Math.max(
+                        1,
+                        t.level
+                    ),
+                    .58
+                )
+            )
+        );
 
-<div class="ratio">
+    return `
 
-<span>СВОБОДНЫЕ ДЕНЬГИ</span>
+        <div class="summary">
 
-<strong>${fmt(sv)} ₽</strong>
+            <div class="section-label">
+                HEALTH LEVEL ${h.level}
+            </div>
 
-</div>
+            <div class="summary-number">
+                ${p}%
+            </div>
 
-</div>
+            <div class="progress">
+                <i style="width:${clamp(p,0,100)}%"></i>
+            </div>
 
-</div>
+            <div class="finance-box">
 
-</div>
+                <div class="finance-line">
+                    <span>HEALTH XP</span>
+                    <strong>
+                        ${fmt(h.xp)} XP
+                    </strong>
+                </div>
 
-${metric(
-'🏆',
-'Цель на год',
-fmt(i*12)+' ₽',
-fmt(c.yearlyGoal)+' ₽',
-mp(i*12,c.yearlyGoal),
-'yearlyGoal'
-)}
+                <div class="finance-line">
+                    <span>STREAK</span>
+                    <strong>
+                        🔥 ${h.streak}
+                    </strong>
+                </div>
 
-${metric(
-'🛡️',
-'Финансовая эффективность',
-ep<=0?'—':(100-ep)+'%',
-'100%',
-clamp(100-ep,0,100),
-null
-)}
+            </div>
 
-<div class="notice">
-💡 В «Заработано за месяц» можно задать фактический доход и личную цель на месяц. Отдельной карточки «Цель на месяц» больше нет.
-</div>
+        </div>
 
-</div>
-`;
+        <div class="cards">
+
+            <div class="training-divider">
+                TRAINING
+            </div>
+
+            ${metric(
+                '🏋️',
+                'Тренировки',
+                fmt(t.workouts),
+                fmt(t.monthlyTarget),
+                mp(
+                    t.workouts,
+                    t.monthlyTarget
+                ),
+                'workouts'
+            )}
+
+            <div class="metric">
+
+                <div class="metric-head">
+
+                    <div class="metric-left">
+
+                        <div class="metric-icon">
+                            ⚡
+                        </div>
+
+                        <div class="metric-text">
+
+                            <strong>
+                                XP за тренировку
+                            </strong>
+
+                            <span>
+                                Чем выше уровень,
+                                тем сложнее прокачка
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="metric-percent">
+                        +${workoutXP}
+                    </div>
+
+                </div>
+
+                <button
+                    class="edit"
+                    id="completeWorkout"
+                >
+                    ВЫПОЛНИТЬ ТРЕНИРОВКУ
+                </button>
+
+            </div>
+
+            <div class="training-divider">
+                HEALTH
+            </div>
+
+            ${metric(
+                '⏰',
+                'Режим дня',
+                fmt(h.routine)+'%',
+                '100%',
+                clamp(
+                    num(h.routine),
+                    0,
+                    100
+                ),
+                'routine'
+            )}
+
+            ${metric(
+                '🍎',
+                'Питание',
+                fmt(h.nutrition)+'%',
+                '100%',
+                clamp(
+                    num(h.nutrition),
+                    0,
+                    100
+                ),
+                'nutrition'
+            )}
+
+            ${metric(
+                '🚶',
+                'Шаги',
+                fmt(h.steps),
+                '10 000',
+                mp(
+                    h.steps,
+                    10000
+                ),
+                'steps'
+            )}
+
+            <div class="notice">
+                Прогресс тренировок теперь входит
+                в общий показатель здоровья.
+                Все ранее сохранённые тренировки
+                сохранены.
+            </div>
+
+            ${creatorHTML()}
+
+        </div>
+    `;
 
 }
+
 
 function genericPage(c){
 
-let x=state.categories[c],
-p=progress(c),
-body='';
+    let x=
+        state.categories[c];
 
-if(c==='training')
+    let p=
+        progress(c);
 
-body=
-metric(
-'🏋️',
-'Тренировки',
-fmt(x.workouts),
-fmt(x.monthlyTarget),
-p,
-'workouts'
-)+
+    let body='';
 
-`
-<div class="metric">
+    if(c==='development'){
 
-<div class="metric-head">
+        body=
+            metric(
+                '📚',
+                'Чтение книг',
+                fmt(x.books),
+                '2',
+                mp(x.books,2),
+                'books'
+            )+
 
-<div class="metric-left">
+            metric(
+                '🌐',
+                'Изучение языка',
+                fmt(x.languageMinutes)+' мин',
+                '30 мин',
+                mp(
+                    x.languageMinutes,
+                    30
+                ),
+                'languageMinutes'
+            )+
 
-<div class="metric-icon">⚡</div>
+            metric(
+                '🧘',
+                'Медитация',
+                fmt(x.meditationMinutes)+' мин',
+                '15 мин',
+                mp(
+                    x.meditationMinutes,
+                    15
+                ),
+                'meditationMinutes'
+            );
 
-<div class="metric-text">
+    }
 
-<strong>XP за тренировку</strong>
+    return `
 
-<span>
-Чем выше уровень, тем сложнее прокачка
-</span>
+        <div class="summary">
 
-</div>
+            <div class="section-label">
+                ${c.toUpperCase()} LEVEL ${x.level}
+            </div>
 
-</div>
+            <div class="summary-number">
+                ${p}%
+            </div>
 
-<div class="metric-percent">
-+${Math.max(
-5,
-Math.round(
-80/Math.pow(Math.max(1,x.level),.58)
-)
-)}
-</div>
+            <div class="progress">
+                <i style="width:${clamp(p,0,100)}%"></i>
+            </div>
 
-</div>
+            <div class="finance-box">
 
-<button class="edit" id="completeWorkout">
-ВЫПОЛНИТЬ ТРЕНИРОВКУ
-</button>
+                <div class="finance-line">
 
-</div>
-`;
+                    <span>
+                        ${c.toUpperCase()} XP
+                    </span>
 
-if(c==='development')
+                    <strong>
+                        ${fmt(x.xp)} XP
+                    </strong>
 
-body=
-metric('📚','Чтение книг',fmt(x.books),'2',mp(x.books,2),'books')+
-metric('🌐','Изучение языка',fmt(x.languageMinutes)+' мин','30 мин',mp(x.languageMinutes,30),'languageMinutes')+
-metric('🧘','Медитация',fmt(x.meditationMinutes)+' мин','15 мин',mp(x.meditationMinutes,15),'meditationMinutes');
+                </div>
 
-if(c==='discipline')
+                <div class="finance-line">
 
-body=`
+                    <span>
+                        STREAK
+                    </span>
 
-<div class="metric">
+                    <strong>
+                        🔥 ${x.streak}
+                    </strong>
 
-<div class="metric-head">
+                </div>
 
-<div class="metric-left">
+            </div>
 
-<div class="metric-icon">✅</div>
+        </div>
 
-<div class="metric-text">
+        <div class="cards">
 
-<strong>Выполнено</strong>
+            ${body}
 
-<span>${x.completed} действий</span>
+            <div class="notice">
+                Прогресс сохраняется автоматически.
+                Повышение уровня XP происходит
+                сразу после изменения показателя
+                или выполнения действия.
+            </div>
 
-</div>
+            ${creatorHTML()}
 
-</div>
-
-<div class="metric-percent">
-+20 XP
-</div>
-
-</div>
-
-<button class="edit" id="disciplineComplete">
-ВЫПОЛНИТЬ
-</button>
-
-</div>
-
-<div class="metric">
-
-<div class="metric-head">
-
-<div class="metric-left">
-
-<div class="metric-icon">❌</div>
-
-<div class="metric-text">
-
-<strong>Невыполнено</strong>
-
-<span>Нарушение дисциплины</span>
-
-</div>
-
-</div>
-
-<div class="metric-percent">
-−5 XP
-</div>
-
-</div>
-
-<button class="edit" id="disciplineFail">
-ЗАФИКСИРОВАТЬ ПРОПУСК
-</button>
-
-</div>
-
-`;
-
-if(c==='health')
-
-body=
-metric('⏰','Режим дня',fmt(x.routine)+'%','100%',clamp(x.routine,0,100),'routine')+
-metric('🍎','Питание',fmt(x.nutrition)+'%','100%',clamp(x.nutrition,0,100),'nutrition')+
-metric('🚶','Шаги',fmt(x.steps),'10 000',mp(x.steps,10000),'steps');
-
-return `
-
-<div class="summary">
-
-<div class="section-label">
-${c.toUpperCase()} LEVEL ${x.level}
-</div>
-
-<div class="summary-number">
-${p}%
-</div>
-
-<div class="progress">
-<i style="width:${clamp(p,0,100)}%"></i>
-</div>
-
-<div class="finance-box">
-
-<div class="finance-line">
-<span>${c.toUpperCase()} XP</span>
-<strong>${fmt(x.xp)} XP</strong>
-</div>
-
-<div class="finance-line">
-<span>STREAK</span>
-<strong>🔥 ${x.streak}</strong>
-</div>
-
-</div>
-
-</div>
-
-<div class="cards">
-
-${body}
-
-<div class="notice">
-Прогресс сохраняется автоматически. Повышение уровня XP происходит сразу после изменения показателя или выполнения действия.
-</div>
-
-</div>
-
-`;
+        </div>
+    `;
 
 }
+
 
 function openCategory(c){
 
-closePage();
+    closePage();
 
-let p=document.createElement('div');
+    let p=
+        document.createElement('div');
 
-p.className='page';
-p.id='activePage';
+    p.className='page';
+    p.id='activePage';
 
-p.innerHTML=`
+    p.innerHTML=`
 
-<div class="page-inner">
+        <div class="page-inner">
 
-<div class="page-head">
+            <div class="page-head">
 
-<button class="back">←</button>
+                <button class="back">
+                    ←
+                </button>
 
-<div>
+                <div>
 
-<div class="page-eyebrow">
-LIFE GAME
-</div>
+                    <div class="page-eyebrow">
+                        LIFE GAME
+                    </div>
 
-<h2>
-${META[c].icon} ${META[c].title}
-</h2>
+                    <h2>
+                        ${META[c].icon}
+                        ${META[c].title}
+                    </h2>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-${c==='finance'?financePage():genericPage(c)}
+            ${
+                c==='finance'
+                ? financePage()
+                : c==='health'
+                ? healthPage()
+                : genericPage(c)
+            }
 
-</div>
+        </div>
+    `;
 
-`;
+    document.body.appendChild(p);
 
-document.body.appendChild(p);
+    document.body.classList.add(
+        'locked'
+    );
 
-document.body.classList.add('locked');
+    p.querySelector(
+        '.back'
+    ).onclick=()=>{
 
-p.querySelector('.back').onclick=()=>{
-closePage();
-setHome();
-};
+        closePage();
+        setHome();
 
-bindPage(p,c);
+    };
+
+    bindPage(p,c);
 
 }
+
 
 function bindPage(p,c){
 
-p.querySelectorAll('[data-edit]').forEach(
-b=>b.onclick=()=>openEditor(c,b.dataset.edit)
-);
+    p.querySelectorAll(
+        '[data-edit]'
+    ).forEach(b=>{
 
-if(c==='finance'){
+        b.onclick=()=>openEditor(
+            c,
+            b.dataset.edit
+        );
 
-/*
-Сворачивание происходит по нажатию
-на весь заголовок «Обязательные расходы».
-Стрелки здесь больше нет.
-*/
+    });
 
-p.querySelector('#expensesToggle')?.addEventListener(
-'click',
-e=>{
-e.stopPropagation();
 
-ui.expensesCollapsed=
-!ui.expensesCollapsed;
+    if(c==='finance'){
 
-save();
+        p.querySelector(
+            '#expensesToggle'
+        )?.addEventListener(
+            'click',
+            e=>{
 
-openCategory('finance');
+                e.stopPropagation();
+
+                ui.expensesCollapsed=
+                    !ui.expensesCollapsed;
+
+                save();
+
+                openCategory(
+                    'finance'
+                );
+
+            }
+        );
+
+
+        p.querySelector(
+            '#addExpense'
+        )?.addEventListener(
+            'click',
+            ()=>openExpense()
+        );
+
+
+        p.querySelectorAll(
+            '.expense-edit'
+        ).forEach(b=>{
+
+            b.onclick=()=>openExpense(
+                b.dataset.id
+            );
+
+        });
+
+
+        swipes(p);
+
+    }
+
+
+    if(c==='health'){
+
+        p.querySelector(
+            '#completeWorkout'
+        )?.addEventListener(
+            'click',
+            ()=>{
+
+                let t=
+                    state.categories.training;
+
+                let base=
+                    Math.max(
+                        5,
+                        Math.round(
+                            80/
+                            Math.pow(
+                                Math.max(
+                                    1,
+                                    t.level
+                                ),
+                                .58
+                            )
+                        )
+                    );
+
+                t.workouts++;
+
+                t.streak++;
+
+                t.bestStreak=
+                    Math.max(
+                        t.bestStreak,
+                        t.streak
+                    );
+
+                let q=
+                    Math.round(
+                        base*
+                        (
+                            1+
+                            t.streak*.08
+                        )
+                    );
+
+                /*
+                 * Training XP is stored in
+                 * the original training category.
+                 * Player XP also increases.
+                 */
+                addCatXP(
+                    'training',
+                    q
+                );
+
+                /*
+                 * Keep health streak active too.
+                 */
+                let h=
+                    state.categories.health;
+
+                h.streak++;
+
+                h.bestStreak=
+                    Math.max(
+                        h.bestStreak,
+                        h.streak
+                    );
+
+                save();
+
+                toast(
+                    'Тренировка выполнена · +'+
+                    q+
+                    ' XP'
+                );
+
+                openCategory(
+                    'health'
+                );
+
+                renderHome();
+
+            }
+        );
+
+    }
+
 }
-);
 
-p.querySelector('#addExpense')?.addEventListener(
-'click',
-()=>openExpense()
-);
-
-p.querySelectorAll('.expense-edit').forEach(
-b=>b.onclick=()=>openExpense(b.dataset.id)
-);
-
-swipes(p);
-
-}
-
-if(c==='training')
-
-p.querySelector('#completeWorkout')?.addEventListener(
-'click',
-()=>{
-
-let x=state.categories.training;
-
-let base=Math.max(
-5,
-Math.round(
-80/Math.pow(Math.max(1,x.level),.58)
-)
-);
-
-x.workouts++;
-x.streak++;
-
-x.bestStreak=
-Math.max(x.bestStreak,x.streak);
-
-let q=
-Math.round(
-base*(1+x.streak*.08)
-);
-
-addCatXP(c,q);
-
-toast(
-'Тренировка выполнена · +'+q+' XP'
-);
-
-openCategory(c);
-renderHome();
-
-}
-);
-
-if(c==='discipline'){
-
-p.querySelector('#disciplineComplete')?.addEventListener(
-'click',
-()=>{
-
-let x=state.categories.discipline;
-
-x.completed++;
-x.streak++;
-
-x.bestStreak=
-Math.max(x.bestStreak,x.streak);
-
-let q=
-Math.round(
-20*(1+x.streak*.08)
-);
-
-addCatXP(c,q);
-
-toast(
-'Дисциплина +'+q+' XP'
-);
-
-openCategory(c);
-renderHome();
-
-}
-);
-
-p.querySelector('#disciplineFail')?.addEventListener(
-'click',
-()=>{
-
-let x=state.categories.discipline;
-
-x.failed++;
-x.streak=0;
-
-removeCatXP(c,5);
-
-toast('Штраф −5 XP');
-
-openCategory(c);
-renderHome();
-
-}
-);
-
-}
-
-}
 
 function swipes(p){
 
-p.querySelectorAll('.expense-swipe').forEach(w=>{
+    p.querySelectorAll(
+        '.expense-swipe'
+    ).forEach(w=>{
 
-let r=w.querySelector('.expense');
+        let r=
+            w.querySelector(
+                '.expense'
+            );
 
-if(!r)return;
+        if(!r)
+            return;
 
-let sx=0,
-sy=0,
-dx=0,
-drag=false,
-moved=false;
+        let sx=0;
+        let sy=0;
+        let dx=0;
+        let drag=false;
 
-const reveal=82;
+        const reveal=82;
 
-function closeRow(){
 
-r.style.transition=
-'transform .22s cubic-bezier(.2,.8,.2,1)';
+        function closeRow(){
 
-r.style.transform=
-'translateX(0)';
+            r.style.transition=
+                'transform .22s cubic-bezier(.2,.8,.2,1)';
 
-r.classList.remove('swiped');
+            r.style.transform=
+                'translateX(0)';
 
-dx=0;
+            r.classList.remove(
+                'swiped'
+            );
+
+            dx=0;
+
+        }
+
+
+        function openRow(){
+
+            r.style.transition=
+                'transform .22s cubic-bezier(.2,.8,.2,1)';
+
+            r.style.transform=
+                `translateX(-${reveal}px)`;
+
+            r.classList.add(
+                'swiped'
+            );
+
+            dx=-reveal;
+
+        }
+
+
+        r.addEventListener(
+            'touchstart',
+            e=>{
+
+                if(
+                    e.touches.length!==1
+                )
+                    return;
+
+                sx=
+                    e.touches[0].clientX;
+
+                sy=
+                    e.touches[0].clientY;
+
+                dx=
+                    r.classList.contains(
+                        'swiped'
+                    )
+                    ? -reveal
+                    : 0;
+
+                drag=true;
+
+                r.style.transition=
+                    'none';
+
+            },
+            {
+                passive:true
+            }
+        );
+
+
+        r.addEventListener(
+            'touchmove',
+            e=>{
+
+                if(
+                    !drag ||
+                    e.touches.length!==1
+                )
+                    return;
+
+                const x=
+                    e.touches[0].clientX-
+                    sx;
+
+                const y=
+                    e.touches[0].clientY-
+                    sy;
+
+                if(
+                    Math.abs(y)>
+                    Math.abs(x) &&
+                    Math.abs(y)>8
+                ){
+
+                    drag=false;
+
+                    r.style.transition='';
+
+                    return;
+
+                }
+
+                let base=
+                    r.classList.contains(
+                        'swiped'
+                    )
+                    ? -reveal
+                    : 0;
+
+                let next=
+                    Math.min(
+                        0,
+                        Math.max(
+                            -reveal,
+                            base+x
+                        )
+                    );
+
+                dx=next;
+
+                r.style.transform=
+                    `translateX(${next}px)`;
+
+            },
+            {
+                passive:true
+            }
+        );
+
+
+        r.addEventListener(
+            'touchend',
+            ()=>{
+
+                if(!drag)
+                    return;
+
+                drag=false;
+
+                r.style.transition='';
+
+                if(
+                    dx<=-reveal*.45
+                ){
+
+                    openRow();
+
+                }else{
+
+                    closeRow();
+
+                }
+
+            }
+        );
+
+
+        r.addEventListener(
+            'touchcancel',
+            ()=>{
+
+                drag=false;
+
+                closeRow();
+
+            }
+        );
+
+
+        w.querySelector(
+            '.expense-delete-reveal'
+        ).addEventListener(
+            'click',
+            ()=>{
+
+                if(
+                    r.classList.contains(
+                        'swiped'
+                    )
+                ){
+
+                    deleteExpense(
+                        w.dataset.swipeId
+                    );
+
+                }
+
+            }
+        );
+
+
+        r.querySelectorAll(
+            'button'
+        ).forEach(btn=>{
+
+            btn.addEventListener(
+                'click',
+                e=>e.stopPropagation()
+            );
+
+        });
+
+    });
 
 }
 
-function openRow(){
-
-r.style.transition=
-'transform .22s cubic-bezier(.2,.8,.2,1)';
-
-r.style.transform=
-`translateX(-${reveal}px)`;
-
-r.classList.add('swiped');
-
-dx=-reveal;
-
-}
-
-r.addEventListener(
-'touchstart',
-e=>{
-
-if(e.touches.length!==1)return;
-
-sx=e.touches[0].clientX;
-sy=e.touches[0].clientY;
-
-dx=
-r.classList.contains('swiped')
-?-reveal
-:0;
-
-drag=true;
-moved=false;
-
-r.style.transition='none';
-
-},
-{passive:true}
-);
-
-r.addEventListener(
-'touchmove',
-e=>{
-
-if(!drag||e.touches.length!==1)return;
-
-const x=
-e.touches[0].clientX-sx;
-
-const y=
-e.touches[0].clientY-sy;
-
-if(
-Math.abs(y)>Math.abs(x)&&
-Math.abs(y)>8
-){
-
-drag=false;
-r.style.transition='';
-
-return;
-
-}
-
-moved=true;
-
-let base=
-r.classList.contains('swiped')
-?-reveal
-:0;
-
-let next=
-Math.min(
-0,
-Math.max(-reveal,base+x)
-);
-
-dx=next;
-
-r.style.transform=
-`translateX(${next}px)`;
-
-},
-{passive:true}
-);
-
-r.addEventListener(
-'touchend',
-()=>{
-
-if(!drag)return;
-
-drag=false;
-
-r.style.transition='';
-
-if(dx<=-reveal*.45){
-
-openRow();
-
-}else{
-
-closeRow();
-
-}
-
-}
-);
-
-r.addEventListener(
-'touchcancel',
-()=>{
-
-drag=false;
-closeRow();
-
-}
-);
-
-w.querySelector(
-'.expense-delete-reveal'
-)?.addEventListener(
-'click',
-()=>{
-
-if(r.classList.contains('swiped')){
-
-deleteExpense(
-w.dataset.swipeId
-);
-
-}
-
-}
-);
-
-r.querySelectorAll('button').forEach(
-btn=>{
-btn.addEventListener(
-'click',
-e=>e.stopPropagation()
-);
-}
-);
-
-});
-
-}
 
 function openEditor(c,id){
 
-if(c==='finance'&&id==='income'){
+    if(
+        c==='finance' &&
+        id==='income'
+    ){
 
-let x=state.categories.finance;
+        let x=
+            state.categories.finance;
 
-modal(`
+        modal(`
 
-<div class="modal-icon">💵</div>
+            <div class="modal-icon">
+                💵
+            </div>
 
-<div class="modal-label">
-FINANCE
-</div>
+            <div class="modal-label">
+                FINANCE
+            </div>
 
-<h3>
-Заработано за месяц
-</h3>
+            <h3>
+                Заработано за месяц
+            </h3>
 
-<label>
-Сколько заработано
-</label>
+            <label>
+                Сколько заработано
+            </label>
 
-<input
-id="income"
-type="number"
-inputmode="decimal"
-min="0"
-value="${x.monthlyIncome}"
->
+            <input
+                id="income"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                value="${x.monthlyIncome}"
+            >
 
-<label>
-Твоя цель на месяц
-</label>
+            <label>
+                Твоя цель на месяц
+            </label>
 
-<input
-id="goal"
-type="number"
-inputmode="decimal"
-min="1"
-value="${Math.max(1,x.monthlyGoal)}"
->
+            <input
+                id="goal"
+                type="number"
+                inputmode="decimal"
+                min="1"
+                value="${Math.max(1,x.monthlyGoal)}"
+            >
 
-<div class="modal-preview">
+            <div class="modal-preview">
 
-<span>
-ПРОГРЕСС ЦЕЛИ
-</span>
+                <span>
+                    ПРОГРЕСС ЦЕЛИ
+                </span>
 
-<strong id="prev">
-${mp(x.monthlyIncome,x.monthlyGoal,true)}%
-</strong>
+                <strong id="prev">
+                    ${mp(
+                        x.monthlyIncome,
+                        x.monthlyGoal
+                    )}%
+                </strong>
 
-</div>
+            </div>
 
-<button class="primary" id="save">
-СОХРАНИТЬ
-</button>
+            <button
+                class="primary"
+                id="save"
+            >
+                СОХРАНИТЬ
+            </button>
 
-`);
+        `);
 
-let o=document.querySelector('.overlay'),
-i=o.querySelector('#income'),
-g=o.querySelector('#goal');
 
-let upd=()=>{
+        let o=
+            document.querySelector(
+                '.overlay'
+            );
 
-o.querySelector('#prev').textContent=
-mp(
-i.value,
-Math.max(1,num(g.value)),
-true
-)+'%';
+        let i=
+            o.querySelector(
+                '#income'
+            );
 
-};
+        let g=
+            o.querySelector(
+                '#goal'
+            );
 
-i.oninput=upd;
-g.oninput=upd;
 
-o.querySelector('#save').onclick=()=>{
+        let upd=()=>{
 
-let old=num(x.monthlyIncome);
+            o.querySelector(
+                '#prev'
+            ).textContent=
+                mp(
+                    i.value,
+                    Math.max(
+                        1,
+                        num(g.value)
+                    )
+                )+'%';
 
-x.monthlyIncome=
-Math.max(0,num(i.value));
+        };
 
-x.monthlyGoal=
-Math.max(1,num(g.value));
 
-applyIncome(
-old,
-x.monthlyIncome
-);
+        i.oninput=upd;
+        g.oninput=upd;
 
-save();
 
-closeModal();
+        o.querySelector(
+            '#save'
+        ).onclick=()=>{
 
-renderHome();
+            let old=
+                num(
+                    x.monthlyIncome
+                );
 
-openCategory('finance');
+            x.monthlyIncome=
+                Math.max(
+                    0,
+                    num(i.value)
+                );
 
-toast(
-'Доход и цель сохранены'
-);
+            x.monthlyGoal=
+                Math.max(
+                    1,
+                    num(g.value)
+                );
 
-};
+            applyIncome(
+                old,
+                x.monthlyIncome
+            );
 
-return;
+            save();
+
+            closeModal();
+
+            renderHome();
+
+            openCategory(
+                'finance'
+            );
+
+            toast(
+                'Доход и цель сохранены'
+            );
+
+        };
+
+        return;
+
+    }
+
+
+    if(
+        c==='health' &&
+        id==='workouts'
+    ){
+
+        let x=
+            state.categories.training;
+
+        modal(`
+
+            <div class="modal-icon">
+                🏋️
+            </div>
+
+            <div class="modal-label">
+                TRAINING
+            </div>
+
+            <h3>
+                Количество тренировок
+            </h3>
+
+            <label>
+                Текущее значение
+            </label>
+
+            <input
+                id="v"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                value="${num(x.workouts)}"
+            >
+
+            <button
+                class="primary"
+                id="save"
+            >
+                СОХРАНИТЬ
+            </button>
+
+        `);
+
+        let o=
+            document.querySelector(
+                '.overlay'
+            );
+
+        o.querySelector(
+            '#save'
+        ).onclick=()=>{
+
+            x.workouts=
+                Math.max(
+                    0,
+                    num(
+                        o.querySelector(
+                            '#v'
+                        ).value
+                    )
+                );
+
+            save();
+
+            closeModal();
+
+            renderHome();
+
+            openCategory(
+                'health'
+            );
+
+            toast(
+                'Изменения сохранены'
+            );
+
+        };
+
+        return;
+
+    }
+
+
+    let x=
+        state.categories[c];
+
+    let labels={
+
+        yearlyGoal:'Цель на год',
+
+        books:'Книги',
+
+        languageMinutes:
+            'Минуты изучения языка',
+
+        meditationMinutes:
+            'Минуты медитации',
+
+        routine:
+            'Режим дня %',
+
+        nutrition:
+            'Питание %',
+
+        steps:
+            'Шаги'
+
+    };
+
+
+    modal(`
+
+        <div class="modal-icon">
+            ${META[c].icon}
+        </div>
+
+        <div class="modal-label">
+            EDIT VALUE
+        </div>
+
+        <h3>
+            ${esc(
+                labels[id]||id
+            )}
+        </h3>
+
+        <label>
+            Текущее значение
+        </label>
+
+        <input
+            id="v"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            value="${num(x[id])}"
+        >
+
+        <button
+            class="primary"
+            id="save"
+        >
+            СОХРАНИТЬ
+        </button>
+
+    `);
+
+
+    let o=
+        document.querySelector(
+            '.overlay'
+        );
+
+
+    o.querySelector(
+        '#save'
+    ).onclick=()=>{
+
+        x[id]=
+            Math.max(
+                0,
+                num(
+                    o.querySelector(
+                        '#v'
+                    ).value
+                )
+            );
+
+        save();
+
+        closeModal();
+
+        renderHome();
+
+        openCategory(c);
+
+        toast(
+            'Изменения сохранены'
+        );
+
+    };
 
 }
 
-let x=state.categories[c];
-
-let labels={
-yearlyGoal:'Цель на год',
-workouts:'Количество тренировок',
-books:'Книги',
-languageMinutes:'Минуты изучения языка',
-meditationMinutes:'Минуты медитации',
-routine:'Режим дня %',
-nutrition:'Питание %',
-steps:'Шаги'
-};
-
-modal(`
-
-<div class="modal-icon">
-${META[c].icon}
-</div>
-
-<div class="modal-label">
-EDIT VALUE
-</div>
-
-<h3>
-${esc(labels[id]||id)}
-</h3>
-
-<label>
-Текущее значение
-</label>
-
-<input
-id="v"
-type="number"
-inputmode="decimal"
-min="0"
-value="${num(x[id])}"
->
-
-<button class="primary" id="save">
-СОХРАНИТЬ
-</button>
-
-`);
-
-let o=document.querySelector('.overlay');
-
-o.querySelector('#save').onclick=()=>{
-
-x[id]=
-Math.max(
-0,
-num(o.querySelector('#v').value)
-);
-
-save();
-
-closeModal();
-
-renderHome();
-
-openCategory(c);
-
-toast(
-'Изменения сохранены'
-);
-
-};
-
-}
 
 function openExpense(id=null){
 
-let e=
-expenses.find(
-x=>String(x.id)===String(id)
-);
+    let e=
+        expenses.find(
+            x=>String(x.id)===String(id)
+        );
 
-modal(`
+    modal(`
 
-<div class="modal-icon">
-📉
-</div>
+        <div class="modal-icon">
+            📉
+        </div>
 
-<div class="modal-label">
-${e?'EDIT EXPENSE':'NEW EXPENSE'}
-</div>
+        <div class="modal-label">
+            ${e?'EDIT EXPENSE':'NEW EXPENSE'}
+        </div>
 
-<h3>
-${e?'Изменить расход':'Добавить расход'}
-</h3>
+        <h3>
+            ${e
+                ? 'Изменить расход'
+                : 'Добавить расход'
+            }
+        </h3>
 
-<label>
-Название
-</label>
+        <label>
+            Название
+        </label>
 
-<input
-id="name"
-type="text"
-maxlength="60"
-placeholder="Например: Аренда"
-value="${e?esc(e.name):''}"
->
+        <input
+            id="name"
+            type="text"
+            maxlength="60"
+            placeholder="Например: Аренда"
+            value="${e?esc(e.name):''}"
+        >
 
-<label>
-Сумма
-</label>
+        <label>
+            Сумма
+        </label>
 
-<input
-id="amount"
-type="number"
-inputmode="decimal"
-min="0"
-value="${e?e.amount:''}"
->
+        <input
+            id="amount"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            value="${e?e.amount:''}"
+        >
 
-<button class="primary" id="save">
-СОХРАНИТЬ
-</button>
+        <button
+            class="primary"
+            id="save"
+        >
+            СОХРАНИТЬ
+        </button>
 
-`);
+    `);
 
-let o=document.querySelector('.overlay');
 
-o.querySelector('#save').onclick=()=>{
+    let o=
+        document.querySelector(
+            '.overlay'
+        );
 
-let n=
-o.querySelector('#name').value.trim();
 
-let a=
-Math.max(
-0,
-num(o.querySelector('#amount').value)
-);
+    o.querySelector(
+        '#save'
+    ).onclick=()=>{
 
-if(!n)
-return toast(
-'Введите название расхода'
-);
+        let n=
+            o.querySelector(
+                '#name'
+            ).value.trim();
 
-if(a<=0)
-return toast(
-'Введите сумму расхода'
-);
+        let a=
+            Math.max(
+                0,
+                num(
+                    o.querySelector(
+                        '#amount'
+                    ).value
+                )
+            );
 
-if(e){
 
-e.name=n;
-e.amount=a;
+        if(!n){
 
-}else{
+            toast(
+                'Введите название расхода'
+            );
 
-expenses.push({
-id:Date.now().toString(),
-name:n,
-amount:a
-});
+            return;
+
+        }
+
+
+        if(a<=0){
+
+            toast(
+                'Введите сумму расхода'
+            );
+
+            return;
+
+        }
+
+
+        if(e){
+
+            e.name=n;
+            e.amount=a;
+
+        }else{
+
+            expenses.push({
+
+                id:Date.now().toString(),
+
+                name:n,
+
+                amount:a
+
+            });
+
+        }
+
+
+        save();
+
+        closeModal();
+
+        renderHome();
+
+        openCategory(
+            'finance'
+        );
+
+        toast(
+            'Расход сохранён'
+        );
+
+    };
 
 }
 
-save();
-
-closeModal();
-
-renderHome();
-
-openCategory('finance');
-
-toast(
-'Расход сохранён'
-);
-
-};
-
-}
 
 function deleteExpense(id){
 
-expenses=
-expenses.filter(
-e=>String(e.id)!==String(id)
-);
+    expenses=
+        expenses.filter(
+            e=>String(e.id)!==
+            String(id)
+        );
 
-save();
+    save();
 
-renderHome();
+    renderHome();
 
-openCategory('finance');
+    openCategory(
+        'finance'
+    );
 
-toast(
-'Расход удалён'
-);
+    toast(
+        'Расход удалён'
+    );
 
 }
+
 
 function modal(content){
 
-closeModal();
+    closeModal();
 
-let o=document.createElement('div');
+    let o=
+        document.createElement(
+            'div'
+        );
 
-o.className='overlay';
+    o.className='overlay';
 
-o.innerHTML=`
+    o.innerHTML=`
 
-<div class="modal">
+        <div class="modal">
 
-<button class="close">
-×
-</button>
+            <button class="close">
+                ×
+            </button>
 
-${content}
+            ${content}
 
-</div>
-`;
+        </div>
+    `;
 
-document.body.appendChild(o);
+    document.body.appendChild(o);
 
-document.body.classList.add('locked');
+    document.body.classList.add(
+        'locked'
+    );
 
-o.querySelector('.close').onclick=
-closeModal;
+    o.querySelector(
+        '.close'
+    ).onclick=
+        closeModal;
 
-o.onclick=e=>{
-if(e.target===o)
-closeModal();
-};
+    o.onclick=e=>{
+
+        if(e.target===o)
+            closeModal();
+
+    };
 
 }
+
 
 function closeModal(){
 
-document.querySelector('.overlay')?.remove();
+    document.querySelector(
+        '.overlay'
+    )?.remove();
 
-if(!document.getElementById('activePage'))
-document.body.classList.remove('locked');
+    if(
+        !document.getElementById(
+            'activePage'
+        )
+    ){
+
+        document.body.classList.remove(
+            'locked'
+        );
+
+    }
 
 }
+
 
 function closePage(){
 
-document.getElementById('activePage')?.remove();
+    document.getElementById(
+        'activePage'
+    )?.remove();
 
-if(!document.querySelector('.overlay'))
-document.body.classList.remove('locked');
+    if(
+        !document.querySelector(
+            '.overlay'
+        )
+    ){
+
+        document.body.classList.remove(
+            'locked'
+        );
+
+    }
 
 }
+
 
 function setHome(){
 
-document
-.querySelectorAll('[data-nav]')
-.forEach(
-b=>b.classList.toggle(
-'active',
-b.dataset.nav==='home'
-)
-);
+    document.querySelectorAll(
+        '[data-nav]'
+    ).forEach(b=>{
+
+        b.classList.toggle(
+            'active',
+            b.dataset.nav==='home'
+        );
+
+    });
 
 }
+
 
 let tt;
 
+
 function toast(m){
 
-let t=document.querySelector('.toast');
+    let t=
+        document.querySelector(
+            '.toast'
+        );
 
-if(t)t.remove();
+    if(t)
+        t.remove();
 
-t=document.createElement('div');
+    t=
+        document.createElement(
+            'div'
+        );
 
-t.className='toast';
+    t.className='toast';
 
-t.textContent=m;
+    t.textContent=m;
 
-document.body.appendChild(t);
+    document.body.appendChild(t);
 
-requestAnimationFrame(
-()=>t.classList.add('show')
-);
+    requestAnimationFrame(
+        ()=>t.classList.add('show')
+    );
 
-clearTimeout(tt);
+    clearTimeout(tt);
 
-tt=setTimeout(
-()=>{
-t.classList.remove('show');
+    tt=setTimeout(
+        ()=>{
 
-setTimeout(
-()=>t.remove(),
-220
-);
+            t.classList.remove(
+                'show'
+            );
 
-},
-1800
-);
+            setTimeout(
+                ()=>t.remove(),
+                220
+            );
+
+        },
+        1800
+    );
 
 }
+
 
 function quests(){
 
-closePage();
+    closePage();
 
-let p=document.createElement('div');
+    let p=
+        document.createElement(
+            'div'
+        );
 
-p.className='page';
-p.id='activePage';
+    p.className='page';
+    p.id='activePage';
 
-p.innerHTML=`
+    p.innerHTML=`
 
-<div class="page-inner">
+        <div class="page-inner">
 
-<div class="page-head">
+            <div class="page-head">
 
-<button class="back">
-←
-</button>
+                <button class="back">
+                    ←
+                </button>
 
-<div>
+                <div>
 
-<div class="page-eyebrow">
-LIFE GAME
-</div>
+                    <div class="page-eyebrow">
+                        LIFE GAME
+                    </div>
 
-<h2>
-⚡ Daily Quest
-</h2>
+                    <h2>
+                        ⚡ Daily Quest
+                    </h2>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-<div class="quest-card">
+            <div class="quest-card">
 
-<div class="section-label">
-TODAY'S QUESTS
-</div>
+                <div class="section-label">
+                    TODAY'S QUESTS
+                </div>
 
-${state.quests.map(
-(q,i)=>`
+                ${state.quests.map(
+                    (q,i)=>`
 
-<div class="quest-item">
+                    <div class="quest-item">
 
-<div class="quest-row">
+                        <div class="quest-row">
 
-<div class="quest-title">
-${esc(q.title)}
-</div>
+                            <div class="quest-title">
+                                ${esc(q.title)}
+                            </div>
 
-<div class="quest-xp">
-+${q.xp} XP
-</div>
+                            <div class="quest-xp">
+                                +${q.xp} XP
+                            </div>
 
-</div>
+                        </div>
 
-<button
-class="complete ${q.done?'done':''}"
-data-q="${i}"
->
-${q.done?'✓ ВЫПОЛНЕНО':'ВЫПОЛНИТЬ'}
-</button>
+                        <button
+                            class="complete ${q.done?'done':''}"
+                            data-q="${i}"
+                        >
+                            ${
+                                q.done
+                                ? '✓ ВЫПОЛНЕНО'
+                                : 'ВЫПОЛНИТЬ'
+                            }
+                        </button>
 
-</div>
+                    </div>
 
-`
-).join('')}
+                `
+                ).join('')}
 
-</div>
+            </div>
 
-</div>
-`;
+            ${creatorHTML()}
 
-document.body.appendChild(p);
+        </div>
+    `;
 
-document.body.classList.add('locked');
 
-p.querySelector('.back').onclick=()=>{
-closePage();
-setHome();
-};
+    document.body.appendChild(p);
 
-p.querySelectorAll('[data-q]').forEach(
-b=>b.onclick=()=>{
+    document.body.classList.add(
+        'locked'
+    );
 
-let q=
-state.quests[
-num(b.dataset.q)
-];
 
-if(!q||q.done)return;
+    p.querySelector(
+        '.back'
+    ).onclick=()=>{
 
-q.done=true;
+        closePage();
 
-let x=
-state.categories[
-q.category
-];
+        setHome();
 
-x.streak++;
+    };
 
-x.bestStreak=
-Math.max(
-x.bestStreak,
-x.streak
-);
 
-let a=
-Math.round(
-q.xp*(1+x.streak*.08)
-);
+    p.querySelectorAll(
+        '[data-q]'
+    ).forEach(b=>{
 
-addCatXP(
-q.category,
-a
-);
+        b.onclick=()=>{
 
-state.player.rating++;
+            let q=
+                state.quests[
+                    num(b.dataset.q)
+                ];
 
-save();
+            if(!q || q.done)
+                return;
 
-toast(
-'Quest выполнен · +'+a+' XP'
-);
 
-quests();
+            q.done=true;
 
-renderHome();
+
+            /*
+             * Training quest continues
+             * to award XP to training storage.
+             */
+            let category=
+                q.category;
+
+
+            if(
+                !state.categories[category]
+            ){
+
+                category='health';
+
+            }
+
+
+            let x=
+                state.categories[
+                    category
+                ];
+
+
+            x.streak++;
+
+            x.bestStreak=
+                Math.max(
+                    x.bestStreak,
+                    x.streak
+                );
+
+
+            let a=
+                Math.round(
+                    q.xp*
+                    (
+                        1+
+                        x.streak*.08
+                    )
+                );
+
+
+            addCatXP(
+                category,
+                a
+            );
+
+
+            state.player.rating++;
+
+            save();
+
+
+            toast(
+                'Quest выполнен · +'+
+                a+
+                ' XP'
+            );
+
+
+            quests();
+
+            renderHome();
+
+        };
+
+    });
 
 }
-);
 
-}
 
-document
-.querySelectorAll('[data-nav]')
-.forEach(
-b=>b.onclick=()=>{
+/* NAVIGATION */
 
-let c=b.dataset.nav;
+document.querySelectorAll(
+    '[data-nav]'
+).forEach(b=>{
 
-document
-.querySelectorAll('[data-nav]')
-.forEach(
-x=>x.classList.toggle(
-'active',
-x.dataset.nav===c
-)
-);
+    b.onclick=()=>{
 
-if(c==='home'){
+        let c=
+            b.dataset.nav;
 
-closePage();
+        document.querySelectorAll(
+            '[data-nav]'
+        ).forEach(x=>{
 
-renderHome();
+            x.classList.toggle(
+                'active',
+                x.dataset.nav===c
+            );
 
-}else{
+        });
 
-openCategory(c);
 
-}
+        if(c==='home'){
 
-}
-);
+            closePage();
 
-document
-.querySelectorAll('.category')
-.forEach(
-c=>c.onclick=()=>{
+            renderHome();
 
-setHome();
+            return;
 
-document
-.querySelector(
-`[data-nav="${c.dataset.category}"]`
-)
-?.classList.add('active');
+        }
 
-openCategory(
-c.dataset.category
-);
 
-}
-);
+        openCategory(c);
 
-document
-.getElementById('dailyQuest')
-.onclick=quests;
+    };
+
+});
+
+
+/* HOME CATEGORY CARDS */
+
+document.querySelectorAll(
+    '.category'
+).forEach(c=>{
+
+    c.onclick=()=>{
+
+        let category=
+            c.dataset.category;
+
+        document.querySelectorAll(
+            '[data-nav]'
+        ).forEach(x=>{
+
+            x.classList.toggle(
+                'active',
+                x.dataset.nav===category
+            );
+
+        });
+
+        openCategory(
+            category
+        );
+
+    };
+
+});
+
+
+/* INITIALIZATION */
 
 updateLevels();
 
@@ -2691,4 +3979,3 @@ renderHome();
 
 </body>
 </html>
-```
