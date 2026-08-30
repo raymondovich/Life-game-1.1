@@ -1,585 +1,708 @@
 ```javascript
-// ==========================================
+// =====================================================
 // LIFE GAME
 // APP.JS
-// Главный файл приложения
-// ==========================================
+// Главный координатор приложения
+// =====================================================
 
 'use strict';
 
 
-// ==========================================
-// 1. CORE STATE
-// ==========================================
+// =====================================================
+// CORE MODULES
+// =====================================================
 
-let state = {
-    finance: {
-        monthlyIncome: 0,
-        monthlyGoal: 100000,
-        expenses: [],
-        savings: 0
-    },
+import {
+    createDefaultState
+} from './state.js';
 
-    health: {
-        health: 50,
-        routine: 50,
-        nutrition: 50,
-        steps: 5000,
-        workouts: 0,
-        monthlyTarget: 12,
-        level: 1
-    },
+import {
+    loadState,
+    saveState
+} from './storage.js';
 
-    development: {
-        books: 0,
-        languageMinutes: 0,
-        meditationMinutes: 0,
-        xp: 0,
-        level: 1,
-        streak: 0
-    },
+import {
+    clamp,
+    fmt,
+    esc,
+    percent
+} from './utilities.js';
 
-    player: {
-        xp: 0,
-        level: 1
-    }
-};
+import {
+    levelFromXP,
+    xpForLevel,
+    playerXPFromCategoryXP
+} from './xp.js';
 
 
-// ==========================================
-// 2. LOCAL STORAGE
-// ==========================================
+// =====================================================
+// GLOBAL APPLICATION STATE
+// =====================================================
 
-const STORAGE_KEY = 'life_game_data_v4';
+let state = null;
+
+let currentPage = 'home';
+
+let modulesLoaded = false;
 
 
-function loadGameData() {
+// =====================================================
+// MODULE REFERENCES
+// =====================================================
 
-    try {
+let Finance = null;
+let Health = null;
+let Development = null;
 
-        const saved =
-            localStorage.getItem(STORAGE_KEY);
 
-        if (!saved) {
-            return;
-        }
+// =====================================================
+// NORMALIZE STATE
+// =====================================================
 
-        const data =
-            JSON.parse(saved);
+function normalizeState(input) {
 
-        if (data.finance) {
+    const defaults =
+        createDefaultState();
 
-            state.finance = {
-                ...state.finance,
-                ...data.finance
-            };
+    const source =
+        input && typeof input === 'object'
+            ? input
+            : {};
 
-        }
-
-        if (data.health) {
-
-            state.health = {
-                ...state.health,
-                ...data.health
-            };
-
-        }
-
-        if (data.development) {
-
-            state.development = {
-                ...state.development,
-                ...data.development
-            };
-
-        }
-
-        if (data.player) {
-
-            state.player = {
-                ...state.player,
-                ...data.player
-            };
-
-        }
-
-        console.log(
-            '💾 LIFE GAME: данные загружены'
+    const result =
+        JSON.parse(
+            JSON.stringify(defaults)
         );
 
-    } catch (error) {
 
-        console.error(
-            'LIFE GAME: ошибка загрузки данных',
-            error
-        );
+    // -------------------------------------------------
+    // PLAYER
+    // -------------------------------------------------
 
-    }
+    result.player = {
+        ...result.player,
+        ...(source.player || {})
+    };
 
-}
+
+    // -------------------------------------------------
+    // CATEGORIES
+    // -------------------------------------------------
+
+    result.categories = {
+        ...result.categories,
+        ...(source.categories || {})
+    };
 
 
-function saveGameData() {
+    Object.keys(
+        defaults.categories
+    ).forEach(category => {
 
-    try {
+        result.categories[category] = {
+            ...defaults.categories[category],
+            ...(source.categories?.[category] || {})
+        };
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(state)
-        );
+    });
 
-    } catch (error) {
 
-        console.error(
-            'LIFE GAME: ошибка сохранения',
-            error
-        );
+    // -------------------------------------------------
+    // SIMULATOR
+    // -------------------------------------------------
+
+    result.simulator = {
+        ...result.simulator,
+        ...(source.simulator || {})
+    };
+
+
+    // -------------------------------------------------
+    // QUESTS
+    // -------------------------------------------------
+
+    if (Array.isArray(source.quests)) {
+
+        result.quests =
+            source.quests;
 
     }
 
-}
 
+    // -------------------------------------------------
+    // NUMERIC SAFETY
+    // -------------------------------------------------
 
-// ==========================================
-// 3. HELPERS
-// ==========================================
-
-function clamp(
-    value,
-    min = 0,
-    max = 100
-) {
-
-    return Math.min(
-        max,
-        Math.max(
-            min,
-            Number(value) || 0
-        )
-    );
-
-}
-
-
-function fmt(value) {
-
-    return new Intl.NumberFormat(
-        'ru-RU'
-    ).format(
-        Number(value) || 0
-    );
-
-}
-
-
-function esc(value) {
-
-    return String(value)
-        .replace(
-            /[&<>"']/g,
-            character => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            }[character])
-        );
-
-}
-
-
-// ==========================================
-// 4. FINANCE CALCULATIONS
-// ==========================================
-
-function getTotalExpenses() {
-
-    return state.finance.expenses.reduce(
-        (sum, expense) =>
-            sum + (
-                Number(expense.amount) || 0
-            ),
-        0
-    );
-
-}
-
-
-function getExpensePercent() {
-
-    const income =
-        Number(
-            state.finance.monthlyIncome
-        ) || 0;
-
-    if (income <= 0) {
-        return 0;
-    }
-
-    return clamp(
-        Math.round(
-            getTotalExpenses() /
-            income *
-            100
-        )
-    );
-
-}
-
-
-function getSavingsPercent() {
-
-    const income =
-        Number(
-            state.finance.monthlyIncome
-        ) || 0;
-
-    if (income <= 0) {
-        return 0;
-    }
-
-    return clamp(
-        Math.round(
-            state.finance.savings /
-            income *
-            100
-        )
-    );
-
-}
-
-
-function getFinanceState() {
-
-    const income =
-        Number(
-            state.finance.monthlyIncome
-        ) || 0;
-
-    const expenses =
-        getTotalExpenses();
-
-    const savings =
-        Number(
-            state.finance.savings
-        ) || 0;
-
-    if (income <= 0) {
-        return 0;
-    }
-
-    /*
-     * Финансовое состояние:
-     *
-     * 50% — способность зарабатывать
-     * 25% — контроль обязательных расходов
-     * 25% — финансовая подушка
-     */
-
-    const incomeScore =
-        clamp(
-            Math.round(
-                income /
-                Math.max(
-                    1,
-                    state.finance.monthlyGoal
-                ) *
-                100
-            )
-        );
-
-    const expenseScore =
-        clamp(
-            100 -
-            Math.round(
-                expenses /
-                income *
-                100
-            )
-        );
-
-    const savingsScore =
-        clamp(
-            Math.round(
-                savings /
-                income *
-                100
-            )
-        );
-
-    return clamp(
-        Math.round(
-            incomeScore * 0.5 +
-            expenseScore * 0.25 +
-            savingsScore * 0.25
-        )
-    );
-
-}
-
-
-// ==========================================
-// 5. PLAYER XP
-// ==========================================
-
-function addXP(amount) {
-
-    const value =
+    result.player.xp =
         Math.max(
             0,
-            Number(amount) || 0
+            Number(result.player.xp) || 0
         );
 
-    state.player.xp += value;
-
-    while (
-        state.player.xp >=
-        state.player.level * 100
-    ) {
-
-        state.player.xp -=
-            state.player.level * 100;
-
-        state.player.level++;
-
-        showToast(
-            '🎉 УРОВЕНЬ ПОВЫШЕН! LVL ' +
-            state.player.level
+    result.player.level =
+        Math.max(
+            1,
+            Number(result.player.level) || 1
         );
+
+    result.player.rating =
+        Number(result.player.rating) || 0;
+
+
+    // -------------------------------------------------
+    // CATEGORY XP / LEVEL
+    // -------------------------------------------------
+
+    Object.keys(
+        result.categories
+    ).forEach(category => {
+
+        const x =
+            result.categories[category];
+
+        x.xp =
+            Math.max(
+                0,
+                Number(x.xp) || 0
+            );
+
+        x.level =
+            Math.max(
+                1,
+                Number(x.level) || 1
+            );
+
+        x.streak =
+            Math.max(
+                0,
+                Number(x.streak) || 0
+            );
+
+        x.bestStreak =
+            Math.max(
+                0,
+                Number(x.bestStreak) || 0
+            );
+
+    });
+
+
+    return result;
+
+}
+
+
+// =====================================================
+// LOAD MODULES
+// =====================================================
+
+async function loadApplicationModules() {
+
+    try {
+
+        /*
+         * Modules are loaded dynamically.
+         *
+         * This allows both architectures:
+         *
+         * 1. ES module export
+         * 2. window.LifeGame...
+         *
+         * to work.
+         */
+
+
+        const [
+            financeModule,
+            healthModule,
+            developmentModule
+        ] = await Promise.all([
+
+            import('./finance.js'),
+
+            import('./health.js'),
+
+            import('./development.js')
+
+        ]);
+
+
+        Finance =
+            financeModule.default ||
+            financeModule.LifeGameFinance ||
+            window.LifeGameFinance ||
+            null;
+
+
+        Health =
+            healthModule.default ||
+            healthModule.LifeGameHealth ||
+            window.LifeGameHealth ||
+            null;
+
+
+        Development =
+            developmentModule.default ||
+            developmentModule.LifeGameDevelopment ||
+            window.LifeGameDevelopment ||
+            null;
+
+
+        /*
+         * Some versions of the modules register
+         * themselves on window after execution.
+         */
+
+        if (!Finance) {
+
+            Finance =
+                window.LifeGameFinance ||
+                null;
+
+        }
+
+        if (!Health) {
+
+            Health =
+                window.LifeGameHealth ||
+                null;
+
+        }
+
+        if (!Development) {
+
+            Development =
+                window.LifeGameDevelopment ||
+                null;
+
+        }
+
+
+        modulesLoaded = true;
+
+
+        console.log(
+            'LIFE GAME: modules loaded',
+            {
+                finance: !!Finance,
+                health: !!Health,
+                development: !!Development
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'LIFE GAME: module loading error',
+            error
+        );
+
+        /*
+         * We do not stop the application completely.
+         * This makes debugging easier.
+         */
+
+        modulesLoaded = true;
 
     }
 
-    saveGameData();
+}
+
+
+// =====================================================
+// MODULE HELPERS
+// =====================================================
+
+function getHelpers() {
+
+    return {
+
+        metric: createMetric,
+
+        fmt,
+
+        clamp,
+
+        esc,
+
+        percent,
+
+        creatorHTML,
+
+        state
+
+    };
+
+}
+
+
+// =====================================================
+// CREATOR
+// =====================================================
+
+function creatorHTML() {
+
+    return `
+        <a
+            class="creator"
+            href="https://t.me/shkeltinsh"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Created by
+            <strong>&nbsp;@shkeltinsh</strong>
+        </a>
+    `;
+
+}
+
+
+// =====================================================
+// METRIC
+// =====================================================
+
+function createMetric(
+    icon,
+    title,
+    value,
+    target,
+    progress,
+    id
+) {
+
+    const p =
+        clamp(
+            progress,
+            0,
+            100
+        );
+
+
+    return `
+        <div
+            class="metric"
+            data-metric="${esc(id || '')}"
+        >
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${esc(title)}
+                        </strong>
+
+                        <span>
+                            ${esc(value)}
+                            ${target
+                                ? ` / ${esc(target)}`
+                                : ''
+                            }
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="metric-percent">
+                    ${p}%
+                </div>
+
+            </div>
+
+            <div class="metric-bar">
+
+                <i
+                    style="width:${p}%"
+                ></i>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+// =====================================================
+// INIT
+// =====================================================
+
+async function initApp() {
+
+    console.log(
+        '🚀 LIFE GAME — starting'
+    );
+
+
+    // -------------------------------------------------
+    // LOAD MODULES
+    // -------------------------------------------------
+
+    await loadApplicationModules();
+
+
+    // -------------------------------------------------
+    // LOAD STATE
+    // -------------------------------------------------
+
+    state =
+        loadState(
+            normalizeState
+        );
+
+
+    if (!state) {
+
+        state =
+            createDefaultState();
+
+    }
+
+
+    // -------------------------------------------------
+    // GLOBAL STATE
+    // -------------------------------------------------
+
+    window.lifeGameState =
+        state;
+
+
+    // -------------------------------------------------
+    // INITIAL UI
+    // -------------------------------------------------
+
     updateAllUI();
 
-}
+
+    // -------------------------------------------------
+    // NAVIGATION
+    // -------------------------------------------------
+
+    setupNavigation();
 
 
-// ==========================================
-// 6. HOME UI
-// ==========================================
+    // -------------------------------------------------
+    // HOME CATEGORY CLICK
+    // -------------------------------------------------
 
-function updateHealthUI() {
-
-    const value =
-        clamp(
-            state.health.health
-        );
-
-    const percent =
-        document.getElementById(
-            'healthPercent'
-        );
-
-    const fill =
-        document.getElementById(
-            'healthFill'
-        );
-
-    if (percent) {
-        percent.textContent =
-            value + '%';
-    }
-
-    if (fill) {
-        fill.style.width =
-            value + '%';
-    }
-
-}
+    setupCategoryClicks();
 
 
-function updateFinanceUI() {
+    // -------------------------------------------------
+    // DAILY QUEST
+    // -------------------------------------------------
 
-    const financeState =
-        getFinanceState();
+    setupDailyQuest();
 
-    const percent =
-        document.getElementById(
-            'financePercent'
-        );
 
-    const fill =
-        document.getElementById(
-            'financeFill'
-        );
+    // -------------------------------------------------
+    // GENERAL EVENTS
+    // -------------------------------------------------
 
-    if (percent) {
+    setupGlobalEvents();
 
-        percent.textContent =
-            financeState + '%';
 
-    }
+    // -------------------------------------------------
+    // GLOBAL API
+    // -------------------------------------------------
 
-    if (fill) {
+    exposeGlobalAPI();
 
-        fill.style.width =
-            financeState + '%';
 
-    }
+    console.log(
+        '✅ LIFE GAME — application ready'
+    );
 
 }
 
 
-function updateDevelopmentUI() {
+// =====================================================
+// SAVE
+// =====================================================
 
-    const x =
-        state.development;
+function persist() {
 
-    const books =
-        clamp(
-            Math.round(
-                x.books / 2 * 100
-            )
-        );
-
-    const language =
-        clamp(
-            Math.round(
-                x.languageMinutes /
-                30 *
-                100
-            )
-        );
-
-    const meditation =
-        clamp(
-            Math.round(
-                x.meditationMinutes /
-                15 *
-                100
-            )
-        );
-
-    const development =
-        Math.round(
-            (
-                books +
-                language +
-                meditation
-            ) / 3
-        );
-
-    const percent =
-        document.getElementById(
-            'developmentPercent'
-        );
-
-    const fill =
-        document.getElementById(
-            'developmentFill'
-        );
-
-    if (percent) {
-
-        percent.textContent =
-            development + '%';
-
+    if (!state) {
+        return;
     }
 
-    if (fill) {
+    try {
 
-        fill.style.width =
-            development + '%';
+        saveState(state);
+
+    } catch (error) {
+
+        console.error(
+            'LIFE GAME: save error',
+            error
+        );
 
     }
 
 }
 
 
-function updateLevelUI() {
+// =====================================================
+// UPDATE ALL UI
+// =====================================================
+
+function updateAllUI() {
+
+    if (!state) {
+        return;
+    }
+
+
+    updatePlayerUI();
+
+    updateLifeUI();
+
+    updateCategoryCards();
+
+    persist();
+
+}
+
+
+// =====================================================
+// PLAYER UI
+// =====================================================
+
+function updatePlayerUI() {
+
+    const player =
+        state.player;
+
 
     const level =
+        Math.max(
+            1,
+            Number(player.level) || 1
+        );
+
+
+    const xp =
+        Math.max(
+            0,
+            Number(player.xp) || 0
+        );
+
+
+    const required =
+        xpForLevel(
+            level + 1
+        );
+
+
+    const xpPercent =
+        required > 0
+            ? clamp(
+                Math.round(
+                    xp / required * 100
+                ),
+                0,
+                100
+            )
+            : 0;
+
+
+    const levelEl =
         document.getElementById(
             'playerLevel'
         );
 
-    const xp =
+    const xpEl =
         document.getElementById(
             'playerXP'
         );
 
-    const fill =
+    const xpFill =
         document.getElementById(
             'playerXPFill'
         );
 
-    const next =
+    const xpNext =
         document.getElementById(
             'xpNext'
         );
 
-    if (!level) {
-        return;
-    }
-
-    const currentLevel =
-        state.player.level;
-
-    const currentXP =
-        state.player.xp;
-
-    const requiredXP =
-        currentLevel * 100;
-
-    level.textContent =
-        'LVL ' + currentLevel;
-
-    if (xp) {
-
-        xp.textContent =
-            currentXP + ' XP';
-
-    }
-
-    if (fill) {
-
-        fill.style.width =
-            Math.min(
-                100,
-                currentXP /
-                requiredXP *
-                100
-            ) + '%';
-
-    }
-
-    if (next) {
-
-        next.textContent =
-            Math.max(
-                0,
-                requiredXP - currentXP
-            ) +
-            ' XP TO NEXT LEVEL';
-
-    }
-
-    const rank =
+    const rankEl =
         document.getElementById(
             'playerRank'
         );
 
-    if (rank) {
+
+    if (levelEl) {
+
+        levelEl.textContent =
+            `LVL ${level}`;
+
+    }
+
+
+    if (xpEl) {
+
+        xpEl.textContent =
+            `${fmt(xp)} XP`;
+
+    }
+
+
+    if (xpFill) {
+
+        xpFill.style.width =
+            `${xpPercent}%`;
+
+    }
+
+
+    if (xpNext) {
+
+        xpNext.textContent =
+            `${fmt(
+                Math.max(
+                    0,
+                    required - xp
+                )
+            )} XP TO NEXT LEVEL`;
+
+    }
+
+
+    if (rankEl) {
 
         const ranks = [
+
             'BEGINNER',
             'EXPLORER',
             'ADVENTURER',
             'HERO',
             'LEGEND'
+
         ];
+
 
         const index =
             Math.min(
                 Math.floor(
-                    currentLevel / 3
+                    Math.max(
+                        1,
+                        level
+                    ) / 3
                 ),
                 ranks.length - 1
             );
 
-        rank.textContent =
+
+        rankEl.textContent =
             ranks[index];
 
     }
@@ -587,70 +710,207 @@ function updateLevelUI() {
 }
 
 
-function getDevelopmentProgress() {
+// =====================================================
+// LIFE PROGRESS
+// =====================================================
+
+function calculateCategoryProgress(
+    category
+) {
 
     const x =
-        state.development;
+        state.categories[category];
 
-    const books =
-        clamp(
-            Math.round(
-                x.books / 2 * 100
-            )
+
+    if (!x) {
+        return 0;
+    }
+
+
+    // -------------------------------------------------
+    // FINANCE
+    // -------------------------------------------------
+
+    if (
+        category === 'finance' &&
+        Finance &&
+        typeof Finance.progress === 'function'
+    ) {
+
+        return clamp(
+            Finance.progress(state),
+            0,
+            100
         );
 
-    const language =
-        clamp(
-            Math.round(
-                x.languageMinutes /
-                30 *
+    }
+
+
+    // -------------------------------------------------
+    // HEALTH
+    // -------------------------------------------------
+
+    if (
+        category === 'health' &&
+        Health &&
+        typeof Health.progress === 'function'
+    ) {
+
+        return clamp(
+            Health.progress(state),
+            0,
+            100
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // DEVELOPMENT
+    // -------------------------------------------------
+
+    if (
+        category === 'development' &&
+        Development &&
+        typeof Development.progress === 'function'
+    ) {
+
+        return clamp(
+            Development.progress(state),
+            0,
+            100
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // FALLBACK
+    // -------------------------------------------------
+
+    if (
+        category === 'development'
+    ) {
+
+        const books =
+            percent(
+                x.books,
+                2
+            );
+
+        const language =
+            percent(
+                x.languageMinutes,
+                30
+            );
+
+        const meditation =
+            percent(
+                x.meditationMinutes,
+                15
+            );
+
+
+        return Math.round(
+            (
+                books +
+                language +
+                meditation
+            ) / 3
+        );
+
+    }
+
+
+    if (
+        category === 'health'
+    ) {
+
+        const routine =
+            clamp(
+                x.routine,
+                0,
                 100
-            )
-        );
+            );
 
-    const meditation =
-        clamp(
-            Math.round(
-                x.meditationMinutes /
-                15 *
+        const nutrition =
+            clamp(
+                x.nutrition,
+                0,
                 100
-            )
+            );
+
+        const steps =
+            percent(
+                x.steps,
+                10000
+            );
+
+
+        return Math.round(
+            (
+                routine +
+                nutrition +
+                steps
+            ) / 3
         );
 
-    return Math.round(
-        (
-            books +
-            language +
-            meditation
-        ) / 3
+    }
+
+
+    return clamp(
+        Number(x.level) || 0,
+        0,
+        100
     );
 
 }
 
 
-function updateLifeProgressUI() {
+// =====================================================
+// LIFE UI
+// =====================================================
 
-    const healthProgress =
-        clamp(
-            state.health.health
+function updateLifeUI() {
+
+    const finance =
+        calculateCategoryProgress(
+            'finance'
         );
 
-    const financeProgress =
-        getFinanceState();
+    const health =
+        calculateCategoryProgress(
+            'health'
+        );
 
-    const developmentProgress =
-        getDevelopmentProgress();
+    const development =
+        calculateCategoryProgress(
+            'development'
+        );
+
+
+    const values = [
+
+        finance,
+
+        health,
+
+        development
+
+    ];
+
 
     const progress =
         Math.round(
-            (
-                healthProgress +
-                financeProgress +
-                developmentProgress
-            ) / 3
+            values.reduce(
+                (sum, value) =>
+                    sum + value,
+                0
+            ) / values.length
         );
 
-    const lifeProgress =
+
+    const lifeEl =
         document.getElementById(
             'lifeProgress'
         );
@@ -660,521 +920,329 @@ function updateLifeProgressUI() {
             'lifeFill'
         );
 
-    if (lifeProgress) {
 
-        lifeProgress.innerHTML =
-            progress +
-            '<span>%</span>';
+    if (lifeEl) {
+
+        lifeEl.innerHTML =
+            `${progress}<span>%</span>`;
 
     }
+
 
     if (lifeFill) {
 
         lifeFill.style.width =
-            progress + '%';
+            `${progress}%`;
 
     }
 
 }
 
 
-// ==========================================
-// 7. ALL UI
-// ==========================================
+// =====================================================
+// CATEGORY CARDS
+// =====================================================
 
-function updateAllUI() {
+function updateCategoryCards() {
 
-    updateHealthUI();
-    updateFinanceUI();
-    updateDevelopmentUI();
-    updateLevelUI();
-    updateLifeProgressUI();
-
-    /*
-     * Если открыта страница финансов,
-     * обновляем её содержимое через
-     * finance.js.
-     */
-
-    if (
-        currentPage === 'finance' &&
-        window.LifeGameFinance &&
-        typeof window.LifeGameFinance.refresh ===
-        'function'
-    ) {
-
-        window.LifeGameFinance.refresh(
-            state,
-            getFinanceHelpers()
-        );
-
-    }
-
-    saveGameData();
-
-}
+    updateCategoryCard(
+        'finance',
+        calculateCategoryProgress(
+            'finance'
+        )
+    );
 
 
-// ==========================================
-// 8. FINANCE HELPERS
-// ==========================================
-
-function getFinanceHelpers() {
-
-    return {
-
-        fmt,
-        clamp,
-        esc,
-
-        getTotalExpenses,
-        getExpensePercent,
-        getSavingsPercent,
-        getFinanceState,
-
-        save: saveGameData,
-
-        toast: showToast,
-
-        update: updateAllUI
-
-    };
-
-}
+    updateCategoryCard(
+        'health',
+        calculateCategoryProgress(
+            'health'
+        )
+    );
 
 
-// ==========================================
-// 9. HEALTH MECHANICS
-// ==========================================
-
-function increaseHealth() {
-
-    const old =
-        state.health.health;
-
-    state.health.health =
-        clamp(
-            state.health.health + 5
-        );
-
-    if (
-        state.health.health !== old
-    ) {
-
-        addXP(15);
-
-        showToast(
-            '❤️ +5 здоровья'
-        );
-
-    } else {
-
-        showToast(
-            '⚠️ Здоровье уже максимальное'
-        );
-
-    }
-
-}
-
-
-function decreaseHealth() {
-
-    const old =
-        state.health.health;
-
-    state.health.health =
-        Math.max(
-            0,
-            state.health.health - 5
-        );
-
-    if (
-        state.health.health !== old
-    ) {
-
-        showToast(
-            '💔 -5 здоровья'
-        );
-
-        updateAllUI();
-
-    } else {
-
-        showToast(
-            '⚠️ Здоровье уже минимальное'
-        );
-
-    }
-
-}
-
-
-// ==========================================
-// 10. DEVELOPMENT MECHANICS
-// ==========================================
-
-function levelUp() {
-
-    const old =
-        getDevelopmentProgress();
-
-    if (old >= 100) {
-
-        showToast(
-            '⚠️ Развитие уже максимальное'
-        );
-
-        return;
-
-    }
-
-    state.development.meditationMinutes += 1;
-
-    addXP(20);
-
-    showToast(
-        '🧠 +1 к развитию'
+    updateCategoryCard(
+        'development',
+        calculateCategoryProgress(
+            'development'
+        )
     );
 
 }
 
 
-// ==========================================
-// 11. DAILY QUEST
-// ==========================================
+// =====================================================
+// SINGLE CATEGORY CARD
+// =====================================================
 
-function completeDailyQuest() {
+function updateCategoryCard(
+    category,
+    value
+) {
 
-    const rewards = [
-
-        {
-            type: 'health',
-            value: 10,
-            text: '💪 +10 здоровья'
-        },
-
-        {
-            type: 'income',
-            value: 200,
-            text: '💰 +200 ₽'
-        },
-
-        {
-            type: 'development',
-            value: 5,
-            text: '🧠 +5 развития'
-        }
-
-    ];
-
-    const reward =
-        rewards[
-            Math.floor(
-                Math.random() *
-                rewards.length
-            )
-        ];
-
-    if (
-        reward.type ===
-        'health'
-    ) {
-
-        state.health.health =
-            clamp(
-                state.health.health +
-                reward.value
-            );
-
-    }
-
-    if (
-        reward.type ===
-        'income'
-    ) {
-
-        state.finance.monthlyIncome +=
-            reward.value;
-
-    }
-
-    if (
-        reward.type ===
-        'development'
-    ) {
-
-        state.development.books +=
-            reward.value;
-
-    }
-
-    addXP(50);
-
-    showToast(
-        '⚡ Квест выполнен! ' +
-        reward.text
-    );
-
-    const button =
+    const percentEl =
         document.getElementById(
-            'dailyQuest'
+            `${category}Percent`
         );
 
-    if (button) {
-
-        button.textContent =
-            '✅ КВЕСТ ВЫПОЛНЕН';
-
-        button.disabled =
-            true;
-
-        button.style.opacity =
-            '0.5';
-
-        setTimeout(
-            () => {
-
-                button.textContent =
-                    '⚡ DAILY QUEST';
-
-                button.disabled =
-                    false;
-
-                button.style.opacity =
-                    '1';
-
-            },
-            30000
+    const fillEl =
+        document.getElementById(
+            `${category}Fill`
         );
+
+
+    const p =
+        clamp(
+            Math.round(value),
+            0,
+            100
+        );
+
+
+    if (percentEl) {
+
+        percentEl.textContent =
+            `${p}%`;
 
     }
 
-    updateAllUI();
+
+    if (fillEl) {
+
+        fillEl.style.width =
+            `${p}%`;
+
+    }
 
 }
 
 
-// ==========================================
-// 12. PAGE NAVIGATION
-// ==========================================
-
-let currentPage =
-    'home';
-
-
-const pageCreators = {
-
-    home:
-        createHomePage,
-
-    finance:
-        createFinancePage,
-
-    health:
-        createHealthPage,
-
-    development:
-        createDevelopmentPage
-
-};
-
+// =====================================================
+// NAVIGATION
+// =====================================================
 
 function setupNavigation() {
 
-    const buttons =
-        document.querySelectorAll(
+    document
+        .querySelectorAll(
             '.nav button'
-        );
-
-    buttons.forEach(
-        button => {
+        )
+        .forEach(button => {
 
             button.addEventListener(
                 'click',
-                function() {
+                () => {
 
                     const page =
-                        this.dataset.nav;
+                        button.dataset.nav;
 
-                    if (
-                        page &&
-                        pageCreators[page]
-                    ) {
+                    if (!page) {
+                        return;
+                    }
 
-                        openPage(page);
+                    openPage(page);
+
+                }
+            );
+
+        });
+
+}
+
+
+// =====================================================
+// CATEGORY CLICKS
+// =====================================================
+
+function setupCategoryClicks() {
+
+    document
+        .querySelectorAll(
+            '.category[data-category]'
+        )
+        .forEach(card => {
+
+            card.addEventListener(
+                'click',
+                () => {
+
+                    const category =
+                        card.dataset.category;
+
+                    if (category) {
+
+                        openPage(
+                            category
+                        );
 
                     }
 
                 }
             );
 
-        }
-    );
+        });
 
 }
 
 
-function openPage(pageName) {
+// =====================================================
+// OPEN PAGE
+// =====================================================
 
-    const oldPage =
-        document.querySelector(
-            '.page'
-        );
+function openPage(
+    pageName
+) {
 
-    if (oldPage) {
-
-        oldPage.remove();
-
-    }
-
-    document
-        .querySelectorAll(
-            '.nav button'
-        )
-        .forEach(
-            button => {
-
-                button.classList.toggle(
-                    'active',
-                    button.dataset.nav ===
-                    pageName
-                );
-
-            }
-        );
-
-    const creator =
-        pageCreators[pageName];
-
-    if (!creator) {
+    if (!state) {
         return;
     }
 
-    const html =
-        creator();
+
+    closePage(
+        false
+    );
+
 
     const page =
         document.createElement(
             'div'
         );
 
+
     page.className =
         'page';
 
+
+    page.dataset.page =
+        pageName;
+
+
+    let html = '';
+
+
+    // -------------------------------------------------
+    // HOME
+    // -------------------------------------------------
+
+    if (
+        pageName === 'home'
+    ) {
+
+        html =
+            createHomePage();
+
+    }
+
+
+    // -------------------------------------------------
+    // FINANCE
+    // -------------------------------------------------
+
+    else if (
+        pageName === 'finance'
+    ) {
+
+        html =
+            createModulePage(
+                Finance,
+                'finance'
+            );
+
+    }
+
+
+    // -------------------------------------------------
+    // HEALTH
+    // -------------------------------------------------
+
+    else if (
+        pageName === 'health'
+    ) {
+
+        html =
+            createModulePage(
+                Health,
+                'health'
+            );
+
+    }
+
+
+    // -------------------------------------------------
+    // DEVELOPMENT
+    // -------------------------------------------------
+
+    else if (
+        pageName === 'development'
+    ) {
+
+        html =
+            createModulePage(
+                Development,
+                'development'
+            );
+
+    }
+
+
+    else {
+
+        return;
+
+    }
+
+
     page.innerHTML =
         html;
+
 
     document.body.appendChild(
         page
     );
 
+
     currentPage =
         pageName;
+
 
     document.body.classList.add(
         'locked'
     );
 
 
-    /*
-     * Передаём управление
-     * специализированным модулям.
-     */
-
-    if (
-        pageName === 'finance' &&
-        window.LifeGameFinance &&
-        typeof window.LifeGameFinance.init ===
-        'function'
-    ) {
-
-        window.LifeGameFinance.init(
-            state,
-            getFinanceHelpers()
-        );
-
-    }
-
-    if (
-        pageName === 'health' &&
-        window.LifeGameHealth &&
-        typeof window.LifeGameHealth.init ===
-        'function'
-    ) {
-
-        window.LifeGameHealth.init(
-            state,
-            getFinanceHelpers()
-        );
-
-    }
-
-    if (
-        pageName === 'development' &&
-        window.LifeGameDevelopment &&
-        typeof window.LifeGameDevelopment.init ===
-        'function'
-    ) {
-
-        window.LifeGameDevelopment.init(
-            state,
-            getFinanceHelpers()
-        );
-
-    }
-
-}
+    updateActiveNavigation(
+        pageName
+    );
 
 
-function closePage() {
-
-    const page =
-        document.querySelector(
-            '.page'
-        );
-
-    if (page) {
-
-        page.remove();
-
-    }
-
-    currentPage =
-        'home';
-
-    document.body.classList.remove(
-        'locked'
+    setupPageHandlers(
+        pageName
     );
 
 }
 
 
-// ==========================================
-// 13. HOME PAGE
-// ==========================================
+// =====================================================
+// CREATE MODULE PAGE
+// =====================================================
 
-function createHomePage() {
+function createModulePage(
+    module,
+    category
+) {
 
-    const health =
-        clamp(
-            state.health.health
+    if (
+        module &&
+        typeof module.page === 'function'
+    ) {
+
+        return module.page(
+            state,
+            getHelpers()
         );
 
-    const finance =
-        getFinanceState();
+    }
 
-    const development =
-        getDevelopmentProgress();
-
-    const total =
-        Math.round(
-            (
-                health +
-                finance +
-                development
-            ) / 3
-        );
 
     return `
 
@@ -1184,6 +1252,75 @@ function createHomePage() {
 
                 <button
                     class="back"
+                    type="button"
+                    onclick="closePage()"
+                >
+                    ←
+                </button>
+
+                <h2>
+                    ${esc(
+                        category
+                    )}
+                </h2>
+
+            </div>
+
+            <div class="notice">
+
+                Модуль ${esc(category)}
+                не загружен.
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// HOME PAGE
+// =====================================================
+
+function createHomePage() {
+
+    const finance =
+        calculateCategoryProgress(
+            'finance'
+        );
+
+    const health =
+        calculateCategoryProgress(
+            'health'
+        );
+
+    const development =
+        calculateCategoryProgress(
+            'development'
+        );
+
+
+    const progress =
+        Math.round(
+            (
+                finance +
+                health +
+                development
+            ) / 3
+        );
+
+
+    return `
+
+        <div class="page-inner">
+
+            <div class="page-head">
+
+                <button
+                    class="back"
+                    type="button"
                     onclick="closePage()"
                 >
                     ←
@@ -1199,23 +1336,17 @@ function createHomePage() {
             <div class="summary">
 
                 <div class="section-label">
-                    ОБЩИЙ ПРОГРЕСС
+                    LIFE PROGRESS
                 </div>
 
-                <div
-                    class="summary-number"
-                    id="homeProgress"
-                >
-                    ${total}%
+                <div class="summary-number">
+                    ${progress}%
                 </div>
 
                 <div class="progress">
 
                     <i
-                        id="homeProgressFill"
-                        style="
-                            width:${total}%
-                        "
+                        style="width:${progress}%"
                     ></i>
 
                 </div>
@@ -1225,133 +1356,23 @@ function createHomePage() {
 
             <div class="cards">
 
-                <div class="metric">
+                ${homeMetric(
+                    '❤️',
+                    'Здоровье',
+                    health
+                )}
 
-                    <div class="metric-head">
+                ${homeMetric(
+                    '💰',
+                    'Финансы',
+                    finance
+                )}
 
-                        <div class="metric-left">
-
-                            <div class="metric-icon">
-                                ❤️
-                            </div>
-
-                            <div class="metric-text">
-
-                                <strong>
-                                    Здоровье
-                                </strong>
-
-                                <span>
-                                    ${health}%
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <div class="metric-percent">
-                            ${health}%
-                        </div>
-
-                    </div>
-
-                    <div class="metric-bar">
-                        <i
-                            style="
-                                width:${health}%
-                            "
-                        ></i>
-                    </div>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <div class="metric-head">
-
-                        <div class="metric-left">
-
-                            <div class="metric-icon">
-                                💰
-                            </div>
-
-                            <div class="metric-text">
-
-                                <strong>
-                                    Финансы
-                                </strong>
-
-                                <span>
-                                    ${fmt(
-                                        state.finance.monthlyIncome
-                                    )} ₽
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <div class="metric-percent">
-                            ${finance}%
-                        </div>
-
-                    </div>
-
-                    <div class="metric-bar">
-
-                        <i
-                            style="
-                                width:${finance}%
-                            "
-                        ></i>
-
-                    </div>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <div class="metric-head">
-
-                        <div class="metric-left">
-
-                            <div class="metric-icon">
-                                🧠
-                            </div>
-
-                            <div class="metric-text">
-
-                                <strong>
-                                    Развитие
-                                </strong>
-
-                                <span>
-                                    ${development}%
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <div class="metric-percent">
-                            ${development}%
-                        </div>
-
-                    </div>
-
-                    <div class="metric-bar">
-
-                        <i
-                            style="
-                                width:${development}%
-                            "
-                        ></i>
-
-                    </div>
-
-                </div>
+                ${homeMetric(
+                    '🧠',
+                    'Развитие',
+                    development
+                )}
 
             </div>
 
@@ -1362,480 +1383,995 @@ function createHomePage() {
 }
 
 
-// ==========================================
-// 14. FINANCE PAGE
-// ==========================================
+// =====================================================
+// HOME METRIC
+// =====================================================
 
-function createFinancePage() {
+function homeMetric(
+    icon,
+    title,
+    value
+) {
+
+    const p =
+        clamp(
+            Math.round(value),
+            0,
+            100
+        );
+
+
+    return `
+
+        <div class="metric">
+
+            <div class="metric-head">
+
+                <div class="metric-left">
+
+                    <div class="metric-icon">
+                        ${icon}
+                    </div>
+
+                    <div class="metric-text">
+
+                        <strong>
+                            ${title}
+                        </strong>
+
+                        <span>
+                            ${p}%
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="metric-percent">
+                    ${p}%
+                </div>
+
+            </div>
+
+
+            <div class="metric-bar">
+
+                <i
+                    style="width:${p}%"
+                ></i>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+// =====================================================
+// ACTIVE NAV
+// =====================================================
+
+function updateActiveNavigation(
+    pageName
+) {
+
+    document
+        .querySelectorAll(
+            '.nav button'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.nav ===
+                    pageName
+            );
+
+        });
+
+}
+
+
+// =====================================================
+// CLOSE PAGE
+// =====================================================
+
+function closePage(
+    updateNavigation = true
+) {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (page) {
+
+        page.remove();
+
+    }
+
+
+    document.body.classList.remove(
+        'locked'
+    );
+
+
+    currentPage =
+        'home';
+
+
+    if (updateNavigation) {
+
+        updateActiveNavigation(
+            'home'
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// PAGE HANDLERS
+// =====================================================
+
+function setupPageHandlers(
+    pageName
+) {
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
 
     /*
-     * ВАЖНО:
-     *
-     * Здесь больше НЕТ старого финансового
-     * интерфейса.
-     *
-     * finance.js полностью отвечает
-     * за содержимое страницы.
+     * Allow modules to install their
+     * own event handlers.
+     */
+
+    let module = null;
+
+
+    if (
+        pageName === 'finance'
+    ) {
+
+        module =
+            Finance;
+
+    }
+
+    else if (
+        pageName === 'health'
+    ) {
+
+        module =
+            Health;
+
+    }
+
+    else if (
+        pageName === 'development'
+    ) {
+
+        module =
+            Development;
+
+    }
+
+
+    if (
+        module &&
+        typeof module.mount === 'function'
+    ) {
+
+        try {
+
+            module.mount(
+                page,
+                state,
+                getHelpers()
+            );
+
+        } catch (error) {
+
+            console.error(
+                `LIFE GAME: ${pageName} mount error`,
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Generic buttons used by modules.
+     */
+
+    page
+        .querySelectorAll(
+            '[data-action]'
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                'click',
+                event => {
+
+                    const action =
+                        button.dataset.action;
+
+                    handleAction(
+                        action,
+                        button,
+                        event
+                    );
+
+                }
+            );
+
+        });
+
+}
+
+
+// =====================================================
+// GENERIC ACTION HANDLER
+// =====================================================
+
+function handleAction(
+    action,
+    button,
+    event
+) {
+
+    if (!action) {
+        return;
+    }
+
+
+    // -------------------------------------------------
+    // CLOSE
+    // -------------------------------------------------
+
+    if (
+        action === 'close'
+    ) {
+
+        closePage();
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------
+    // SAVE
+    // -------------------------------------------------
+
+    if (
+        action === 'save'
+    ) {
+
+        persist();
+
+        updateAllUI();
+
+        return;
+
+    }
+
+
+    /*
+     * Try to call a global function.
      */
 
     if (
-        window.LifeGameFinance &&
-        typeof window.LifeGameFinance.page ===
+        typeof window[action] ===
         'function'
     ) {
 
-        return `
+        try {
 
-            <div class="page-inner">
+            window[action](
+                button,
+                event
+            );
 
-                <div class="page-head">
+        } catch (error) {
 
-                    <button
-                        class="back"
-                        onclick="closePage()"
-                    >
-                        ←
-                    </button>
+            console.error(
+                `LIFE GAME: action ${action} error`,
+                error
+            );
 
-                    <h2>
-                        Финансы
-                    </h2>
-
-                </div>
-
-                <div id="financeModule">
-
-                    ${window.LifeGameFinance.page(
-                        state,
-                        getFinanceHelpers()
-                    )}
-
-                </div>
-
-            </div>
-
-        `;
+        }
 
     }
-
-
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    onclick="closePage()"
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Финансы
-                </h2>
-
-            </div>
-
-            <div class="notice">
-
-                ⚠️ Модуль finance.js
-                не загружен.
-
-            </div>
-
-        </div>
-
-    `;
 
 }
 
 
-// ==========================================
-// 15. HEALTH PAGE
-// ==========================================
+// =====================================================
+// DAILY QUEST
+// =====================================================
 
-function createHealthPage() {
+function setupDailyQuest() {
 
-    if (
-        window.LifeGameHealth &&
-        typeof window.LifeGameHealth.page ===
-        'function'
-    ) {
-
-        return `
-
-            <div class="page-inner">
-
-                <div class="page-head">
-
-                    <button
-                        class="back"
-                        onclick="closePage()"
-                    >
-                        ←
-                    </button>
-
-                    <h2>
-                        Здоровье
-                    </h2>
-
-                </div>
-
-                ${window.LifeGameHealth.page(
-                    state,
-                    getFinanceHelpers()
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    const health =
-        clamp(
-            state.health.health
-        );
-
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    onclick="closePage()"
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Здоровье
-                </h2>
-
-            </div>
-
-            <div class="summary">
-
-                <div class="section-label">
-                    ТЕКУЩЕЕ СОСТОЯНИЕ
-                </div>
-
-                <div class="summary-number">
-                    ${health}%
-                </div>
-
-                <div class="progress">
-
-                    <i
-                        style="
-                            width:${health}%
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// ==========================================
-// 16. DEVELOPMENT PAGE
-// ==========================================
-
-function createDevelopmentPage() {
-
-    if (
-        window.LifeGameDevelopment &&
-        typeof window.LifeGameDevelopment.page ===
-        'function'
-    ) {
-
-        return `
-
-            <div class="page-inner">
-
-                <div class="page-head">
-
-                    <button
-                        class="back"
-                        onclick="closePage()"
-                    >
-                        ←
-                    </button>
-
-                    <h2>
-                        Развитие
-                    </h2>
-
-                </div>
-
-                ${window.LifeGameDevelopment.page(
-                    state,
-                    getFinanceHelpers()
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    const development =
-        getDevelopmentProgress();
-
-    return `
-
-        <div class="page-inner">
-
-            <div class="page-head">
-
-                <button
-                    class="back"
-                    onclick="closePage()"
-                >
-                    ←
-                </button>
-
-                <h2>
-                    Развитие
-                </h2>
-
-            </div>
-
-            <div class="summary">
-
-                <div class="section-label">
-                    УРОВЕНЬ РАЗВИТИЯ
-                </div>
-
-                <div class="summary-number">
-                    ${development}%
-                </div>
-
-                <div class="progress">
-
-                    <i
-                        style="
-                            width:${development}%
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-// ==========================================
-// 17. GLOBAL EVENTS
-// ==========================================
-
-function setupEventListeners() {
-
-    const quest =
+    const button =
         document.getElementById(
             'dailyQuest'
         );
 
-    if (quest) {
 
-        quest.addEventListener(
-            'click',
-            completeDailyQuest
-        );
-
+    if (!button) {
+        return;
     }
 
 
-    document.addEventListener(
+    button.addEventListener(
         'click',
-        function(event) {
-
-            if (
-                event.target.classList.contains(
-                    'page'
-                ) ||
-                event.target.classList.contains(
-                    'overlay'
-                )
-            ) {
-
-                closePage();
-
-            }
-
-        }
-    );
-
-
-    document.addEventListener(
-        'keydown',
-        function(event) {
-
-            if (
-                event.key ===
-                'Escape'
-            ) {
-
-                closePage();
-
-            }
-
-        }
+        completeDailyQuest
     );
 
 }
 
 
-// ==========================================
-// 18. TOAST
-// ==========================================
+// =====================================================
+// DAILY QUEST LOGIC
+// =====================================================
 
-function showToast(message) {
+function completeDailyQuest() {
 
-    const toast =
-        document.createElement(
-            'div'
+    if (!state) {
+        return;
+    }
+
+
+    const quests =
+        Array.isArray(state.quests)
+            ? state.quests
+            : [];
+
+
+    const available =
+        quests.filter(
+            quest =>
+                !quest.done
         );
 
-    toast.className =
-        'toast show';
 
-    toast.textContent =
-        message;
+    if (
+        available.length === 0
+    ) {
 
-    document.body.appendChild(
-        toast
+        showToast(
+            '⚡ Все квесты выполнены'
+        );
+
+        return;
+
+    }
+
+
+    const quest =
+        available[0];
+
+
+    const category =
+        state.categories[
+            quest.category
+        ];
+
+
+    const reward =
+        Math.max(
+            0,
+            Number(quest.xp) || 0
+        );
+
+
+    if (category) {
+
+        category.xp +=
+            reward;
+
+
+        category.level =
+            levelFromXP(
+                category.xp
+            );
+
+    }
+
+
+    const playerReward =
+        playerXPFromCategoryXP(
+            reward
+        );
+
+
+    state.player.xp +=
+        playerReward;
+
+
+    state.player.level =
+        levelFromXP(
+            state.player.xp
+        );
+
+
+    quest.done =
+        true;
+
+
+    persist();
+
+
+    updateAllUI();
+
+
+    showToast(
+        `⚡ Квест выполнен! +${reward} XP`
     );
+
+
+    const button =
+        document.getElementById(
+            'dailyQuest'
+        );
+
+
+    if (button) {
+
+        button.textContent =
+            '✅ QUEST COMPLETED';
+
+        button.disabled =
+            true;
+
+        button.style.opacity =
+            '.5';
+
+    }
+
+
+    /*
+     * Daily reset for current session.
+     * The permanent quest state remains in storage.
+     */
 
     setTimeout(
         () => {
 
-            toast.classList.remove(
-                'show'
-            );
+            if (!button) {
+                return;
+            }
 
-            setTimeout(
-                () => {
+            button.textContent =
+                '⚡ DAILY QUEST';
 
-                    toast.remove();
+            button.disabled =
+                false;
 
-                },
-                300
-            );
+            button.style.opacity =
+                '1';
 
         },
-        2500
+        30000
     );
 
 }
 
 
-// ==========================================
-// 19. GLOBAL API
-// ==========================================
+// =====================================================
+// GLOBAL EVENTS
+// =====================================================
 
-window.lifeGameState =
-    state;
+function setupGlobalEvents() {
 
-window.getLifeGameState =
-    () => state;
+    // -------------------------------------------------
+    // CLICK OUTSIDE PAGE
+    // -------------------------------------------------
 
-window.saveGameData =
-    saveGameData;
+    document.addEventListener(
+        'click',
+        event => {
 
-window.updateAllUI =
-    updateAllUI;
-
-window.updateFinanceUI =
-    updateFinanceUI;
-
-window.updateHealthUI =
-    updateHealthUI;
-
-window.updateDevelopmentUI =
-    updateDevelopmentUI;
-
-window.updateLifeProgressUI =
-    updateLifeProgressUI;
-
-window.addXP =
-    addXP;
-
-window.increaseHealth =
-    increaseHealth;
-
-window.decreaseHealth =
-    decreaseHealth;
-
-window.levelUp =
-    levelUp;
-
-window.completeDailyQuest =
-    completeDailyQuest;
-
-window.openPage =
-    openPage;
-
-window.closePage =
-    closePage;
-
-window.showToast =
-    showToast;
-
-window.getTotalExpenses =
-    getTotalExpenses;
-
-window.getExpensePercent =
-    getExpensePercent;
-
-window.getSavingsPercent =
-    getSavingsPercent;
-
-window.getFinanceState =
-    getFinanceState;
+            const page =
+                document.querySelector(
+                    '.page'
+                );
 
 
-// ==========================================
-// 20. INITIALIZATION
-// ==========================================
+            if (
+                page &&
+                event.target === page
+            ) {
 
-document.addEventListener(
-    'DOMContentLoaded',
-    function() {
+                closePage();
 
-        console.log(
-            '🚀 LIFE GAME — APP START'
+            }
+
+        }
+    );
+
+
+    // -------------------------------------------------
+    // ESC
+    // -------------------------------------------------
+
+    document.addEventListener(
+        'keydown',
+        event => {
+
+            if (
+                event.key === 'Escape'
+            ) {
+
+                closePage();
+
+            }
+
+        }
+    );
+
+
+    // -------------------------------------------------
+    // BACK SWIPE
+    // -------------------------------------------------
+
+    setupBackSwipe();
+
+}
+
+
+// =====================================================
+// MOBILE BACK SWIPE
+// =====================================================
+
+function setupBackSwipe() {
+
+    let startX = 0;
+
+    let startY = 0;
+
+    let tracking = false;
+
+
+    document.addEventListener(
+        'touchstart',
+        event => {
+
+            if (
+                !document.querySelector(
+                    '.page'
+                )
+            ) {
+                return;
+            }
+
+
+            const touch =
+                event.touches[0];
+
+
+            if (!touch) {
+                return;
+            }
+
+
+            /*
+             * iPhone-style edge swipe.
+             */
+
+            if (
+                touch.clientX > 35
+            ) {
+
+                return;
+
+            }
+
+
+            startX =
+                touch.clientX;
+
+            startY =
+                touch.clientY;
+
+            tracking =
+                true;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    document.addEventListener(
+        'touchend',
+        event => {
+
+            if (!tracking) {
+                return;
+            }
+
+
+            tracking =
+                false;
+
+
+            const touch =
+                event.changedTouches[0];
+
+
+            if (!touch) {
+                return;
+            }
+
+
+            const dx =
+                touch.clientX -
+                startX;
+
+
+            const dy =
+                Math.abs(
+                    touch.clientY -
+                    startY
+                );
+
+
+            if (
+                dx > 80 &&
+                dy < 100
+            ) {
+
+                closePage();
+
+            }
+
+        },
+        {
+            passive: true
+        }
+    );
+
+}
+
+
+// =====================================================
+// TOAST
+// =====================================================
+
+function showToast(
+    message
+) {
+
+    /*
+     * Reuse existing toast if available.
+     */
+
+    let toast =
+        document.querySelector(
+            '.toast'
         );
 
-        loadGameData();
 
-        setupNavigation();
+    if (!toast) {
 
-        setupEventListeners();
+        toast =
+            document.createElement(
+                'div'
+            );
 
-        updateAllUI();
+        toast.className =
+            'toast';
 
-        console.log(
-            '✅ LIFE GAME — APP.JS READY'
+        document.body.appendChild(
+            toast
         );
 
     }
-);
+
+
+    toast.textContent =
+        String(message);
+
+
+    toast.classList.add(
+        'show'
+    );
+
+
+    clearTimeout(
+        toast._lifeGameTimer
+    );
+
+
+    toast._lifeGameTimer =
+        setTimeout(
+            () => {
+
+                toast.classList.remove(
+                    'show'
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+// =====================================================
+// ADD PLAYER XP
+// =====================================================
+
+function addXP(
+    amount
+) {
+
+    if (!state) {
+        return;
+    }
+
+
+    const value =
+        Math.max(
+            0,
+            Number(amount) || 0
+        );
+
+
+    if (value <= 0) {
+        return;
+    }
+
+
+    state.player.xp +=
+        value;
+
+
+    const oldLevel =
+        state.player.level;
+
+
+    state.player.level =
+        levelFromXP(
+            state.player.xp
+        );
+
+
+    persist();
+
+
+    updateAllUI();
+
+
+    if (
+        state.player.level >
+        oldLevel
+    ) {
+
+        showToast(
+            `🎉 УРОВЕНЬ ПОВЫШЕН! LVL ${state.player.level}`
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// CATEGORY XP
+// =====================================================
+
+function addCategoryXP(
+    categoryName,
+    amount
+) {
+
+    if (!state) {
+        return;
+    }
+
+
+    const category =
+        state.categories[
+            categoryName
+        ];
+
+
+    if (!category) {
+        return;
+    }
+
+
+    const value =
+        Math.max(
+            0,
+            Number(amount) || 0
+        );
+
+
+    category.xp +=
+        value;
+
+
+    category.level =
+        levelFromXP(
+            category.xp
+        );
+
+
+    /*
+     * Category XP also contributes
+     * to player XP.
+     */
+
+    addXP(
+        playerXPFromCategoryXP(
+            value
+        )
+    );
+
+
+    persist();
+
+
+    updateAllUI();
+
+}
+
+
+// =====================================================
+// UPDATE CURRENT PAGE
+// =====================================================
+
+function refreshCurrentPage() {
+
+    if (
+        currentPage === 'home'
+    ) {
+
+        return;
+
+    }
+
+
+    const page =
+        document.querySelector(
+            '.page'
+        );
+
+
+    if (!page) {
+        return;
+    }
+
+
+    openPage(
+        currentPage
+    );
+
+}
+
+
+// =====================================================
+// GLOBAL API
+// =====================================================
+
+function exposeGlobalAPI() {
+
+    window.openPage =
+        openPage;
+
+
+    window.closePage =
+        closePage;
+
+
+    window.showToast =
+        showToast;
+
+
+    window.updateAllUI =
+        updateAllUI;
+
+
+    window.addXP =
+        addXP;
+
+
+    window.addCategoryXP =
+        addCategoryXP;
+
+
+    window.persistLifeGame =
+        persist;
+
+
+    window.refreshCurrentPage =
+        refreshCurrentPage;
+
+
+    /*
+     * Expose state.
+     */
+
+    window.getLifeGameState =
+        () => state;
+
+
+    /*
+     * Compatibility.
+     */
+
+    window.lifeGame =
+        {
+
+            get state() {
+
+                return state;
+
+            },
+
+            save:
+                persist,
+
+            update:
+                updateAllUI,
+
+            openPage,
+
+            closePage,
+
+            toast:
+                showToast,
+
+            addXP,
+
+            addCategoryXP
+
+        };
+
+}
+
+
+// =====================================================
+// START
+// =====================================================
+
+if (
+    document.readyState ===
+    'loading'
+) {
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        initApp,
+        {
+            once: true
+        }
+    );
+
+} else {
+
+    initApp();
+
+}
 ```
