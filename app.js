@@ -1,5 +1,5 @@
 <\> JavaScript
-alert("LIFE GAME JS WORKS");
+
 const STORAGE_KEY = "life_game_data_v1";
 
 const DEFAULT_DATA = {
