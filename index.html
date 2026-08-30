@@ -1,7 +1,9 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
+
 <meta charset="UTF-8">
 
 <meta
@@ -9,16 +11,28 @@
     content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
 >
 
-<meta name="theme-color" content="#050505">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta
+    name="theme-color"
+    content="#050505"
+>
+
+<meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+>
 
 <title>LIFE GAME</title>
 
+
 <style>
+
+/* =====================================================
+   RESET
+   ===================================================== */
 
 *{
     box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent
+    -webkit-tap-highlight-color:transparent;
 }
 
 :root{
@@ -27,7 +41,7 @@
     --border:#252525;
     --text:#f5f5f5;
     --muted:#626262;
-    --radius:22px
+    --radius:22px;
 }
 
 html,
@@ -46,44 +60,54 @@ body{
         "Helvetica Neue",
         Arial,
         sans-serif;
-    -webkit-font-smoothing:antialiased
+    -webkit-font-smoothing:antialiased;
 }
 
 body{
-    overflow-x:hidden
+    overflow-x:hidden;
 }
 
 body.locked{
-    overflow:hidden
+    overflow:hidden;
 }
 
 button,
 input{
-    font-family:inherit
+    font-family:inherit;
 }
 
 button{
     border:0;
-    cursor:pointer
+    cursor:pointer;
 }
 
 button:active{
-    transform:scale(.985)
+    transform:scale(.985);
 }
+
+
+/* =====================================================
+   APP
+   ===================================================== */
 
 .app{
     width:100%;
     max-width:560px;
     min-height:100vh;
     margin:auto;
-    padding:24px 18px 155px
+    padding:24px 18px 155px;
 }
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
 
 .header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:25px
+    margin-bottom:25px;
 }
 
 .eyebrow,
@@ -93,11 +117,11 @@ button:active{
     font-size:8px;
     font-weight:700;
     letter-spacing:2.5px;
-    text-transform:uppercase
+    text-transform:uppercase;
 }
 
 .eyebrow{
-    margin-bottom:6px
+    margin-bottom:6px;
 }
 
 .header h1{
@@ -105,7 +129,7 @@ button:active{
     font-size:27px;
     line-height:1;
     font-weight:800;
-    letter-spacing:-1.2px
+    letter-spacing:-1.2px;
 }
 
 .avatar{
@@ -121,8 +145,13 @@ button:active{
     font-weight:800;
     box-shadow:
         0 12px 30px #0007,
-        inset 0 1px #ffffff14
+        inset 0 1px #ffffff14;
 }
+
+
+/* =====================================================
+   HERO
+   ===================================================== */
 
 .hero{
     padding:22px;
@@ -132,13 +161,13 @@ button:active{
     background:linear-gradient(145deg,#161616,#0a0a0a);
     box-shadow:
         0 25px 65px #0006,
-        inset 0 1px #ffffff09
+        inset 0 1px #ffffff09;
 }
 
 .hero-top{
     display:flex;
     align-items:flex-end;
-    justify-content:space-between
+    justify-content:space-between;
 }
 
 .label{
@@ -147,19 +176,19 @@ button:active{
     color:#626262;
     font-size:8px;
     font-weight:700;
-    letter-spacing:2px
+    letter-spacing:2px;
 }
 
 .level{
     font-size:28px;
     font-weight:800;
-    letter-spacing:-1px
+    letter-spacing:-1px;
 }
 
 .xp{
     color:#909090;
     font-size:11px;
-    font-weight:700
+    font-weight:700;
 }
 
 .bar{
@@ -167,7 +196,7 @@ button:active{
     margin-top:18px;
     background:#242424;
     border-radius:20px;
-    overflow:hidden
+    overflow:hidden;
 }
 
 .fill{
@@ -175,7 +204,7 @@ button:active{
     width:0;
     border-radius:inherit;
     background:linear-gradient(90deg,#777,#fff);
-    transition:width .65s cubic-bezier(.2,.8,.2,1)
+    transition:width .65s cubic-bezier(.2,.8,.2,1);
 }
 
 .hero-bottom{
@@ -184,11 +213,16 @@ button:active{
     margin-top:12px;
     color:#646464;
     font-size:9px;
-    font-weight:600
+    font-weight:600;
 }
 
+
+/* =====================================================
+   LIFE
+   ===================================================== */
+
 .life{
-    margin-bottom:25px
+    margin-bottom:25px;
 }
 
 .life-number{
@@ -196,26 +230,31 @@ button:active{
     font-weight:800;
     line-height:.95;
     letter-spacing:-4px;
-    margin:7px 0 12px
+    margin:7px 0 12px;
 }
 
 .life-number span{
     font-size:27px;
     color:#777;
-    letter-spacing:-1px
+    letter-spacing:-1px;
 }
 
 .life-bar{
     height:3px;
     background:#1c1c1c;
     border-radius:20px;
-    overflow:hidden
+    overflow:hidden;
 }
+
+
+/* =====================================================
+   CATEGORIES
+   ===================================================== */
 
 .categories{
     display:flex;
     flex-direction:column;
-    gap:12px
+    gap:12px;
 }
 
 .category{
@@ -226,20 +265,20 @@ button:active{
     box-shadow:
         0 16px 40px #0004,
         inset 0 1px #ffffff06;
-    cursor:pointer
+    cursor:pointer;
 }
 
 .category-head{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom:17px
+    margin-bottom:17px;
 }
 
 .category-title{
     display:flex;
     align-items:center;
-    gap:12px
+    gap:12px;
 }
 
 .icon{
@@ -251,14 +290,14 @@ button:active{
     border:1px solid #292929;
     border-radius:14px;
     background:linear-gradient(145deg,#1b1b1b,#111);
-    font-size:19px
+    font-size:19px;
 }
 
 .category-name strong{
     display:block;
     font-size:13px;
     font-weight:800;
-    letter-spacing:1px
+    letter-spacing:1px;
 }
 
 .category-name span{
@@ -266,19 +305,19 @@ button:active{
     margin-top:6px;
     color:#606060;
     font-size:9px;
-    font-weight:600
+    font-weight:600;
 }
 
 .percent{
     font-size:20px;
-    font-weight:800
+    font-weight:800;
 }
 
 .progress{
     height:4px;
     background:#222;
     border-radius:20px;
-    overflow:hidden
+    overflow:hidden;
 }
 
 .progress i{
@@ -287,8 +326,13 @@ button:active{
     width:0;
     background:linear-gradient(90deg,#777,#f5f5f5);
     border-radius:inherit;
-    transition:width .65s cubic-bezier(.2,.8,.2,1)
+    transition:width .65s cubic-bezier(.2,.8,.2,1);
 }
+
+
+/* =====================================================
+   QUEST
+   ===================================================== */
 
 .quest{
     width:100%;
@@ -300,8 +344,13 @@ button:active{
     color:#080808;
     font-size:10px;
     font-weight:900;
-    letter-spacing:2px
+    letter-spacing:2px;
 }
+
+
+/* =====================================================
+   CREATOR
+   ===================================================== */
 
 .creator{
     display:flex;
@@ -318,20 +367,23 @@ button:active{
     font-size:9px;
     font-weight:700;
     letter-spacing:1px;
-    transition:.2s ease
+    transition:.2s ease;
 }
 
 .creator strong{
     color:#aaa;
-    font-weight:800
+    font-weight:800;
 }
 
 .creator:active{
     transform:scale(.985);
-    background:#111
+    background:#111;
 }
 
-/* NAV */
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
 
 .nav{
     position:fixed;
@@ -351,7 +403,7 @@ button:active{
     background:rgba(14,14,14,.96)!important;
     backdrop-filter:blur(24px);
     -webkit-backdrop-filter:blur(24px);
-    box-shadow:0 20px 50px rgba(0,0,0,.65)!important
+    box-shadow:0 20px 50px rgba(0,0,0,.65)!important;
 }
 
 .nav button{
@@ -366,31 +418,34 @@ button:active{
     background:transparent!important;
     color:#555!important;
     -webkit-appearance:none!important;
-    appearance:none!important
+    appearance:none!important;
 }
 
 .nav button.active{
     color:#fff!important;
-    background:rgba(255,255,255,.055)!important
+    background:rgba(255,255,255,.055)!important;
 }
 
 .nav button:focus,
 .nav button:focus-visible{
     outline:none!important;
-    box-shadow:none!important
+    box-shadow:none!important;
 }
 
 .nav-icon{
     font-size:17px;
-    line-height:1
+    line-height:1;
 }
 
 .nav-label{
     font-size:7px;
-    font-weight:600
+    font-weight:600;
 }
 
-/* PAGES */
+
+/* =====================================================
+   PAGES
+   ===================================================== */
 
 .page{
     position:fixed;
@@ -410,30 +465,33 @@ button:active{
             #050505 60%,
             #030303
         );
-    animation:pageIn .22s ease
+    animation:pageIn .22s ease;
 }
 
 @keyframes pageIn{
+
     from{
         opacity:0;
-        transform:translateY(10px)
+        transform:translateY(10px);
     }
+
     to{
         opacity:1;
-        transform:translateY(0)
+        transform:translateY(0);
     }
+
 }
 
 .page-inner{
     max-width:560px;
-    margin:auto
+    margin:auto;
 }
 
 .page-head{
     display:flex;
     align-items:center;
     gap:13px;
-    margin-bottom:22px
+    margin-bottom:22px;
 }
 
 .back{
@@ -446,15 +504,20 @@ button:active{
     border-radius:14px;
     background:#111;
     color:#fff;
-    font-size:20px
+    font-size:20px;
 }
 
 .page h2{
     margin:0;
     font-size:25px;
     font-weight:800;
-    letter-spacing:-.8px
+    letter-spacing:-.8px;
 }
+
+
+/* =====================================================
+   SUMMARY
+   ===================================================== */
 
 .summary{
     padding:21px;
@@ -462,7 +525,7 @@ button:active{
     border:1px solid #242424;
     border-radius:22px;
     background:linear-gradient(145deg,#151515,#0c0c0c);
-    box-shadow:0 20px 50px #0006
+    box-shadow:0 20px 50px #0006;
 }
 
 .summary-number{
@@ -470,13 +533,18 @@ button:active{
     font-weight:800;
     line-height:1;
     letter-spacing:-3px;
-    margin:8px 0 15px
+    margin:8px 0 15px;
 }
+
+
+/* =====================================================
+   METRICS
+   ===================================================== */
 
 .cards{
     display:flex;
     flex-direction:column;
-    gap:11px
+    gap:11px;
 }
 
 .metric{
@@ -484,7 +552,7 @@ button:active{
     border:1px solid #222;
     border-radius:20px;
     background:linear-gradient(145deg,#121212,#0a0a0a);
-    box-shadow:0 14px 35px #0004
+    box-shadow:0 14px 35px #0004;
 }
 
 .metric-head{
@@ -492,14 +560,14 @@ button:active{
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    margin-bottom:14px
+    margin-bottom:14px;
 }
 
 .metric-left{
     display:flex;
     align-items:center;
     gap:11px;
-    min-width:0
+    min-width:0;
 }
 
 .metric-icon{
@@ -512,14 +580,14 @@ button:active{
     border:1px solid #292929;
     border-radius:13px;
     background:#171717;
-    font-size:18px
+    font-size:18px;
 }
 
 .metric-text strong{
     display:block;
     font-size:12px;
     font-weight:750;
-    line-height:1.2
+    line-height:1.2;
 }
 
 .metric-text span{
@@ -527,13 +595,13 @@ button:active{
     margin-top:5px;
     color:#666;
     font-size:9px;
-    line-height:1.25
+    line-height:1.25;
 }
 
 .metric-percent{
     font-size:19px;
     font-weight:800;
-    white-space:nowrap
+    white-space:nowrap;
 }
 
 .metric-bar{
@@ -541,15 +609,20 @@ button:active{
     margin-bottom:14px;
     background:#202020;
     border-radius:20px;
-    overflow:hidden
+    overflow:hidden;
 }
 
 .metric-bar i{
     display:block;
     height:100%;
     background:linear-gradient(90deg,#666,#eee);
-    border-radius:inherit
+    border-radius:inherit;
 }
+
+
+/* =====================================================
+   BUTTONS
+   ===================================================== */
 
 .edit,
 .add{
@@ -561,44 +634,52 @@ button:active{
     color:#8d8d8d;
     font-size:8px;
     font-weight:800;
-    letter-spacing:1.5px
+    letter-spacing:1.5px;
 }
+
+
+/* =====================================================
+   FINANCE BOX
+   ===================================================== */
 
 .finance-box{
     margin-top:15px;
     padding-top:15px;
-    border-top:1px solid #222
+    border-top:1px solid #222;
 }
 
 .finance-line{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:9px
+    margin-bottom:9px;
 }
 
 .finance-line:last-child{
-    margin-bottom:0
+    margin-bottom:0;
 }
 
 .finance-line span{
     color:#666;
     font-size:8px;
     font-weight:700;
-    letter-spacing:1.5px
+    letter-spacing:1.5px;
 }
 
 .finance-line strong{
     font-size:13px;
-    font-weight:800
+    font-weight:800;
 }
 
-/* EXPENSES */
+
+/* =====================================================
+   EXPENSES
+   ===================================================== */
 
 .expenses{
     margin-top:15px;
     padding-top:15px;
-    border-top:1px solid #222
+    border-top:1px solid #222;
 }
 
 .expenses-title{
@@ -614,11 +695,11 @@ button:active{
     appearance:none;
     border:0;
     color:inherit;
-    background:transparent
+    background:transparent;
 }
 
 .expenses-title:active{
-    transform:none
+    transform:none;
 }
 
 .expenses-title-left{
@@ -626,27 +707,23 @@ button:active{
     align-items:center;
     gap:8px;
     flex:1;
-    min-width:0
+    min-width:0;
 }
 
 .expenses-title span{
     color:#777;
     font-size:8px;
     font-weight:800;
-    letter-spacing:1.6px
+    letter-spacing:1.6px;
 }
 
 .expenses-title strong{
     font-size:12px;
-    font-weight:800
+    font-weight:800;
 }
 
 .collapse-chevron{
-    display:none!important
-}
-
-.expenses.collapsed .collapse-chevron{
-    display:none!important
+    display:none!important;
 }
 
 .expense-content{
@@ -654,26 +731,31 @@ button:active{
     max-height:900px;
     transition:
         max-height .28s cubic-bezier(.2,.8,.2,1),
-        opacity .18s ease
+        opacity .18s ease;
 }
 
 .expenses.collapsed .expense-content{
     max-height:0;
-    opacity:0
+    opacity:0;
 }
 
 .expense-list{
     display:flex;
     flex-direction:column;
-    gap:7px
+    gap:7px;
 }
+
+
+/* =====================================================
+   EXPENSE SWIPE
+   ===================================================== */
 
 .expense-swipe{
     position:relative;
     overflow:hidden;
     border-radius:13px;
     background:#ff3b30;
-    touch-action:pan-y
+    touch-action:pan-y;
 }
 
 .expense-delete-reveal{
@@ -685,14 +767,14 @@ button:active{
     justify-content:center;
     background:#ff3b30!important;
     color:#fff;
-    font-size:0
+    font-size:0;
 }
 
 .expense-delete-reveal::after{
     content:"×";
     font-size:24px;
     font-weight:300;
-    line-height:1
+    line-height:1;
 }
 
 .expense{
@@ -709,16 +791,16 @@ button:active{
     background:#0c0c0c;
     transform:translateX(0);
     transition:transform .2s ease;
-    will-change:transform
+    will-change:transform;
 }
 
 .expense.swiped{
     transform:translateX(-76px);
-    box-shadow:-8px 0 18px rgba(0,0,0,.18)
+    box-shadow:-8px 0 18px rgba(0,0,0,.18);
 }
 
 .expense-info{
-    min-width:0
+    min-width:0;
 }
 
 .expense-name{
@@ -726,23 +808,23 @@ button:active{
     text-overflow:ellipsis;
     white-space:nowrap;
     font-size:11px;
-    font-weight:600
+    font-weight:600;
 }
 
 .expense-amount{
     margin-top:3px;
     color:#777;
     font-size:10px;
-    font-weight:700
+    font-weight:700;
 }
 
 .expense-actions{
     display:flex;
-    gap:5px
+    gap:5px;
 }
 
 .expense-delete{
-    display:none!important
+    display:none!important;
 }
 
 .small-btn{
@@ -755,8 +837,13 @@ button:active{
     border-radius:9px;
     background:#141414;
     color:#777;
-    font-size:14px
+    font-size:14px;
 }
+
+
+/* =====================================================
+   RATIO
+   ===================================================== */
 
 .ratio{
     display:flex;
@@ -765,19 +852,24 @@ button:active{
     margin-top:10px;
     padding:11px 12px;
     border-radius:12px;
-    background:#141414
+    background:#141414;
 }
 
 .ratio span{
     color:#666;
     font-size:8px;
-    font-weight:700
+    font-weight:700;
 }
 
 .ratio strong{
     font-size:13px;
-    font-weight:800
+    font-weight:800;
 }
+
+
+/* =====================================================
+   NOTICE
+   ===================================================== */
 
 .notice{
     padding:14px;
@@ -787,16 +879,19 @@ button:active{
     background:#0d0d0d;
     color:#666;
     font-size:9px;
-    line-height:1.5
+    line-height:1.5;
 }
 
-/* QUEST */
+
+/* =====================================================
+   QUEST PAGE
+   ===================================================== */
 
 .quest-card{
     padding:20px;
     border:1px solid #282828;
     border-radius:20px;
-    background:linear-gradient(145deg,#171717,#0b0b0b)
+    background:linear-gradient(145deg,#171717,#0b0b0b);
 }
 
 .quest-item{
@@ -804,29 +899,29 @@ button:active{
     margin-top:9px;
     border:1px solid #222;
     border-radius:14px;
-    background:#0d0d0d
+    background:#0d0d0d;
 }
 
 .quest-item:first-child{
-    margin-top:0
+    margin-top:0;
 }
 
 .quest-row{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px
+    gap:10px;
 }
 
 .quest-title{
     font-size:11px;
-    font-weight:700
+    font-weight:700;
 }
 
 .quest-xp{
     font-size:10px;
     color:#aaa;
-    font-weight:800
+    font-weight:800;
 }
 
 .complete{
@@ -839,15 +934,18 @@ button:active{
     color:#bbb;
     font-size:8px;
     font-weight:800;
-    letter-spacing:1px
+    letter-spacing:1px;
 }
 
 .complete.done{
     background:#eee;
-    color:#080808
+    color:#080808;
 }
 
-/* MODAL */
+
+/* =====================================================
+   MODAL
+   ===================================================== */
 
 .overlay{
     position:fixed;
@@ -860,12 +958,19 @@ button:active{
     background:#000bd;
     backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
-    animation:fade .18s ease
+    animation:fade .18s ease;
 }
 
 @keyframes fade{
-    from{opacity:0}
-    to{opacity:1}
+
+    from{
+        opacity:0;
+    }
+
+    to{
+        opacity:1;
+    }
+
 }
 
 .modal{
@@ -879,12 +984,19 @@ button:active{
     border-radius:26px 26px 20px 20px;
     background:linear-gradient(145deg,#171717,#0b0b0b);
     box-shadow:0 -10px 60px #0009;
-    animation:modalIn .22s cubic-bezier(.2,.8,.2,1)
+    animation:modalIn .22s cubic-bezier(.2,.8,.2,1);
 }
 
 @keyframes modalIn{
-    from{transform:translateY(25px)}
-    to{transform:translateY(0)}
+
+    from{
+        transform:translateY(25px);
+    }
+
+    to{
+        transform:translateY(0);
+    }
+
 }
 
 .close{
@@ -897,7 +1009,7 @@ button:active{
     border-radius:50%;
     background:#111;
     color:#777;
-    font-size:20px
+    font-size:20px;
 }
 
 .modal-icon{
@@ -910,7 +1022,7 @@ button:active{
     border:1px solid #2a2a2a;
     border-radius:15px;
     background:#191919;
-    font-size:21px
+    font-size:21px;
 }
 
 .modal-label{
@@ -918,7 +1030,7 @@ button:active{
     color:#606060;
     font-size:8px;
     font-weight:800;
-    letter-spacing:2px
+    letter-spacing:2px;
 }
 
 .modal h3{
@@ -926,7 +1038,7 @@ button:active{
     padding-right:40px;
     font-size:21px;
     line-height:1.1;
-    font-weight:800
+    font-weight:800;
 }
 
 .modal label{
@@ -934,7 +1046,7 @@ button:active{
     margin-bottom:7px;
     color:#777;
     font-size:9px;
-    font-weight:600
+    font-weight:600;
 }
 
 .modal input{
@@ -948,12 +1060,12 @@ button:active{
     background:#0d0d0d;
     color:#f5f5f5;
     font-size:16px;
-    font-weight:600
+    font-weight:600;
 }
 
 .modal input:focus{
     border-color:#555;
-    background:#111
+    background:#111;
 }
 
 .modal-preview{
@@ -963,17 +1075,17 @@ button:active{
     margin:3px 0 16px;
     border:1px solid #242424;
     border-radius:14px;
-    background:#0d0d0d
+    background:#0d0d0d;
 }
 
 .modal-preview span{
     color:#666;
     font-size:9px;
-    font-weight:600
+    font-weight:600;
 }
 
 .modal-preview strong{
-    font-size:16px
+    font-size:16px;
 }
 
 .primary{
@@ -984,8 +1096,13 @@ button:active{
     color:#080808;
     font-size:9px;
     font-weight:900;
-    letter-spacing:2px
+    letter-spacing:2px;
 }
+
+
+/* =====================================================
+   TOAST
+   ===================================================== */
 
 .toast{
     position:fixed;
@@ -1003,13 +1120,18 @@ button:active{
     white-space:nowrap;
     opacity:0;
     pointer-events:none;
-    transition:.2s
+    transition:.2s;
 }
 
 .toast.show{
     opacity:1;
-    transform:translate(-50%,0)
+    transform:translate(-50%,0);
 }
+
+
+/* =====================================================
+   TRAINING
+   ===================================================== */
 
 .training-divider{
     margin:4px 0 2px;
@@ -1018,30 +1140,35 @@ button:active{
     font-size:8px;
     font-weight:800;
     letter-spacing:2px;
-    text-transform:uppercase
+    text-transform:uppercase;
 }
+
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
 
 @media(max-width:360px){
 
     .app{
         padding-left:14px;
-        padding-right:14px
+        padding-right:14px;
     }
 
     .header h1{
-        font-size:24px
+        font-size:24px;
     }
 
     .life-number{
-        font-size:51px
+        font-size:51px;
     }
 
     .category{
-        padding:17px
+        padding:17px;
     }
 
     .nav-label{
-        font-size:6px
+        font-size:6px;
     }
 
 }
@@ -1049,21 +1176,31 @@ button:active{
 @media(min-width:700px){
 
     .app{
-        padding-top:45px
+        padding-top:45px;
     }
 
     .page{
-        padding-top:35px
+        padding-top:35px;
     }
 
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- =====================================================
+     MAIN APPLICATION
+     ===================================================== -->
+
 <div class="app">
+
+
+    <!-- HEADER -->
 
     <header class="header">
 
@@ -1079,12 +1216,15 @@ button:active{
 
         </div>
 
+
         <div class="avatar">
             B
         </div>
 
     </header>
 
+
+    <!-- PLAYER -->
 
     <section class="hero">
 
@@ -1105,6 +1245,7 @@ button:active{
 
             </div>
 
+
             <div
                 class="xp"
                 id="playerXP"
@@ -1120,6 +1261,7 @@ button:active{
             <div
                 class="fill"
                 id="playerXPFill"
+                style="width:0%"
             ></div>
 
         </div>
@@ -1140,11 +1282,14 @@ button:active{
     </section>
 
 
+    <!-- LIFE PROGRESS -->
+
     <section class="life">
 
         <div class="section-label">
             LIFE PROGRESS
         </div>
+
 
         <div
             class="life-number"
@@ -1153,11 +1298,13 @@ button:active{
             0<span>%</span>
         </div>
 
+
         <div class="life-bar">
 
             <div
                 class="fill"
                 id="lifeFill"
+                style="width:0%"
             ></div>
 
         </div>
@@ -1165,7 +1312,12 @@ button:active{
     </section>
 
 
+    <!-- CATEGORIES -->
+
     <main class="categories">
+
+
+        <!-- FINANCE -->
 
         <article
             class="category"
@@ -1194,6 +1346,7 @@ button:active{
 
                 </div>
 
+
                 <div
                     class="percent"
                     id="financePercent"
@@ -1203,14 +1356,20 @@ button:active{
 
             </div>
 
+
             <div class="progress">
 
-                <i id="financeFill"></i>
+                <i
+                    id="financeFill"
+                    style="width:0%"
+                ></i>
 
             </div>
 
         </article>
 
+
+        <!-- DEVELOPMENT -->
 
         <article
             class="category"
@@ -1239,6 +1398,7 @@ button:active{
 
                 </div>
 
+
                 <div
                     class="percent"
                     id="developmentPercent"
@@ -1248,14 +1408,20 @@ button:active{
 
             </div>
 
+
             <div class="progress">
 
-                <i id="developmentFill"></i>
+                <i
+                    id="developmentFill"
+                    style="width:0%"
+                ></i>
 
             </div>
 
         </article>
 
+
+        <!-- HEALTH -->
 
         <article
             class="category"
@@ -1284,6 +1450,7 @@ button:active{
 
                 </div>
 
+
                 <div
                     class="percent"
                     id="healthPercent"
@@ -1293,16 +1460,23 @@ button:active{
 
             </div>
 
+
             <div class="progress">
 
-                <i id="healthFill"></i>
+                <i
+                    id="healthFill"
+                    style="width:0%"
+                ></i>
 
             </div>
 
         </article>
 
+
     </main>
 
+
+    <!-- DAILY QUEST -->
 
     <button
         class="quest"
@@ -1312,6 +1486,8 @@ button:active{
         ⚡ DAILY QUEST
     </button>
 
+
+    <!-- CREATOR -->
 
     <a
         class="creator"
@@ -1323,10 +1499,16 @@ button:active{
         <strong>&nbsp;@shkeltinsh</strong>
     </a>
 
+
 </div>
 
 
+<!-- =====================================================
+     BOTTOM NAVIGATION
+     ===================================================== -->
+
 <nav class="nav">
+
 
     <button
         type="button"
@@ -1392,21 +1574,35 @@ button:active{
 
     </button>
 
+
 </nav>
 
 
-<div class="toast"></div>
+<!-- =====================================================
+     TOAST
+     ===================================================== -->
+
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
 <!-- =====================================================
      APPLICATION
+     
+     ВАЖНО:
+     Вся логика находится в js/app.js.
+     index.html больше НЕ содержит старого JS.
      ===================================================== -->
 
 <script
     type="module"
-    src="js/app.js"
+    src="./js/app.js"
 ></script>
 
+
 </body>
+
 </html>
 ```
