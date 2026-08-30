@@ -1,56 +1,2261 @@
 <!DOCTYPE html>
-
 <html lang="ru">
 
 <head>
 
-```
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
->
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
-<meta
-    name="theme-color"
-    content="#050505"
->
+    <meta
+        name="theme-color"
+        content="#050505"
+    >
 
-<meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
->
-
-<meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
->
-
-<title>LIFE GAME</title>
+    <title>LIFE GAME</title>
 
 
-<link
-    rel="stylesheet"
-    href="./style.css"
->
-```
+    <style>
+
+        /* =========================================
+           LIFE GAME — PREMIUM BLACK
+        ========================================= */
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        :root {
+
+            --bg: #050505;
+            --bg-soft: #090909;
+
+            --card: #101010;
+            --card-light: #151515;
+
+            --border: #242424;
+            --border-light: #303030;
+
+            --text: #f5f5f5;
+            --text-soft: #a0a0a0;
+            --text-muted: #626262;
+
+            --white: #ffffff;
+
+            --radius-large: 24px;
+            --radius-medium: 18px;
+
+        }
+
+
+        html {
+
+            margin: 0;
+            padding: 0;
+
+            min-height: 100%;
+
+            background: var(--bg);
+
+        }
+
+
+        body {
+
+            margin: 0;
+            padding: 0;
+
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 50% -15%,
+                    rgba(255,255,255,0.07),
+                    transparent 38%
+                ),
+                linear-gradient(
+                    180deg,
+                    #080808 0%,
+                    #050505 45%,
+                    #030303 100%
+                );
+
+            color: var(--text);
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "SF Pro Display",
+                "SF Pro Text",
+                "Inter",
+                "Helvetica Neue",
+                Arial,
+                sans-serif;
+
+            -webkit-font-smoothing: antialiased;
+
+            text-rendering: optimizeLegibility;
+
+            overflow-x: hidden;
+
+        }
+
+
+        body.page-open {
+            overflow: hidden;
+        }
+
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+
+        button {
+            border: 0;
+            cursor: pointer;
+        }
+
+
+        /* =========================================
+           APP
+        ========================================= */
+
+        .app {
+
+            width: 100%;
+            max-width: 520px;
+
+            min-height: 100vh;
+
+            margin: 0 auto;
+
+            padding:
+                24px
+                18px
+                120px;
+
+        }
+
+
+        /* =========================================
+           HEADER
+        ========================================= */
+
+        .header {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        .eyebrow {
+
+            margin-bottom: 5px;
+
+            color: var(--text-muted);
+
+            font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .header h1 {
+
+            margin: 0;
+
+            color: var(--text);
+
+            font-size: 27px;
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -1.2px;
+
+        }
+
+
+        .avatar {
+
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #2a2a2a;
+
+            border-radius: 50%;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #292929,
+                    #0b0b0b
+                );
+
+            color: #ffffff;
+
+            font-size: 14px;
+            font-weight: 700;
+
+            box-shadow:
+                0 12px 30px rgba(0,0,0,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+
+        }
+
+
+        /* =========================================
+           LEVEL
+        ========================================= */
+
+        .level-card {
+
+            position: relative;
+
+            margin-bottom: 30px;
+
+            padding: 21px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius-large);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #151515 0%,
+                    #0d0d0d 55%,
+                    #090909 100%
+                );
+
+            box-shadow:
+                0 24px 60px rgba(0,0,0,0.38),
+                inset 0 1px 0 rgba(255,255,255,0.035);
+
+        }
+
+
+        .level-top {
+
+            position: relative;
+
+            display: flex;
+
+            align-items: flex-end;
+            justify-content: space-between;
+
+            z-index: 1;
+
+        }
+
+
+        .label {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: var(--text-muted);
+
+            font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        .level-number {
+
+            color: var(--text);
+
+            font-size: 26px;
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+        }
+
+
+        .xp-value {
+
+            color: #8b8b8b;
+
+            font-size: 11px;
+            font-weight: 600;
+
+            letter-spacing: 0.5px;
+
+        }
+
+
+        .xp-bar {
+
+            position: relative;
+
+            width: 100%;
+            height: 4px;
+
+            margin-top: 19px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #252525;
+
+        }
+
+
+        .xp-fill {
+
+            width: 0%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #777777,
+                    #ffffff
+                );
+
+            transition:
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
+        }
+
+
+        /* =========================================
+           OVERALL
+        ========================================= */
+
+        .overall-section {
+            margin-bottom: 25px;
+        }
+
+
+        .section-label {
+
+            margin-bottom: 3px;
+
+            color: var(--text-muted);
+
+            font-size: 9px;
+            font-weight: 600;
+
+            letter-spacing: 2.5px;
+
+        }
+
+
+        .overall-value {
+
+            margin-bottom: 12px;
+
+            color: var(--text);
+
+            font-size: 58px;
+            line-height: 0.95;
+
+            font-weight: 800;
+
+            letter-spacing: -4px;
+
+        }
+
+
+        .overall-value span {
+
+            margin-left: 2px;
+
+            color: #777777;
+
+            font-size: 27px;
+
+            letter-spacing: -1px;
+
+        }
+
+
+        .overall-bar {
+
+            width: 100%;
+            height: 3px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #1c1c1c;
+
+        }
+
+
+        .overall-fill {
+
+            width: 0%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background: #eeeeee;
+
+            box-shadow:
+                0 0 10px rgba(255,255,255,0.18);
+
+            transition:
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
+        }
+
+
+        /* =========================================
+           CATEGORIES
+        ========================================= */
+
+        .categories {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 13px;
+
+        }
+
+
+        .category-card {
+
+            position: relative;
+
+            padding: 20px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius-large);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #121212,
+                    #0b0b0b
+                );
+
+            cursor: pointer;
+
+            box-shadow:
+                0 16px 40px rgba(0,0,0,0.22),
+                inset 0 1px 0 rgba(255,255,255,0.025);
+
+            transition:
+                transform 0.18s ease,
+                border-color 0.18s ease;
+
+        }
+
+
+        .category-card:active {
+
+            transform: scale(0.985);
+
+            border-color: #3a3a3a;
+
+        }
+
+
+        .category-header {
+
+            position: relative;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 18px;
+
+            z-index: 1;
+
+        }
+
+
+        .category-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+        }
+
+
+        .category-icon {
+
+            width: 43px;
+            height: 43px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border: 1px solid #282828;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #1b1b1b,
+                    #111111
+                );
+
+            font-size: 19px;
+
+        }
+
+
+        .category-name strong {
+
+            display: block;
+
+            color: #eeeeee;
+
+            font-size: 13px;
+            line-height: 1;
+
+            font-weight: 750;
+
+            letter-spacing: 1.1px;
+
+        }
+
+
+        .category-name span {
+
+            display: block;
+
+            margin-top: 6px;
+
+            color: var(--text-muted);
+
+            font-size: 10px;
+
+            font-weight: 500;
+
+        }
+
+
+        .category-percent {
+
+            color: #eeeeee;
+
+            font-size: 20px;
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -0.7px;
+
+        }
+
+
+        .category-level {
+
+            margin-top: 7px;
+
+            color: #555555;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+        }
+
+
+        .progress-bar {
+
+            width: 100%;
+            height: 4px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #222222;
+
+        }
+
+
+        .progress-fill {
+
+            width: 0%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #777777,
+                    #f5f5f5
+                );
+
+            transition:
+                width 0.8s cubic-bezier(.2,.8,.2,1);
+
+        }
+
+
+        /* =========================================
+           DAILY QUEST
+        ========================================= */
+
+        .quest-button {
+
+            width: 100%;
+            height: 58px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            margin-top: 20px;
+
+            border: 1px solid #303030;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #eeeeee,
+                    #bdbdbd
+                );
+
+            color: #080808;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+            box-shadow:
+                0 18px 40px rgba(0,0,0,0.35);
+
+        }
+
+
+        .quest-icon {
+
+            margin-right: 8px;
+
+            font-size: 19px;
+
+        }
+
+
+        /* =========================================
+           BOTTOM NAV
+        ========================================= */
+
+        .bottom-nav {
+
+            position: fixed;
+
+            left: 50%;
+            bottom: 12px;
+
+            transform: translateX(-50%);
+
+            width: calc(100% - 24px);
+            max-width: 484px;
+
+            height: 69px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-around;
+
+            padding: 5px 7px;
+
+            z-index: 100;
+
+            border: 1px solid #242424;
+
+            border-radius: 23px;
+
+            background:
+                rgba(14,14,14,0.92);
+
+            backdrop-filter: blur(24px);
+
+            -webkit-backdrop-filter: blur(24px);
+
+            box-shadow:
+                0 20px 50px rgba(0,0,0,0.65);
+
+        }
+
+
+        .nav-item {
+
+            min-width: 58px;
+            height: 56px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 4px;
+
+            border-radius: 17px;
+
+            background: transparent;
+
+            color: #555555;
+
+        }
+
+
+        .nav-item.active {
+
+            color: #ffffff;
+
+            background:
+                rgba(255,255,255,0.055);
+
+        }
+
+
+        .nav-icon {
+
+            font-size: 17px;
+
+            line-height: 1;
+
+        }
+
+
+        .nav-label {
+
+            font-size: 8px;
+
+            font-weight: 500;
+
+        }
+
+
+        /* =========================================
+           CATEGORY PAGE
+        ========================================= */
+
+        .category-page {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 200;
+
+            overflow-y: auto;
+
+            padding:
+                24px
+                18px
+                120px;
+
+            background:
+                radial-gradient(
+                    circle at 50% -10%,
+                    rgba(255,255,255,0.07),
+                    transparent 38%
+                ),
+                linear-gradient(
+                    180deg,
+                    #080808 0%,
+                    #050505 60%,
+                    #030303 100%
+                );
+
+            animation:
+                pageIn 0.25s ease;
+
+        }
+
+
+        @keyframes pageIn {
+
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        .category-page-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+
+            margin-bottom: 24px;
+
+        }
+
+
+        .back-button {
+
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border: 1px solid #292929;
+
+            border-radius: 14px;
+
+            background: #111111;
+
+            color: #ffffff;
+
+            font-size: 20px;
+
+        }
+
+
+        .page-eyebrow {
+
+            margin-bottom: 5px;
+
+            color: #5f5f5f;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 2.5px;
+
+        }
+
+
+        .category-page h2 {
+
+            margin: 0;
+
+            color: #f5f5f5;
+
+            font-size: 25px;
+
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -0.8px;
+
+        }
+
+
+        .category-summary {
+
+            margin-bottom: 18px;
+
+            padding: 22px;
+
+            border: 1px solid #242424;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #151515,
+                    #0c0c0c
+                );
+
+            box-shadow:
+                0 20px 50px rgba(0,0,0,0.35);
+
+        }
+
+
+        .summary-value {
+
+            margin-bottom: 15px;
+
+            color: #f5f5f5;
+
+            font-size: 46px;
+
+            line-height: 1;
+
+            font-weight: 800;
+
+            letter-spacing: -3px;
+
+        }
+
+
+        .summary-meta {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 12px;
+
+            color: #666666;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+        }
+
+
+        .summary-meta strong {
+
+            color: #dddddd;
+
+            font-size: 11px;
+
+        }
+
+
+        .summary-bar {
+
+            width: 100%;
+            height: 4px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #222222;
+
+        }
+
+
+        .summary-fill {
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #777777,
+                    #ffffff
+                );
+
+            transition:
+                width 0.5s ease;
+
+        }
+
+
+        /* =========================================
+           METRICS
+        ========================================= */
+
+        .metrics-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 12px;
+
+        }
+
+
+        .metric-card {
+
+            padding: 18px;
+
+            border: 1px solid #222222;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #121212,
+                    #0a0a0a
+                );
+
+            box-shadow:
+                0 14px 35px rgba(0,0,0,0.22);
+
+        }
+
+
+        .metric-top {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .metric-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            min-width: 0;
+
+        }
+
+
+        .metric-icon {
+
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border: 1px solid #292929;
+
+            border-radius: 13px;
+
+            background: #171717;
+
+            font-size: 18px;
+
+        }
+
+
+        .metric-title strong {
+
+            display: block;
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            line-height: 1.2;
+
+            font-weight: 700;
+
+        }
+
+
+        .metric-title span {
+
+            display: block;
+
+            margin-top: 5px;
+
+            color: #666666;
+
+            font-size: 9px;
+
+            line-height: 1.2;
+
+        }
+
+
+        .metric-percent {
+
+            color: #eeeeee;
+
+            font-size: 19px;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+
+        }
+
+
+        .metric-progress {
+
+            width: 100%;
+            height: 3px;
+
+            margin-bottom: 15px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #202020;
+
+        }
+
+
+        .metric-progress-fill {
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #666666,
+                    #eeeeee
+                );
+
+            transition:
+                width 0.5s ease;
+
+        }
+
+
+        .metric-edit {
+
+            width: 100%;
+            height: 38px;
+
+            border: 1px solid #292929;
+
+            border-radius: 12px;
+
+            background: #111111;
+
+            color: #8c8c8c;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+
+        }
+
+
+        /* =========================================
+           CATEGORY XP PANEL
+        ========================================= */
+
+        .category-xp-panel {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 8px;
+
+            margin-top: 14px;
+
+        }
+
+
+        .xp-stat {
+
+            padding: 13px 10px;
+
+            border: 1px solid #202020;
+
+            border-radius: 14px;
+
+            background: #0d0d0d;
+
+        }
+
+
+        .xp-stat span {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #555555;
+
+            font-size: 7px;
+
+            font-weight: 700;
+
+            letter-spacing: 1px;
+
+        }
+
+
+        .xp-stat strong {
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =========================================
+           STREAK
+        ========================================= */
+
+        .streak-card {
+
+            margin-bottom: 14px;
+
+            padding: 17px;
+
+            border: 1px solid #252525;
+
+            border-radius: 19px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #141414,
+                    #0b0b0b
+                );
+
+        }
+
+
+        .streak-top {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .streak-title {
+
+            color: #777777;
+
+            font-size: 8px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.8px;
+
+        }
+
+
+        .streak-value {
+
+            color: #eeeeee;
+
+            font-size: 14px;
+
+            font-weight: 800;
+
+        }
+
+
+        .streak-description {
+
+            color: #5e5e5e;
+
+            font-size: 9px;
+
+            line-height: 1.45;
+
+        }
+
+
+        /* =========================================
+           EXPENSES
+        ========================================= */
+
+        .expenses-subblock {
+
+            margin-top: 15px;
+
+            padding-top: 16px;
+
+            border-top: 1px solid #222222;
+
+        }
+
+
+        .expenses-subblock-header {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .expenses-subblock-title {
+
+            color: #777777;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 1.8px;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .expenses-subblock-total {
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+        }
+
+
+        .expense-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+
+        }
+
+
+        .expense-row {
+
+            min-height: 48px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            padding:
+                8px
+                10px
+                8px
+                12px;
+
+            border: 1px solid #1f1f1f;
+
+            border-radius: 13px;
+
+            background: #0c0c0c;
+
+        }
+
+
+        .expense-row-info {
+
+            min-width: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 3px;
+
+        }
+
+
+        .expense-row-name {
+
+            overflow: hidden;
+
+            color: #dcdcdc;
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+
+        }
+
+
+        .expense-row-amount {
+
+            color: #888888;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+        }
+
+
+        .expense-row-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .expense-action {
+
+            width: 31px;
+            height: 31px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #262626;
+
+            border-radius: 9px;
+
+            background: #141414;
+
+            color: #777777;
+
+            font-size: 14px;
+
+        }
+
+
+        .expense-empty {
+
+            padding: 16px 10px;
+
+            border: 1px dashed #292929;
+
+            border-radius: 13px;
+
+            color: #555555;
+
+            font-size: 10px;
+
+            line-height: 1.5;
+
+            text-align: center;
+
+        }
+
+
+        .add-expense-button {
+
+            width: 100%;
+            height: 42px;
+
+            margin-top: 10px;
+
+            border: 1px solid #292929;
+
+            border-radius: 12px;
+
+            background: #111111;
+
+            color: #999999;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.4px;
+
+        }
+
+
+        .expenses-ratio {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-top: 10px;
+
+            padding: 11px 12px;
+
+            border-radius: 12px;
+
+            background: #141414;
+
+        }
+
+
+        .expenses-ratio span {
+
+            color: #666666;
+
+            font-size: 9px;
+
+            font-weight: 600;
+
+        }
+
+
+        .expenses-ratio strong {
+
+            color: #eeeeee;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =========================================
+           SIMULATOR
+        ========================================= */
+
+        .simulator-button {
+
+            width: 100%;
+            height: 48px;
+
+            margin-top: 10px;
+
+            border: 1px solid #2b2b2b;
+
+            border-radius: 14px;
+
+            background: #101010;
+
+            color: #d0d0d0;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.5px;
+
+        }
+
+
+        .simulator-result {
+
+            margin-top: 14px;
+
+            padding: 17px;
+
+            border: 1px solid #222222;
+
+            border-radius: 18px;
+
+            background: #0c0c0c;
+
+        }
+
+
+        .simulator-result-title {
+
+            margin-bottom: 12px;
+
+            color: #666666;
+
+            font-size: 8px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.8px;
+
+        }
+
+
+        .simulator-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 8px;
+
+        }
+
+
+        .simulator-stat {
+
+            padding: 12px;
+
+            border: 1px solid #1e1e1e;
+
+            border-radius: 13px;
+
+            background: #111111;
+
+        }
+
+
+        .simulator-stat span {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #5b5b5b;
+
+            font-size: 8px;
+
+        }
+
+
+        .simulator-stat strong {
+
+            color: #eeeeee;
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =========================================
+           HISTORY
+        ========================================= */
+
+        .history-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            margin-top: 14px;
+
+        }
+
+
+        .history-row {
+
+            display: grid;
+
+            grid-template-columns:
+                55px
+                1fr
+                auto;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 12px;
+
+            border: 1px solid #1d1d1d;
+
+            border-radius: 13px;
+
+            background: #0d0d0d;
+
+        }
+
+
+        .history-month {
+
+            color: #777777;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+        }
+
+
+        .history-income {
+
+            color: #dddddd;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+        }
+
+
+        .history-xp {
+
+            color: #888888;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =========================================
+           EDITOR
+        ========================================= */
+
+        .editor-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 500;
+
+            display: flex;
+
+            align-items: flex-end;
+            justify-content: center;
+
+            padding: 14px;
+
+            background:
+                rgba(0,0,0,0.72);
+
+            backdrop-filter: blur(12px);
+
+            -webkit-backdrop-filter: blur(12px);
+
+            animation:
+                overlayIn 0.2s ease;
+
+        }
+
+
+        .editor {
+
+            position: relative;
+
+            width: 100%;
+            max-width: 500px;
+
+            max-height: calc(100vh - 28px);
+
+            overflow-y: auto;
+
+            padding: 26px 20px 22px;
+
+            border: 1px solid #292929;
+
+            border-radius: 26px 26px 20px 20px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #171717,
+                    #0b0b0b
+                );
+
+            box-shadow:
+                0 -10px 60px rgba(0,0,0,0.55);
+
+            animation:
+                editorIn 0.25s cubic-bezier(.2,.8,.2,1);
+
+        }
+
+
+        @keyframes editorIn {
+
+            from {
+                transform: translateY(30px);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+
+        }
+
+
+        @keyframes overlayIn {
+
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+
+        }
+
+
+        .editor-close {
+
+            position: absolute;
+
+            top: 15px;
+            right: 15px;
+
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border: 1px solid #292929;
+
+            border-radius: 50%;
+
+            background: #111111;
+
+            color: #777777;
+
+            font-size: 20px;
+
+        }
+
+
+        .editor-icon {
+
+            width: 48px;
+            height: 48px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 15px;
+
+            border: 1px solid #2a2a2a;
+
+            border-radius: 15px;
+
+            background: #191919;
+
+            font-size: 21px;
+
+        }
+
+
+        .editor-eyebrow {
+
+            margin-bottom: 5px;
+
+            color: #606060;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        .editor h3 {
+
+            margin: 0 0 23px;
+
+            padding-right: 40px;
+
+            color: #f3f3f3;
+
+            font-size: 21px;
+
+            line-height: 1.1;
+
+            font-weight: 800;
+
+        }
+
+
+        .editor label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #777777;
+
+            font-size: 9px;
+
+            font-weight: 600;
+
+        }
+
+
+        .editor input,
+        .editor select {
+
+            width: 100%;
+            height: 50px;
+
+            margin-bottom: 15px;
+
+            padding:
+                0
+                15px;
+
+            border: 1px solid #292929;
+
+            border-radius: 14px;
+
+            outline: none;
+
+            background: #0d0d0d;
+
+            color: #f5f5f5;
+
+            font-family: inherit;
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            -webkit-appearance: none;
+
+        }
+
+
+        .editor input:focus,
+        .editor select:focus {
+
+            border-color: #555555;
+
+            background: #111111;
+
+        }
+
+
+        .editor-preview {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin: 4px 0 17px;
+
+            padding: 14px;
+
+            border: 1px solid #242424;
+
+            border-radius: 14px;
+
+            background: #0d0d0d;
+
+        }
+
+
+        .editor-preview span {
+
+            color: #666666;
+
+            font-size: 9px;
+
+            font-weight: 600;
+
+        }
+
+
+        .editor-preview strong {
+
+            color: #eeeeee;
+
+            font-size: 16px;
+
+            font-weight: 800;
+
+        }
+
+
+        .save-button {
+
+            width: 100%;
+            height: 52px;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #f1f1f1,
+                    #bdbdbd
+                );
+
+            color: #080808;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 2px;
+
+        }
+
+
+        .secondary-button {
+
+            width: 100%;
+            height: 46px;
+
+            margin-top: 9px;
+
+            border: 1px solid #292929;
+
+            border-radius: 14px;
+
+            background: #111111;
+
+            color: #888888;
+
+            font-size: 9px;
+
+            font-weight: 800;
+
+            letter-spacing: 1.4px;
+
+        }
+
+
+        /* =========================================
+           TOAST
+        ========================================= */
+
+        .life-message {
+
+            position: fixed;
+
+            left: 50%;
+            bottom: 96px;
+
+            z-index: 1000;
+
+            transform:
+                translate(-50%, 10px);
+
+            padding:
+                12px 18px;
+
+            border: 1px solid #303030;
+
+            border-radius: 14px;
+
+            background:
+                rgba(20,20,20,0.95);
+
+            color: #ffffff;
+
+            font-size: 11px;
+
+            font-weight: 600;
+
+            white-space: nowrap;
+
+            box-shadow:
+                0 15px 40px rgba(0,0,0,0.5);
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transition:
+                opacity 0.2s ease,
+                transform 0.2s ease;
+
+        }
+
+
+        .life-message.show {
+
+            opacity: 1;
+
+            transform:
+                translate(-50%, 0);
+
+        }
+
+
+        /* =========================================
+           SMALL PHONES
+        ========================================= */
+
+        @media (max-width: 360px) {
+
+            .app {
+
+                padding-left: 14px;
+                padding-right: 14px;
+
+            }
+
+
+            .header h1 {
+
+                font-size: 24px;
+
+            }
+
+
+            .overall-value {
+
+                font-size: 51px;
+
+            }
+
+
+            .category-card {
+
+                padding: 17px;
+
+            }
+
+
+            .category-icon {
+
+                width: 40px;
+                height: 40px;
+
+            }
+
+
+            .category-name strong {
+
+                font-size: 12px;
+
+            }
+
+
+            .category-percent {
+
+                font-size: 18px;
+
+            }
+
+
+            .metric-card {
+
+                padding: 16px;
+
+            }
+
+
+            .metric-title strong {
+
+                font-size: 11px;
+
+            }
+
+
+            .metric-title span {
+
+                font-size: 8px;
+
+            }
+
+        }
+
+
+        @media (min-width: 700px) {
+
+            .app {
+
+                padding-top: 45px;
+
+            }
+
+
+            .category-page {
+
+                padding-top: 35px;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-```
-<!-- =====================================================
-     MAIN APPLICATION
-====================================================== -->
 
 <div class="app">
 
 
-    <!-- =================================================
+    <!-- =====================================
          HEADER
-    ================================================== -->
+    ====================================== -->
 
     <header class="header">
 
@@ -74,23 +2279,23 @@
     </header>
 
 
-    <!-- =================================================
-         PLAYER
-    ================================================== -->
+    <!-- =====================================
+         GLOBAL LEVEL
+    ====================================== -->
 
-    <section class="hero">
+    <section class="level-card">
 
-        <div class="hero-top">
+        <div class="level-top">
 
             <div>
 
                 <span class="label">
-                    PLAYER LEVEL
+                    CHARACTER LEVEL
                 </span>
 
                 <div
-                    class="level"
-                    id="playerLevel"
+                    class="level-number"
+                    id="globalLevel"
                 >
                     LVL 1
                 </div>
@@ -99,8 +2304,8 @@
 
 
             <div
-                class="xp"
-                id="playerXP"
+                class="xp-value"
+                id="globalXP"
             >
                 0 XP
             </div>
@@ -108,37 +2313,24 @@
         </div>
 
 
-        <div class="bar">
+        <div class="xp-bar">
 
             <div
-                class="fill"
-                id="playerXPFill"
+                class="xp-fill"
+                id="globalXPFill"
                 style="width:0%"
             ></div>
-
-        </div>
-
-
-        <div class="hero-bottom">
-
-            <span id="xpNext">
-                100 XP TO NEXT LEVEL
-            </span>
-
-            <span id="playerRank">
-                BEGINNER
-            </span>
 
         </div>
 
     </section>
 
 
-    <!-- =================================================
+    <!-- =====================================
          LIFE PROGRESS
-    ================================================== -->
+    ====================================== -->
 
-    <section class="life">
+    <section class="overall-section">
 
         <div class="section-label">
             LIFE PROGRESS
@@ -146,18 +2338,18 @@
 
 
         <div
-            class="life-number"
-            id="lifeProgress"
+            class="overall-value"
+            id="overallValue"
         >
             0<span>%</span>
         </div>
 
 
-        <div class="life-bar">
+        <div class="overall-bar">
 
             <div
-                class="fill"
-                id="lifeFill"
+                class="overall-fill"
+                id="overallFill"
                 style="width:0%"
             ></div>
 
@@ -166,9 +2358,9 @@
     </section>
 
 
-    <!-- =================================================
+    <!-- =====================================
          CATEGORIES
-    ================================================== -->
+    ====================================== -->
 
     <main class="categories">
 
@@ -176,17 +2368,18 @@
         <!-- FINANCE -->
 
         <article
-            class="category"
+            class="category-card"
             data-category="finance"
         >
 
-            <div class="category-head">
+            <div class="category-header">
 
                 <div class="category-title">
 
-                    <div class="icon">
+                    <div class="category-icon">
                         💰
                     </div>
+
 
                     <div class="category-name">
 
@@ -198,14 +2391,21 @@
                             Финансы
                         </span>
 
+                        <div
+                            class="category-level"
+                            id="homeLevelFinance"
+                        >
+                            LVL 1
+                        </div>
+
                     </div>
 
                 </div>
 
 
                 <div
-                    class="percent"
-                    id="financePercent"
+                    class="category-percent"
+                    id="homePercentFinance"
                 >
                     0%
                 </div>
@@ -213,12 +2413,74 @@
             </div>
 
 
-            <div class="progress">
+            <div class="progress-bar">
 
-                <i
-                    id="financeFill"
+                <div
+                    class="progress-fill"
+                    id="homeFillFinance"
                     style="width:0%"
-                ></i>
+                ></div>
+
+            </div>
+
+        </article>
+
+
+        <!-- TRAINING -->
+
+        <article
+            class="category-card"
+            data-category="training"
+        >
+
+            <div class="category-header">
+
+                <div class="category-title">
+
+                    <div class="category-icon">
+                        🏋️
+                    </div>
+
+
+                    <div class="category-name">
+
+                        <strong>
+                            TRAINING
+                        </strong>
+
+                        <span>
+                            Тренировки
+                        </span>
+
+                        <div
+                            class="category-level"
+                            id="homeLevelTraining"
+                        >
+                            LVL 1
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="category-percent"
+                    id="homePercentTraining"
+                >
+                    0%
+                </div>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    id="homeFillTraining"
+                    style="width:0%"
+                ></div>
 
             </div>
 
@@ -228,17 +2490,18 @@
         <!-- DEVELOPMENT -->
 
         <article
-            class="category"
+            class="category-card"
             data-category="development"
         >
 
-            <div class="category-head">
+            <div class="category-header">
 
                 <div class="category-title">
 
-                    <div class="icon">
+                    <div class="category-icon">
                         🧠
                     </div>
+
 
                     <div class="category-name">
 
@@ -250,14 +2513,21 @@
                             Развитие
                         </span>
 
+                        <div
+                            class="category-level"
+                            id="homeLevelDevelopment"
+                        >
+                            LVL 1
+                        </div>
+
                     </div>
 
                 </div>
 
 
                 <div
-                    class="percent"
-                    id="developmentPercent"
+                    class="category-percent"
+                    id="homePercentDevelopment"
                 >
                     0%
                 </div>
@@ -265,12 +2535,74 @@
             </div>
 
 
-            <div class="progress">
+            <div class="progress-bar">
 
-                <i
-                    id="developmentFill"
+                <div
+                    class="progress-fill"
+                    id="homeFillDevelopment"
                     style="width:0%"
-                ></i>
+                ></div>
+
+            </div>
+
+        </article>
+
+
+        <!-- DISCIPLINE -->
+
+        <article
+            class="category-card"
+            data-category="discipline"
+        >
+
+            <div class="category-header">
+
+                <div class="category-title">
+
+                    <div class="category-icon">
+                        ⚡
+                    </div>
+
+
+                    <div class="category-name">
+
+                        <strong>
+                            DISCIPLINE
+                        </strong>
+
+                        <span>
+                            Дисциплина
+                        </span>
+
+                        <div
+                            class="category-level"
+                            id="homeLevelDiscipline"
+                        >
+                            LVL 1
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="category-percent"
+                    id="homePercentDiscipline"
+                >
+                    0%
+                </div>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    id="homeFillDiscipline"
+                    style="width:0%"
+                ></div>
 
             </div>
 
@@ -280,17 +2612,18 @@
         <!-- HEALTH -->
 
         <article
-            class="category"
+            class="category-card"
             data-category="health"
         >
 
-            <div class="category-head">
+            <div class="category-header">
 
                 <div class="category-title">
 
-                    <div class="icon">
+                    <div class="category-icon">
                         ❤️
                     </div>
+
 
                     <div class="category-name">
 
@@ -299,8 +2632,15 @@
                         </strong>
 
                         <span>
-                            Здоровье · Тренировки
+                            Здоровье
                         </span>
+
+                        <div
+                            class="category-level"
+                            id="homeLevelHealth"
+                        >
+                            LVL 1
+                        </div>
 
                     </div>
 
@@ -308,8 +2648,8 @@
 
 
                 <div
-                    class="percent"
-                    id="healthPercent"
+                    class="category-percent"
+                    id="homePercentHealth"
                 >
                     0%
                 </div>
@@ -317,177 +2657,5366 @@
             </div>
 
 
-            <div class="progress">
+            <div class="progress-bar">
 
-                <i
-                    id="healthFill"
+                <div
+                    class="progress-fill"
+                    id="homeFillHealth"
                     style="width:0%"
-                ></i>
+                ></div>
 
             </div>
 
         </article>
 
-
     </main>
 
 
-    <!-- =================================================
+    <!-- =====================================
          DAILY QUEST
-    ================================================== -->
+    ====================================== -->
 
     <button
-        class="quest"
+        class="quest-button"
         id="dailyQuest"
         type="button"
     >
-        ⚡ DAILY QUEST
+
+        <span class="quest-icon">
+            +
+        </span>
+
+        DAILY QUEST
+
     </button>
 
 
-    <!-- =================================================
-         CREATOR
-    ================================================== -->
+    <!-- =====================================
+         NAVIGATION
+    ====================================== -->
 
-    <a
-        class="creator"
-        href="https://t.me/shkeltinsh"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        Created by
-        <strong>
-            &nbsp;@shkeltinsh
-        </strong>
-    </a>
+    <nav class="bottom-nav">
 
+        <button
+            class="nav-item active"
+            type="button"
+            data-section="home"
+        >
+
+            <span class="nav-icon">
+                ⌂
+            </span>
+
+            <span class="nav-label">
+                Главная
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            type="button"
+            data-section="finance"
+        >
+
+            <span class="nav-icon">
+                💰
+            </span>
+
+            <span class="nav-label">
+                Финансы
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            type="button"
+            data-section="training"
+        >
+
+            <span class="nav-icon">
+                🏋️
+            </span>
+
+            <span class="nav-label">
+                Тренировки
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            type="button"
+            data-section="health"
+        >
+
+            <span class="nav-icon">
+                ❤️
+            </span>
+
+            <span class="nav-label">
+                Здоровье
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            type="button"
+            data-section="development"
+        >
+
+            <span class="nav-icon">
+                🧠
+            </span>
+
+            <span class="nav-label">
+                Развитие
+            </span>
+
+        </button>
+
+    </nav>
 
 </div>
 
 
-<!-- =====================================================
-     BOTTOM NAVIGATION
-====================================================== -->
+<script>
 
-<nav class="nav">
+(function () {
 
-
-    <button
-        type="button"
-        class="active"
-        data-nav="home"
-    >
-
-        <span class="nav-icon">
-            ⌂
-        </span>
-
-        <span class="nav-label">
-            Главная
-        </span>
-
-    </button>
+    "use strict";
 
 
-    <button
-        type="button"
-        data-nav="finance"
-    >
+    /* =========================================
+       STORAGE
+    ========================================= */
 
-        <span class="nav-icon">
-            💰
-        </span>
+    const STORAGE_KEY =
+        "life_game_v3";
 
-        <span class="nav-label">
-            Финансы
-        </span>
+    const OLD_STORAGE_KEY =
+        "life_game_v2";
 
-    </button>
+    const EXPENSES_KEY =
+        "life_game_expenses_v1";
 
 
-    <button
-        type="button"
-        data-nav="health"
-    >
+    /* =========================================
+       ECONOMY CONFIGURATION
+    ========================================= */
 
-        <span class="nav-icon">
-            ❤️
-        </span>
+    const ECONOMY = {
 
-        <span class="nav-label">
-            Здоровье
-        </span>
+        /*
+         * XP, необходимый для перехода
+         * с уровня L на L+1.
+         *
+         * Формула растёт постепенно,
+         * поэтому 1-100 — только первая
+         * большая часть прогрессии.
+         */
 
-    </button>
+        levelXP: function (level) {
 
+            const l =
+                Math.max(
+                    1,
+                    Number(level) || 1
+                );
 
-    <button
-        type="button"
-        data-nav="development"
-    >
+            return Math.round(
+                100 *
+                Math.pow(
+                    l,
+                    1.38
+                )
+            );
 
-        <span class="nav-icon">
-            🧠
-        </span>
-
-        <span class="nav-label">
-            Развитие
-        </span>
-
-    </button>
-
-
-</nav>
-
-
-<!-- =====================================================
-     TOAST
-====================================================== -->
-
-<div
-    class="toast"
-    id="toast"
-></div>
+        },
 
 
-<!-- =====================================================
-     MODULES
-     
-     ВАЖНО:
-     finance.js использует import.
-     Поэтому он подключается как module.
+        /*
+         * Finance.
+         *
+         * Чем выше уровень —
+         * тем меньше коэффициент XP.
+         *
+         * Но рост дохода относительно
+         * предыдущего месяца возвращает
+         * дополнительный XP.
+         */
 
-     health.js и development.js используют
-     window.LifeGameHealth / window.LifeGameDevelopment
-     и подключаются обычным script.
-====================================================== -->
+        finance: {
 
+            baseXP: 100,
 
-<script
-    src="./js/sections/health.js"
-></script>
+            levelDecay: 0.018,
 
+            growthBonus: 0.60,
 
-<script
-    src="./js/sections/development.js"
-></script>
+            savingsBonus: 0.20,
 
+            maxMonthlyXP: 5000
 
-<script
-    type="module"
-    src="./js/sections/finance.js"
-></script>
+        },
 
 
-<!-- =====================================================
-     MAIN APPLICATION
-====================================================== -->
+        /*
+         * Training.
+         *
+         * Та же философия:
+         * одинаковая тренировка на
+         * высоком уровне ценится меньше,
+         * но рост нагрузки/результата
+         * даёт бонус.
+         */
 
-<script
-    type="module"
-    src="./js/app.js"
-></script>
-```
+        training: {
+
+            baseXP: 45,
+
+            levelDecay: 0.014,
+
+            growthBonus: 0.35,
+
+            maxActionXP: 500
+
+        },
+
+
+        /*
+         * Development.
+         *
+         * Стабильный XP.
+         */
+
+        development: {
+
+            actionXP: 30,
+
+            streakBonus: 0.10,
+
+            maxActionXP: 300
+
+        },
+
+
+        /*
+         * Остальные категории.
+         */
+
+        discipline: {
+
+            actionXP: 25,
+
+            streakBonus: 0.12
+
+        },
+
+
+        health: {
+
+            actionXP: 25,
+
+            streakBonus: 0.10
+
+        }
+
+    };
+
+
+    /* =========================================
+       CATEGORY META
+    ========================================= */
+
+    const CATEGORY_META = {
+
+        finance: {
+
+            icon: "💰",
+            title: "Финансы",
+            code: "FINANCE"
+
+        },
+
+        training: {
+
+            icon: "🏋️",
+            title: "Тренировки",
+            code: "TRAINING"
+
+        },
+
+        development: {
+
+            icon: "🧠",
+            title: "Развитие",
+            code: "DEVELOPMENT"
+
+        },
+
+        discipline: {
+
+            icon: "⚡",
+            title: "Дисциплина",
+            code: "DISCIPLINE"
+
+        },
+
+        health: {
+
+            icon: "❤️",
+            title: "Здоровье",
+            code: "HEALTH"
+
+        }
+
+    };
+
+
+    /* =========================================
+       DEFAULT DATA
+    ========================================= */
+
+    const defaultData = {
+
+        meta: {
+
+            version: 3,
+
+            characterXP: 0,
+
+            negativeXP: 0,
+
+            createdAt:
+                new Date().toISOString()
+
+        },
+
+
+        categories: {
+
+            finance: {
+
+                xp: 0,
+
+                level: 1,
+
+                streak: 0,
+
+                bestStreak: 0,
+
+                lastActionDate: null,
+
+                previousIncome: 0,
+
+                monthlyHistory: []
+
+            },
+
+
+            training: {
+
+                xp: 0,
+
+                level: 1,
+
+                streak: 0,
+
+                bestStreak: 0,
+
+                lastActionDate: null,
+
+                previousLoad: 0
+
+            },
+
+
+            development: {
+
+                xp: 0,
+
+                level: 1,
+
+                streak: 0,
+
+                bestStreak: 0,
+
+                lastActionDate: null
+
+            },
+
+
+            discipline: {
+
+                xp: 0,
+
+                level: 1,
+
+                streak: 0,
+
+                bestStreak: 0,
+
+                lastActionDate: null
+
+            },
+
+
+            health: {
+
+                xp: 0,
+
+                level: 1,
+
+                streak: 0,
+
+                bestStreak: 0,
+
+                lastActionDate: null
+
+            }
+
+        },
+
+
+        finance: [
+
+            {
+
+                id: "income",
+
+                icon: "💵",
+
+                name: "Заработано за месяц",
+
+                unit: "₽",
+
+                current: 0,
+
+                target: 100000
+
+            },
+
+            {
+
+                id: "monthlyGoal",
+
+                icon: "🎯",
+
+                name: "Цель на месяц",
+
+                unit: "₽",
+
+                current: 0,
+
+                target: 100000
+
+            },
+
+            {
+
+                id: "yearlyGoal",
+
+                icon: "🏆",
+
+                name: "Цель на год",
+
+                unit: "₽",
+
+                current: 0,
+
+                target: 1200000
+
+            },
+
+            {
+
+                id: "expenses",
+
+                icon: "📉",
+
+                name: "Обязательные расходы",
+
+                unit: "₽",
+
+                current: 0,
+
+                target: 0
+
+            },
+
+            {
+
+                id: "safety",
+
+                icon: "🛡️",
+
+                name: "Подушка безопасности",
+
+                unit: "₽",
+
+                current: 0,
+
+                target: 300000
+
+            }
+
+        ],
+
+
+        training: [
+
+            {
+
+                id: "workouts",
+
+                icon: "🏋️",
+
+                name: "Тренировки",
+
+                unit: "тренировок",
+
+                current: 0,
+
+                target: 12
+
+            },
+
+            {
+
+                id: "load",
+
+                icon: "⚖️",
+
+                name: "Объём нагрузки",
+
+                unit: "кг",
+
+                current: 0,
+
+                target: 10000
+
+            },
+
+            {
+
+                id: "consistency",
+
+                icon: "🔥",
+
+                name: "Стабильность",
+
+                unit: "%",
+
+                current: 0,
+
+                target: 100
+
+            }
+
+        ],
+
+
+        development: [
+
+            {
+
+                id: "books",
+
+                icon: "📚",
+
+                name: "Чтение книг",
+
+                unit: "книг",
+
+                current: 0,
+
+                target: 2
+
+            },
+
+            {
+
+                id: "language",
+
+                icon: "🌐",
+
+                name: "Изучение языка",
+
+                unit: "минут",
+
+                current: 0,
+
+                target: 30
+
+            },
+
+            {
+
+                id: "meditation",
+
+                icon: "🧘",
+
+                name: "Медитация",
+
+                unit: "минут",
+
+                current: 0,
+
+                target: 15
+
+            }
+
+        ],
+
+
+        discipline: [
+
+            {
+
+                id: "wake",
+
+                icon: "⏰",
+
+                name: "Режим",
+
+                unit: "%",
+
+                current: 0,
+
+                target: 100
+
+            },
+
+            {
+
+                id: "tasks",
+
+                icon: "✅",
+
+                name: "Выполненные задачи",
+
+                unit: "задач",
+
+                current: 0,
+
+                target: 10
+
+            },
+
+            {
+
+                id: "streak",
+
+                icon: "🔥",
+
+                name: "Дисциплина",
+
+                unit: "%",
+
+                current: 0,
+
+                target: 100
+
+            }
+
+        ],
+
+
+        health: [
+
+            {
+
+                id: "nutrition",
+
+                icon: "🍎",
+
+                name: "Питание",
+
+                unit: "%",
+
+                current: 0,
+
+                target: 100
+
+            },
+
+            {
+
+                id: "steps",
+
+                icon: "🚶",
+
+                name: "Шаги в день",
+
+                unit: "шагов",
+
+                current: 0,
+
+                target: 10000
+
+            },
+
+            {
+
+                id: "sleep",
+
+                icon: "😴",
+
+                name: "Сон",
+
+                unit: "часов",
+
+                current: 0,
+
+                target: 8
+
+            }
+
+        ]
+
+    };
+
+
+    /* =========================================
+       STATE
+    ========================================= */
+
+    let data =
+        loadData();
+
+    let expenses =
+        loadExpenses();
+
+
+    /* =========================================
+       CLONE
+    ========================================= */
+
+    function clone(object) {
+
+        return JSON.parse(
+            JSON.stringify(object)
+        );
+
+    }
+
+
+    /* =========================================
+       LOAD DATA
+    ========================================= */
+
+    function loadData() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+
+                return mergeData(
+                    parsed
+                );
+
+            }
+
+
+            /*
+             * Мягкая миграция старой версии.
+             *
+             * Старые значения сохраняются,
+             * новая экономика начинает
+             * с чистого XP.
+             */
+
+            const oldSaved =
+                localStorage.getItem(
+                    OLD_STORAGE_KEY
+                );
+
+
+            if (oldSaved) {
+
+                const oldParsed =
+                    JSON.parse(oldSaved);
+
+
+                const migrated =
+                    clone(defaultData);
+
+
+                if (
+                    Array.isArray(
+                        oldParsed.finance
+                    )
+                ) {
+
+                    oldParsed.finance.forEach(
+                        function(oldItem) {
+
+                            const target =
+                                migrated.finance.find(
+                                    function(item) {
+
+                                        return (
+                                            item.id ===
+                                            oldItem.id
+                                        );
+
+                                    }
+                                );
+
+
+                            if (target) {
+
+                                target.current =
+                                    Number(
+                                        oldItem.current
+                                    ) || 0;
+
+                                target.target =
+                                    Number(
+                                        oldItem.target
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                if (
+                    Array.isArray(
+                        oldParsed.health
+                    )
+                ) {
+
+                    oldParsed.health.forEach(
+                        function(oldItem) {
+
+                            const target =
+                                migrated.health.find(
+                                    function(item) {
+
+                                        return (
+                                            item.id ===
+                                            oldItem.id
+                                        );
+
+                                    }
+                                );
+
+
+                            if (target) {
+
+                                target.current =
+                                    Number(
+                                        oldItem.current
+                                    ) || 0;
+
+                                target.target =
+                                    Number(
+                                        oldItem.target
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                if (
+                    Array.isArray(
+                        oldParsed.development
+                    )
+                ) {
+
+                    oldParsed.development.forEach(
+                        function(oldItem) {
+
+                            const target =
+                                migrated.development.find(
+                                    function(item) {
+
+                                        return (
+                                            item.id ===
+                                            oldItem.id
+                                        );
+
+                                    }
+                                );
+
+
+                            if (target) {
+
+                                target.current =
+                                    Number(
+                                        oldItem.current
+                                    ) || 0;
+
+                                target.target =
+                                    Number(
+                                        oldItem.target
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                return migrated;
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "LIFE GAME storage error:",
+                error
+            );
+
+        }
+
+
+        return clone(
+            defaultData
+        );
+
+    }
+
+
+    /* =========================================
+       MERGE DATA
+    ========================================= */
+
+    function mergeData(saved) {
+
+        const result =
+            clone(defaultData);
+
+
+        if (
+            saved.meta
+        ) {
+
+            result.meta =
+                Object.assign(
+                    result.meta,
+                    saved.meta
+                );
+
+        }
+
+
+        if (
+            saved.categories
+        ) {
+
+            Object.keys(
+                result.categories
+            ).forEach(
+                function(category) {
+
+                    if (
+                        saved.categories[category]
+                    ) {
+
+                        result.categories[category] =
+                            Object.assign(
+                                result.categories[category],
+                                saved.categories[category]
+                            );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        Object.keys(
+            result
+        ).forEach(
+            function(section) {
+
+                if (
+                    !Array.isArray(
+                        result[section]
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    Array.isArray(
+                        saved[section]
+                    )
+                ) {
+
+                    saved[section].forEach(
+                        function(savedItem) {
+
+                            const item =
+                                result[section].find(
+                                    function(element) {
+
+                                        return (
+                                            element.id ===
+                                            savedItem.id
+                                        );
+
+                                    }
+                                );
+
+
+                            if (item) {
+
+                                item.current =
+                                    Number(
+                                        savedItem.current
+                                    ) || 0;
+
+
+                                item.target =
+                                    Number(
+                                        savedItem.target
+                                    ) || 0;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Защита от NaN и старых
+         * повреждённых значений.
+         */
+
+        Object.keys(
+            result.categories
+        ).forEach(
+            function(category) {
+
+                const state =
+                    result.categories[category];
+
+
+                state.xp =
+                    Number(state.xp) || 0;
+
+
+                state.level =
+                    Math.max(
+                        1,
+                        Number(state.level) || 1
+                    );
+
+
+                state.streak =
+                    Math.max(
+                        0,
+                        Number(state.streak) || 0
+                    );
+
+
+                state.bestStreak =
+                    Math.max(
+                        0,
+                        Number(state.bestStreak) || 0
+                    );
+
+            }
+        );
+
+
+        result.meta.characterXP =
+            Number(
+                result.meta.characterXP
+            ) || 0;
+
+
+        result.meta.negativeXP =
+            Number(
+                result.meta.negativeXP
+            ) || 0;
+
+
+        return result;
+
+    }
+
+
+    /* =========================================
+       SAVE
+    ========================================= */
+
+    function saveData() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(data)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Cannot save data:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       EXPENSES
+    ========================================= */
+
+    function loadExpenses() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    EXPENSES_KEY
+                );
+
+
+            if (saved) {
+
+                const parsed =
+                    JSON.parse(saved);
+
+
+                if (Array.isArray(parsed)) {
+
+                    return parsed.map(
+                        function(expense) {
+
+                            return {
+
+                                id:
+                                    String(
+                                        expense.id ||
+                                        Date.now()
+                                    ),
+
+                                name:
+                                    String(
+                                        expense.name ||
+                                        ""
+                                    ),
+
+                                amount:
+                                    Number(
+                                        expense.amount
+                                    ) || 0
+
+                            };
+
+                        }
+                    );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Expenses storage error:",
+                error
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    function saveExpenses() {
+
+        try {
+
+            localStorage.setItem(
+                EXPENSES_KEY,
+                JSON.stringify(expenses)
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Cannot save expenses:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       BASIC CALCULATIONS
+    ========================================= */
+
+    function progress(
+        current,
+        target
+    ) {
+
+        const c =
+            Number(current) || 0;
+
+        const t =
+            Number(target) || 0;
+
+
+        if (t <= 0) {
+
+            return 0;
+
+        }
+
+
+        return Math.min(
+            100,
+            Math.max(
+                0,
+                Math.round(
+                    c / t * 100
+                )
+            )
+        );
+
+    }
+
+
+    function formatNumber(value) {
+
+        return new Intl.NumberFormat(
+            "ru-RU"
+        ).format(
+            Number(value) || 0
+        );
+
+    }
+
+
+    function formatXP(value) {
+
+        const n =
+            Math.round(
+                Number(value) || 0
+            );
+
+
+        return formatNumber(n);
+
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =========================================
+       FINANCE
+    ========================================= */
+
+    function getIncome() {
+
+        const item =
+            data.finance.find(
+                function(element) {
+
+                    return (
+                        element.id ===
+                        "income"
+                    );
+
+                }
+            );
+
+
+        return Number(
+            item?.current
+        ) || 0;
+
+    }
+
+
+    function getExpensesTotal() {
+
+        return expenses.reduce(
+            function(total, expense) {
+
+                return (
+                    total +
+                    (
+                        Number(
+                            expense.amount
+                        ) || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+    }
+
+
+    function getExpensesPercent() {
+
+        const income =
+            getIncome();
+
+
+        const total =
+            getExpensesTotal();
+
+
+        if (income <= 0) {
+
+            return 0;
+
+        }
+
+
+        return Math.round(
+            total / income * 100
+        );
+
+    }
+
+
+    function getSavings() {
+
+        return Math.max(
+            0,
+            getIncome() -
+            getExpensesTotal()
+        );
+
+    }
+
+
+    /* =========================================
+       CATEGORY PROGRESS
+    ========================================= */
+
+    function categoryProgress(
+        category
+    ) {
+
+        const items =
+            data[category];
+
+
+        if (
+            !Array.isArray(items) ||
+            !items.length
+        ) {
+
+            return 0;
+
+        }
+
+
+        const progressItems =
+            items.filter(
+                function(item) {
+
+                    return (
+                        item.id !==
+                        "expenses"
+                    );
+
+                }
+            );
+
+
+        if (!progressItems.length) {
+
+            return 0;
+
+        }
+
+
+        const total =
+            progressItems.reduce(
+                function(sum, item) {
+
+                    return (
+                        sum +
+                        progress(
+                            item.current,
+                            item.target
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        return Math.round(
+            total /
+            progressItems.length
+        );
+
+    }
+
+
+    /* =========================================
+       LEVEL ENGINE
+    ========================================= */
+
+    function getLevelFromXP(
+        xp
+    ) {
+
+        let level = 1;
+
+        let remaining =
+            Math.max(
+                0,
+                Number(xp) || 0
+            );
+
+
+        /*
+         * Практический цикл.
+         * При огромном XP уровень всё равно
+         * продолжает расти.
+         */
+
+        while (
+            remaining >=
+            ECONOMY.levelXP(level)
+        ) {
+
+            remaining -=
+                ECONOMY.levelXP(level);
+
+            level++;
+
+
+            if (level > 100000) {
+
+                break;
+
+            }
+
+        }
+
+
+        return {
+
+            level,
+            remaining,
+            required:
+                ECONOMY.levelXP(level)
+
+        };
+
+    }
+
+
+    function normalizeCategoryLevel(
+        category
+    ) {
+
+        const state =
+            data.categories[category];
+
+
+        if (!state) {
+
+            return;
+
+        }
+
+
+        const info =
+            getLevelFromXP(
+                state.xp
+            );
+
+
+        state.level =
+            info.level;
+
+    }
+
+
+    function getCategoryLevelInfo(
+        category
+    ) {
+
+        const state =
+            data.categories[category];
+
+
+        if (!state) {
+
+            return {
+                level: 1,
+                currentXP: 0,
+                requiredXP:
+                    ECONOMY.levelXP(1),
+                percent: 0
+            };
+
+        }
+
+
+        const info =
+            getLevelFromXP(
+                state.xp
+            );
+
+
+        return {
+
+            level:
+                info.level,
+
+            currentXP:
+                info.remaining,
+
+            requiredXP:
+                info.required,
+
+            percent:
+                Math.min(
+                    100,
+                    Math.round(
+                        info.remaining /
+                        info.required *
+                        100
+                    )
+                )
+
+        };
+
+    }
+
+
+    /* =========================================
+       GLOBAL LEVEL
+       ========================================= */
+
+    function calculateCharacterXP() {
+
+        const categories =
+            Object.keys(
+                data.categories
+            );
+
+
+        const total =
+            categories.reduce(
+                function(sum, category) {
+
+                    return (
+                        sum +
+                        Math.max(
+                            0,
+                            Number(
+                                data.categories[
+                                    category
+                                ].xp
+                            ) || 0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        data.meta.characterXP =
+            Math.max(
+                0,
+                total -
+                (
+                    Number(
+                        data.meta.negativeXP
+                    ) || 0
+                )
+            );
+
+
+        return data.meta.characterXP;
+
+    }
+
+
+    function getGlobalLevelInfo() {
+
+        const xp =
+            calculateCharacterXP();
+
+
+        return getLevelFromXP(
+            xp
+        );
+
+    }
+
+
+    /* =========================================
+       STREAK ENGINE
+    ========================================= */
+
+    function todayKey() {
+
+        const date =
+            new Date();
+
+
+        return [
+            date.getFullYear(),
+            String(
+                date.getMonth() + 1
+            ).padStart(2, "0"),
+            String(
+                date.getDate()
+            ).padStart(2, "0")
+        ].join("-");
+
+    }
+
+
+    function dateDifference(
+        a,
+        b
+    ) {
+
+        if (!a || !b) {
+
+            return null;
+
+        }
+
+
+        const first =
+            new Date(
+                a + "T00:00:00"
+            );
+
+
+        const second =
+            new Date(
+                b + "T00:00:00"
+            );
+
+
+        return Math.round(
+            (
+                second -
+                first
+            ) /
+            86400000
+        );
+
+    }
+
+
+    function updateStreak(
+        category
+    ) {
+
+        const state =
+            data.categories[category];
+
+
+        const today =
+            todayKey();
+
+
+        if (
+            state.lastActionDate ===
+            today
+        ) {
+
+            return state.streak;
+
+        }
+
+
+        const difference =
+            dateDifference(
+                state.lastActionDate,
+                today
+            );
+
+
+        if (
+            difference === 1
+        ) {
+
+            state.streak += 1;
+
+        } else {
+
+            state.streak = 1;
+
+        }
+
+
+        state.bestStreak =
+            Math.max(
+                state.bestStreak,
+                state.streak
+            );
+
+
+        state.lastActionDate =
+            today;
+
+
+        return state.streak;
+
+    }
+
+
+    function streakMultiplier(
+        streak
+    ) {
+
+        const s =
+            Math.max(
+                0,
+                Number(streak) || 0
+            );
+
+
+        /*
+         * 1 день = 1.00
+         * 7 дней ≈ 1.18
+         * 30 дней ≈ 1.45
+         * дальше рост замедляется.
+         */
+
+        return (
+            1 +
+            Math.min(
+                0.60,
+                Math.log1p(s) *
+                0.055
+            )
+        );
+
+    }
+
+
+    /* =========================================
+       FINANCE XP
+       ========================================= */
+
+    function calculateFinanceXP(
+        income,
+        previousIncome,
+        expensesAmount
+    ) {
+
+        const current =
+            Math.max(
+                0,
+                Number(income) || 0
+            );
+
+
+        if (current <= 0) {
+
+            return 0;
+
+        }
+
+
+        const state =
+            data.categories.finance;
+
+
+        const levelInfo =
+            getCategoryLevelInfo(
+                "finance"
+            );
+
+
+        const level =
+            levelInfo.level;
+
+
+        /*
+         * Базовый XP.
+         *
+         * 50 000 ₽ на низком уровне
+         * даёт больше XP, чем те же
+         * 50 000 ₽ на высоком уровне.
+         */
+
+        const incomeUnits =
+            current / 50000;
+
+
+        const decay =
+            1 /
+            (
+                1 +
+                ECONOMY.finance.levelDecay *
+                Math.pow(
+                    Math.max(
+                        0,
+                        level - 1
+                    ),
+                    1.18
+                )
+            );
+
+
+        let xp =
+            ECONOMY.finance.baseXP *
+            incomeUnits *
+            decay;
+
+
+        /*
+         * Рост дохода относительно
+         * предыдущего месяца.
+         */
+
+        if (
+            previousIncome > 0 &&
+            current > previousIncome
+        ) {
+
+            const growth =
+                (
+                    current -
+                    previousIncome
+                ) /
+                previousIncome;
+
+
+            xp *=
+                1 +
+                Math.min(
+                    1.5,
+                    growth *
+                    ECONOMY.finance.growthBonus
+                );
+
+        }
+
+
+        /*
+         * Чем меньше расходы относительно
+         * дохода, тем выше эффективность.
+         */
+
+        if (current > 0) {
+
+            const savingsRate =
+                Math.max(
+                    0,
+                    (
+                        current -
+                        expensesAmount
+                    ) /
+                    current
+                );
+
+
+            xp *=
+                1 +
+                Math.min(
+                    ECONOMY.finance.savingsBonus,
+                    savingsRate *
+                    ECONOMY.finance.savingsBonus
+                );
+
+        }
+
+
+        return Math.min(
+            ECONOMY.finance.maxMonthlyXP,
+            Math.max(
+                0,
+                Math.round(xp)
+            )
+        );
+
+    }
+
+
+    /* =========================================
+       TRAINING XP
+       ========================================= */
+
+    function calculateTrainingXP(
+        load,
+        previousLoad
+    ) {
+
+        const current =
+            Math.max(
+                0,
+                Number(load) || 0
+            );
+
+
+        if (current <= 0) {
+
+            return 0;
+
+        }
+
+
+        const levelInfo =
+            getCategoryLevelInfo(
+                "training"
+            );
+
+
+        const level =
+            levelInfo.level;
+
+
+        const decay =
+            1 /
+            (
+                1 +
+                ECONOMY.training.levelDecay *
+                Math.pow(
+                    Math.max(
+                        0,
+                        level - 1
+                    ),
+                    1.15
+                )
+            );
+
+
+        let xp =
+            ECONOMY.training.baseXP *
+            (
+                current /
+                1000
+            ) *
+            decay;
+
+
+        if (
+            previousLoad > 0 &&
+            current > previousLoad
+        ) {
+
+            const growth =
+                (
+                    current -
+                    previousLoad
+                ) /
+                previousLoad;
+
+
+            xp *=
+                1 +
+                Math.min(
+                    1,
+                    growth *
+                    ECONOMY.training.growthBonus
+                );
+
+        }
+
+
+        return Math.min(
+            ECONOMY.training.maxActionXP,
+            Math.max(
+                0,
+                Math.round(xp)
+            )
+        );
+
+    }
+
+
+    /* =========================================
+       ADD XP
+       ========================================= */
+
+    function addXP(
+        category,
+        amount,
+        reason = ""
+    ) {
+
+        const value =
+            Number(amount) || 0;
+
+
+        if (!data.categories[category]) {
+
+            return;
+
+        }
+
+
+        if (value > 0) {
+
+            const before =
+                getCategoryLevelInfo(
+                    category
+                ).level;
+
+
+            data.categories[category].xp +=
+                value;
+
+
+            normalizeCategoryLevel(
+                category
+            );
+
+
+            const after =
+                getCategoryLevelInfo(
+                    category
+                ).level;
+
+
+            calculateCharacterXP();
+
+            saveData();
+
+
+            if (
+                after > before
+            ) {
+
+                showToast(
+                    `${CATEGORY_META[category].icon} ${CATEGORY_META[category].code} LVL ${after}`
+                );
+
+            } else if (reason) {
+
+                showToast(
+                    `+${formatXP(value)} XP · ${reason}`
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* =========================================
+       REMOVE XP
+       ========================================= */
+
+    function removeXP(
+        category,
+        amount,
+        reason = ""
+    ) {
+
+        const value =
+            Math.abs(
+                Number(amount) || 0
+            );
+
+
+        if (!data.categories[category]) {
+
+            return;
+
+        }
+
+
+        const before =
+            getCategoryLevelInfo(
+                category
+            ).level;
+
+
+        data.categories[category].xp =
+            Math.max(
+                0,
+                data.categories[category].xp -
+                value
+            );
+
+
+        data.meta.negativeXP +=
+            value;
+
+
+        normalizeCategoryLevel(
+            category
+        );
+
+
+        const after =
+            getCategoryLevelInfo(
+                category
+            ).level;
+
+
+        calculateCharacterXP();
+
+        saveData();
+
+
+        if (
+            after < before
+        ) {
+
+            showToast(
+                `-${formatXP(value)} XP · уровень снижен`
+            );
+
+        } else if (reason) {
+
+            showToast(
+                `-${formatXP(value)} XP · ${reason}`
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       FINANCE MONTHLY ACTION
+       ========================================= */
+
+    function registerFinanceMonth() {
+
+        const income =
+            getIncome();
+
+
+        if (income <= 0) {
+
+            showToast(
+                "Сначала укажи заработок за месяц"
+            );
+
+            return;
+
+        }
+
+
+        const state =
+            data.categories.finance;
+
+
+        const previousIncome =
+            Number(
+                state.previousIncome
+            ) || 0;
+
+
+        const totalExpenses =
+            getExpensesTotal();
+
+
+        const streak =
+            updateStreak(
+                "finance"
+            );
+
+
+        const multiplier =
+            streakMultiplier(
+                streak
+            );
+
+
+        const rawXP =
+            calculateFinanceXP(
+                income,
+                previousIncome,
+                totalExpenses
+            );
+
+
+        const finalXP =
+            Math.round(
+                rawXP *
+                multiplier
+            );
+
+
+        addXP(
+            "finance",
+            finalXP,
+            `${streak} дн. streak`
+        );
+
+
+        const now =
+            new Date();
+
+
+        const month =
+            [
+                now.getFullYear(),
+                String(
+                    now.getMonth() + 1
+                ).padStart(2, "0")
+            ].join("-");
+
+
+        state.monthlyHistory.push({
+
+            month: month,
+
+            income: income,
+
+            expenses: totalExpenses,
+
+            savings:
+                Math.max(
+                    0,
+                    income -
+                    totalExpenses
+                ),
+
+            xp: finalXP
+
+        });
+
+
+        /*
+         * Храним историю, но не даём ей
+         * бесконтрольно разрастаться.
+         */
+
+        if (
+            state.monthlyHistory.length >
+            240
+        ) {
+
+            state.monthlyHistory =
+                state.monthlyHistory.slice(
+                    -240
+                );
+
+        }
+
+
+        state.previousIncome =
+            income;
+
+
+        saveData();
+
+        updateHome();
+
+        showToast(
+            `FINANCE +${formatXP(finalXP)} XP`
+        );
+
+    }
+
+
+    /* =========================================
+       TRAINING ACTION
+       ========================================= */
+
+    function registerTraining() {
+
+        const loadItem =
+            data.training.find(
+                function(item) {
+
+                    return (
+                        item.id ===
+                        "load"
+                    );
+
+                }
+            );
+
+
+        const load =
+            Number(
+                loadItem?.current
+            ) || 0;
+
+
+        if (load <= 0) {
+
+            showToast(
+                "Укажи объём нагрузки"
+            );
+
+            return;
+
+        }
+
+
+        const state =
+            data.categories.training;
+
+
+        const previousLoad =
+            Number(
+                state.previousLoad
+            ) || 0;
+
+
+        const streak =
+            updateStreak(
+                "training"
+            );
+
+
+        const multiplier =
+            streakMultiplier(
+                streak
+            );
+
+
+        const rawXP =
+            calculateTrainingXP(
+                load,
+                previousLoad
+            );
+
+
+        const finalXP =
+            Math.round(
+                rawXP *
+                multiplier
+            );
+
+
+        addXP(
+            "training",
+            finalXP,
+            `${streak} дн. streak`
+        );
+
+
+        state.previousLoad =
+            load;
+
+
+        saveData();
+
+        updateHome();
+
+    }
+
+
+    /* =========================================
+       DEVELOPMENT ACTION
+    ========================================= */
+
+    function registerDevelopment(
+        itemId
+    ) {
+
+        const item =
+            data.development.find(
+                function(element) {
+
+                    return (
+                        element.id ===
+                        itemId
+                    );
+
+                }
+            );
+
+
+        if (!item) {
+
+            return;
+
+        }
+
+
+        const value =
+            Number(
+                item.current
+            ) || 0;
+
+
+        if (value <= 0) {
+
+            showToast(
+                "Сначала укажи выполненное значение"
+            );
+
+            return;
+
+        }
+
+
+        const state =
+            data.categories.development;
+
+
+        const streak =
+            updateStreak(
+                "development"
+            );
+
+
+        const multiplier =
+            streakMultiplier(
+                streak
+            );
+
+
+        const completion =
+            Math.min(
+                1,
+                value /
+                Math.max(
+                    1,
+                    Number(
+                        item.target
+                    ) || 1
+                )
+            );
+
+
+        const xp =
+            Math.round(
+                ECONOMY.development.actionXP *
+                completion *
+                multiplier
+            );
+
+
+        addXP(
+            "development",
+            Math.min(
+                ECONOMY.development.maxActionXP,
+                xp
+            ),
+            `${streak} дн. streak`
+        );
+
+
+        saveData();
+
+    }
+
+
+    /* =========================================
+       CATEGORY PROGRESS
+       ========================================= */
+
+    function totalProgress() {
+
+        const categories =
+            Object.keys(
+                CATEGORY_META
+            );
+
+
+        const total =
+            categories.reduce(
+                function(sum, category) {
+
+                    return (
+                        sum +
+                        categoryProgress(
+                            category
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        return Math.round(
+            total /
+            categories.length
+        );
+
+    }
+
+
+    /* =========================================
+       UPDATE HOME
+       ========================================= */
+
+    function updateHome() {
+
+        const global =
+            getGlobalLevelInfo();
+
+
+        const globalLevel =
+            document.getElementById(
+                "globalLevel"
+            );
+
+
+        const globalXP =
+            document.getElementById(
+                "globalXP"
+            );
+
+
+        const globalXPFill =
+            document.getElementById(
+                "globalXPFill"
+            );
+
+
+        if (globalLevel) {
+
+            globalLevel.textContent =
+                "LVL " +
+                global.level;
+
+        }
+
+
+        if (globalXP) {
+
+            globalXP.textContent =
+                formatXP(
+                    global.remaining
+                ) +
+                " / " +
+                formatXP(
+                    global.required
+                ) +
+                " XP";
+
+        }
+
+
+        if (globalXPFill) {
+
+            globalXPFill.style.width =
+                global.percent + "%";
+
+        }
+
+
+        const total =
+            totalProgress();
+
+
+        const overallValue =
+            document.getElementById(
+                "overallValue"
+            );
+
+
+        const overallFill =
+            document.getElementById(
+                "overallFill"
+            );
+
+
+        if (overallValue) {
+
+            overallValue.innerHTML =
+                total +
+                "<span>%</span>";
+
+        }
+
+
+        if (overallFill) {
+
+            overallFill.style.width =
+                total + "%";
+
+        }
+
+
+        Object.keys(
+            CATEGORY_META
+        ).forEach(
+            function(category) {
+
+                const value =
+                    categoryProgress(
+                        category
+                    );
+
+
+                const level =
+                    getCategoryLevelInfo(
+                        category
+                    ).level;
+
+
+                const percent =
+                    document.getElementById(
+                        "homePercent" +
+                        capitalize(category)
+                    );
+
+
+                const fill =
+                    document.getElementById(
+                        "homeFill" +
+                        capitalize(category)
+                    );
+
+
+                const levelElement =
+                    document.getElementById(
+                        "homeLevel" +
+                        capitalize(category)
+                    );
+
+
+                if (percent) {
+
+                    percent.textContent =
+                        value + "%";
+
+                }
+
+
+                if (fill) {
+
+                    fill.style.width =
+                        value + "%";
+
+                }
+
+
+                if (levelElement) {
+
+                    levelElement.textContent =
+                        "LVL " +
+                        level;
+
+                }
+
+            }
+        );
+
+    }
+
+
+    function capitalize(
+        value
+    ) {
+
+        return (
+            value.charAt(0).toUpperCase() +
+            value.slice(1)
+        );
+
+    }
+
+
+    /* =========================================
+       NAVIGATION
+    ========================================= */
+
+    function setupNavigation() {
+
+        document
+            .querySelectorAll(
+                ".nav-item"
+            )
+            .forEach(
+                function(button) {
+
+                    button.addEventListener(
+                        "click",
+                        function(event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            const section =
+                                this.dataset.section;
+
+
+                            setActiveNav(
+                                section
+                            );
+
+
+                            if (
+                                section ===
+                                "home"
+                            ) {
+
+                                closeCategory();
+
+                                updateHome();
+
+                            } else {
+
+                                openCategory(
+                                    section
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".category-card"
+            )
+            .forEach(
+                function(card) {
+
+                    card.addEventListener(
+                        "click",
+                        function() {
+
+                            openCategory(
+                                this.dataset.category
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    function setActiveNav(
+        section
+    ) {
+
+        document
+            .querySelectorAll(
+                ".nav-item"
+            )
+            .forEach(
+                function(button) {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.section ===
+                        section
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* =========================================
+       OPEN CATEGORY
+    ========================================= */
+
+    function openCategory(
+        category
+    ) {
+
+        if (
+            !CATEGORY_META[category]
+        ) {
+
+            return;
+
+        }
+
+
+        closeCategory();
+
+
+        const page =
+            document.createElement(
+                "div"
+            );
+
+
+        page.className =
+            "category-page";
+
+
+        if (
+            category ===
+            "finance"
+        ) {
+
+            page.innerHTML =
+                renderFinancePage();
+
+        } else {
+
+            page.innerHTML =
+                renderStandardCategoryPage(
+                    category
+                );
+
+        }
+
+
+        document.body.appendChild(
+            page
+        );
+
+
+        document.body.classList.add(
+            "page-open"
+        );
+
+
+        bindCategoryPage(
+            page,
+            category
+        );
+
+    }
+
+
+    /* =========================================
+       STANDARD CATEGORY PAGE
+    ========================================= */
+
+    function renderStandardCategoryPage(
+        category
+    ) {
+
+        const meta =
+            CATEGORY_META[category];
+
+
+        const percent =
+            categoryProgress(
+                category
+            );
+
+
+        const level =
+            getCategoryLevelInfo(
+                category
+            );
+
+
+        const state =
+            data.categories[category];
+
+
+        return `
+
+            <div class="category-page-header">
+
+                <button
+                    class="back-button"
+                    type="button"
+                >
+                    ←
+                </button>
+
+                <div>
+
+                    <div class="page-eyebrow">
+                        LIFE GAME
+                    </div>
+
+                    <h2>
+                        ${meta.icon}
+                        ${meta.title}
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="category-summary">
+
+                <div class="section-label">
+                    CATEGORY PROGRESS
+                </div>
+
+                <div class="summary-value">
+                    ${percent}%
+                </div>
+
+                <div class="summary-meta">
+
+                    <span>
+                        LEVEL
+                    </span>
+
+                    <strong>
+                        LVL ${level.level}
+                    </strong>
+
+                </div>
+
+                <div class="summary-bar">
+
+                    <div
+                        class="summary-fill"
+                        style="width:${level.percent}%"
+                    ></div>
+
+                </div>
+
+
+                <div class="category-xp-panel">
+
+                    <div class="xp-stat">
+
+                        <span>
+                            XP
+                        </span>
+
+                        <strong>
+                            ${formatXP(state.xp)}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="xp-stat">
+
+                        <span>
+                            STREAK
+                        </span>
+
+                        <strong>
+                            ${state.streak} D
+                        </strong>
+
+                    </div>
+
+
+                    <div class="xp-stat">
+
+                        <span>
+                            BEST
+                        </span>
+
+                        <strong>
+                            ${state.bestStreak} D
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="streak-card">
+
+                <div class="streak-top">
+
+                    <div class="streak-title">
+                        CONSISTENCY BONUS
+                    </div>
+
+                    <div class="streak-value">
+                        ×${streakMultiplier(
+                            state.streak
+                        ).toFixed(2)}
+                    </div>
+
+                </div>
+
+                <div class="streak-description">
+
+                    Чем дольше непрерывная серия действий,
+                    тем выше XP за выполнение целей.
+
+                </div>
+
+            </div>
+
+
+            <div class="metrics-list">
+
+                ${data[category]
+                    .map(
+                        function(item) {
+
+                            return renderMetric(
+                                item,
+                                category
+                            );
+
+                        }
+                    )
+                    .join("")}
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       FINANCE PAGE
+    ========================================= */
+
+    function renderFinancePage() {
+
+        const percent =
+            categoryProgress(
+                "finance"
+            );
+
+
+        const level =
+            getCategoryLevelInfo(
+                "finance"
+            );
+
+
+        const state =
+            data.categories.finance;
+
+
+        const income =
+            getIncome();
+
+
+        const totalExpenses =
+            getExpensesTotal();
+
+
+        const expensesPercent =
+            getExpensesPercent();
+
+
+        const savings =
+            getSavings();
+
+
+        const regularMetrics =
+            data.finance.filter(
+                function(item) {
+
+                    return (
+                        item.id !==
+                        "expenses"
+                    );
+
+                }
+            );
+
+
+        const expensesMetric =
+            data.finance.find(
+                function(item) {
+
+                    return (
+                        item.id ===
+                        "expenses"
+                    );
+
+                }
+            );
+
+
+        return `
+
+            <div class="category-page-header">
+
+                <button
+                    class="back-button"
+                    type="button"
+                >
+                    ←
+                </button>
+
+                <div>
+
+                    <div class="page-eyebrow">
+                        LIFE GAME
+                    </div>
+
+                    <h2>
+                        💰 Финансы
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="category-summary">
+
+                <div class="section-label">
+                    FINANCE LEVEL
+                </div>
+
+                <div class="summary-value">
+                    LVL ${level.level}
+                </div>
+
+                <div class="summary-meta">
+
+                    <span>
+                        ${formatXP(
+                            level.currentXP
+                        )} XP
+                    </span>
+
+                    <strong>
+                        ${formatXP(
+                            level.requiredXP
+                        )} XP
+                    </strong>
+
+                </div>
+
+                <div class="summary-bar">
+
+                    <div
+                        class="summary-fill"
+                        style="width:${level.percent}%"
+                    ></div>
+
+                </div>
+
+
+                <div class="category-xp-panel">
+
+                    <div class="xp-stat">
+
+                        <span>
+                            TOTAL XP
+                        </span>
+
+                        <strong>
+                            ${formatXP(state.xp)}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="xp-stat">
+
+                        <span>
+                            STREAK
+                        </span>
+
+                        <strong>
+                            ${state.streak} D
+                        </strong>
+
+                    </div>
+
+
+                    <div class="xp-stat">
+
+                        <span>
+                            BEST
+                        </span>
+
+                        <strong>
+                            ${state.bestStreak} D
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="streak-card">
+
+                <div class="streak-top">
+
+                    <div class="streak-title">
+                        FINANCE STREAK
+                    </div>
+
+                    <div class="streak-value">
+                        ×${streakMultiplier(
+                            state.streak
+                        ).toFixed(2)}
+                    </div>
+
+                </div>
+
+                <div class="streak-description">
+
+                    Повторное достижение финансовой цели
+                    без перерыва увеличивает эффективность
+                    XP. При росте уровня одинаковый доход
+                    постепенно приносит меньше XP.
+
+                </div>
+
+            </div>
+
+
+            <div class="metrics-list">
+
+
+                ${regularMetrics
+                    .map(
+                        function(item) {
+
+                            return renderMetric(
+                                item,
+                                "finance"
+                            );
+
+                        }
+                    )
+                    .join("")}
+
+
+                <div
+                    class="metric-card"
+                    data-id="expenses"
+                >
+
+                    <div class="metric-top">
+
+                        <div class="metric-title">
+
+                            <div class="metric-icon">
+                                ${expensesMetric.icon}
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Обязательные расходы
+                                </strong>
+
+                                <span>
+                                    ${formatNumber(
+                                        totalExpenses
+                                    )}
+                                    ₽
+                                    ·
+                                    ${expensesPercent}%
+                                    от заработанного
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="metric-percent">
+                            ${expensesPercent}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-progress">
+
+                        <div
+                            class="metric-progress-fill"
+                            style="width:${Math.min(
+                                expensesPercent,
+                                100
+                            )}%"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="expenses-subblock">
+
+                        <div class="expenses-subblock-header">
+
+                            <div class="expenses-subblock-title">
+                                МОИ ОБЯЗАТЕЛЬНЫЕ РАСХОДЫ
+                            </div>
+
+                            <div class="expenses-subblock-total">
+                                ${formatNumber(
+                                    totalExpenses
+                                )} ₽
+                            </div>
+
+                        </div>
+
+
+                        <div class="expense-list">
+
+                            ${
+                                expenses.length
+                                    ? expenses
+                                        .map(
+                                            expenseHTML
+                                        )
+                                        .join("")
+                                    : `
+                                        <div class="expense-empty">
+                                            Добавь свои обязательные расходы.
+                                            Например: аренда, коммунальные,
+                                            связь, транспорт или продукты.
+                                        </div>
+                                    `
+                            }
+
+                        </div>
+
+
+                        <button
+                            class="add-expense-button"
+                            type="button"
+                        >
+                            ＋ ДОБАВИТЬ РАСХОД
+                        </button>
+
+
+                        <div class="expenses-ratio">
+
+                            <span>
+                                ОТ ЗАРАБОТАННОГО
+                            </span>
+
+                            <strong>
+                                ${expensesPercent}%
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="simulator-result">
+
+                    <div class="simulator-result-title">
+                        CURRENT FINANCIAL STATE
+                    </div>
+
+                    <div class="simulator-grid">
+
+                        <div class="simulator-stat">
+
+                            <span>
+                                ДОХОД
+                            </span>
+
+                            <strong>
+                                ${formatNumber(income)} ₽
+                            </strong>
+
+                        </div>
+
+
+                        <div class="simulator-stat">
+
+                            <span>
+                                РАСХОДЫ
+                            </span>
+
+                            <strong>
+                                ${formatNumber(
+                                    totalExpenses
+                                )} ₽
+                            </strong>
+
+                        </div>
+
+
+                        <div class="simulator-stat">
+
+                            <span>
+                                ОСТАЁТСЯ
+                            </span>
+
+                            <strong>
+                                ${formatNumber(
+                                    savings
+                                )} ₽
+                            </strong>
+
+                        </div>
+
+
+                        <div class="simulator-stat">
+
+                            <span>
+                                STREAK
+                            </span>
+
+                            <strong>
+                                ${state.streak} мес.
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="simulator-button"
+                    type="button"
+                    data-action="simulator"
+                >
+                    📊 FINANCE SIMULATOR · 120 МЕСЯЦЕВ
+                </button>
+
+
+                <div class="history-list">
+
+                    ${
+                        state.monthlyHistory.length
+                            ? state.monthlyHistory
+                                .slice(-6)
+                                .reverse()
+                                .map(
+                                    function(row) {
+
+                                        return `
+
+                                            <div class="history-row">
+
+                                                <div class="history-month">
+                                                    ${escapeHTML(
+                                                        row.month
+                                                    )}
+                                                </div>
+
+                                                <div class="history-income">
+                                                    ${formatNumber(
+                                                        row.income
+                                                    )} ₽
+                                                </div>
+
+                                                <div class="history-xp">
+                                                    +${formatXP(
+                                                        row.xp
+                                                    )} XP
+                                                </div>
+
+                                            </div>
+
+                                        `;
+
+                                    }
+                                )
+                                .join("")
+                            : `
+                                <div class="expense-empty">
+                                    История финансовых месяцев появится
+                                    после первого закрытого месяца.
+                                </div>
+                            `
+                    }
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       METRIC
+    ========================================= */
+
+    function renderMetric(
+        item,
+        category
+    ) {
+
+        const p =
+            progress(
+                item.current,
+                item.target
+            );
+
+
+        return `
+
+            <div
+                class="metric-card"
+                data-id="${item.id}"
+            >
+
+                <div class="metric-top">
+
+                    <div class="metric-title">
+
+                        <div class="metric-icon">
+                            ${item.icon}
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                ${escapeHTML(
+                                    item.name
+                                )}
+                            </strong>
+
+                            <span>
+                                ${formatNumber(
+                                    item.current
+                                )}
+                                ${item.unit}
+                                /
+                                ${formatNumber(
+                                    item.target
+                                )}
+                                ${item.unit}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="metric-percent">
+                        ${p}%
+                    </div>
+
+                </div>
+
+
+                <div class="metric-progress">
+
+                    <div
+                        class="metric-progress-fill"
+                        style="width:${p}%"
+                    ></div>
+
+                </div>
+
+
+                <button
+                    class="metric-edit"
+                    type="button"
+                    data-edit="${item.id}"
+                >
+                    ✎ ИЗМЕНИТЬ
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       EXPENSE HTML
+    ========================================= */
+
+    function expenseHTML(
+        expense
+    ) {
+
+        return `
+
+            <div class="expense-row">
+
+                <div class="expense-row-info">
+
+                    <div class="expense-row-name">
+                        ${escapeHTML(
+                            expense.name
+                        )}
+                    </div>
+
+                    <div class="expense-row-amount">
+                        ${formatNumber(
+                            expense.amount
+                        )} ₽
+                    </div>
+
+                </div>
+
+
+                <div class="expense-row-actions">
+
+                    <button
+                        class="expense-action expense-edit"
+                        type="button"
+                        data-expense="${expense.id}"
+                        aria-label="Изменить"
+                    >
+                        ✎
+                    </button>
+
+
+                    <button
+                        class="expense-action expense-delete"
+                        type="button"
+                        data-expense="${expense.id}"
+                        aria-label="Удалить"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================
+       PAGE EVENTS
+    ========================================= */
+
+    function bindCategoryPage(
+        page,
+        category
+    ) {
+
+        const backButton =
+            page.querySelector(
+                ".back-button"
+            );
+
+
+        if (backButton) {
+
+            backButton.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+
+                    closeCategory();
+
+                    updateHome();
+
+                    setActiveNav(
+                        "home"
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+         * Finance
+         */
+
+        if (
+            category ===
+            "finance"
+        ) {
+
+            const addButton =
+                page.querySelector(
+                    ".add-expense-button"
+                );
+
+
+            if (addButton) {
+
+                addButton.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        openExpenseEditor();
+
+                    }
+                );
+
+            }
+
+
+            page
+                .querySelectorAll(
+                    ".expense-edit"
+                )
+                .forEach(
+                    function(button) {
+
+                        button.addEventListener(
+                            "click",
+                            function(event) {
+
+                                event.preventDefault();
+                                event.stopPropagation();
+
+
+                                openExpenseEditor(
+                                    this.dataset.expense
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            page
+                .querySelectorAll(
+                    ".expense-delete"
+                )
+                .forEach(
+                    function(button) {
+
+                        button.addEventListener(
+                            "click",
+                            function(event) {
+
+                                event.preventDefault();
+                                event.stopPropagation();
+
+
+                                deleteExpense(
+                                    this.dataset.expense
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            const simulator =
+                page.querySelector(
+                    "[data-action='simulator']"
+                );
+
+
+            if (simulator) {
+
+                simulator.addEventListener(
+                    "click",
+                    function() {
+
+                        openFinanceSimulator();
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Metric editing
+         */
+
+        page
+            .querySelectorAll(
+                ".metric-edit"
+            )
+            .forEach(
+                function(button) {
+
+                    button.addEventListener(
+                        "click",
+                        function(event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            openEditor(
+                                category,
+                                this.dataset.edit
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* =========================================
+       STANDARD EDITOR
+    ========================================= */
+
+    function openEditor(
+        category,
+        id
+    ) {
+
+        const item =
+            data[category].find(
+                function(element) {
+
+                    return (
+                        element.id ===
+                        id
+                    );
+
+                }
+            );
+
+
+        if (!item) {
+
+            return;
+
+        }
+
+
+        const overlay =
+            document.createElement(
+                "div"
+            );
+
+
+        overlay.className =
+            "editor-overlay";
+
+
+        overlay.innerHTML = `
+
+            <div class="editor">
+
+                <button
+                    class="editor-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+
+                <div class="editor-icon">
+                    ${item.icon}
+                </div>
+
+
+                <div class="editor-eyebrow">
+                    EDIT GOAL
+                </div>
+
+
+                <h3>
+                    ${escapeHTML(
+                        item.name
+                    )}
+                </h3>
+
+
+                <label>
+                    Текущее значение
+                </label>
+
+
+                <input
+                    class="current-input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    value="${item.current}"
+                >
+
+
+                <label>
+                    Цель
+                </label>
+
+
+                <input
+                    class="target-input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    value="${item.target}"
+                >
+
+
+                <div class="editor-preview">
+
+                    <span>
+                        ПРОГРЕСС
+                    </span>
+
+                    <strong
+                        class="editor-progress"
+                    >
+                        ${progress(
+                            item.current,
+                            item.target
+                        )}%
+                    </strong>
+
+                </div>
+
+
+                <button
+                    class="save-button"
+                    type="button"
+                >
+                    СОХРАНИТЬ
+                </button>
+
+
+                ${
+                    (
+                        category !== "finance" &&
+                        category !== "training"
+                    )
+                        ? `
+                            <button
+                                class="secondary-button"
+                                type="button"
+                                data-complete="1"
+                            >
+                                + ЗАВЕРШИТЬ ДЕЙСТВИЕ И ПОЛУЧИТЬ XP
+                            </button>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        const currentInput =
+            overlay.querySelector(
+                ".current-input"
+            );
+
+
+        const targetInput =
+            overlay.querySelector(
+                ".target-input"
+            );
+
+
+        const preview =
+            overlay.querySelector(
+                ".editor-progress"
+            );
+
+
+        function updatePreview() {
+
+            preview.textContent =
+                progress(
+                    currentInput.value,
+                    targetInput.value
+                ) + "%";
+
+        }
+
+
+        currentInput.addEventListener(
+            "input",
+            updatePreview
+        );
+
+
+        targetInput.addEventListener(
+            "input",
+            updatePreview
+        );
+
+
+        overlay
+            .querySelector(
+                ".editor-close"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    overlay.remove();
+
+                }
+            );
+
+
+        const completeButton =
+            overlay.querySelector(
+                "[data-complete='1']"
+            );
+
+
+        if (completeButton) {
+
+            completeButton.addEventListener(
+                "click",
+                function() {
+
+                    item.current =
+                        Math.max(
+                            0,
+                            Number(
+                                currentInput.value
+                            ) || 0
+                        );
+
+
+                    item.target =
+                        Math.max(
+                            0,
+                            Number(
+                                targetInput.value
+                            ) || 0
+                        );
+
+
+                    saveData();
+
+
+                    if (
+                        category ===
+                        "development"
+                    ) {
+
+                        registerDevelopment(
+                            item.id
+                        );
+
+                    } else {
+
+                        const state =
+                            data.categories[
+                                category
+                            ];
+
+
+                        const streak =
+                            updateStreak(
+                                category
+                            );
+
+
+                        const completion =
+                            Math.min(
+                                1,
+                                item.current /
+                                Math.max(
+                                    1,
+                                    item.target
+                                )
+                            );
+
+
+                        const config =
+                            ECONOMY[
+                                category
+                            ];
+
+
+                        const base =
+                            Number(
+                                config?.actionXP
+                            ) || 20;
+
+
+                        const xp =
+                            Math.round(
+                                base *
+                                completion *
+                                streakMultiplier(
+                                    streak
+                                )
+                            );
+
+
+                        addXP(
+                            category,
+                            xp,
+                            `${streak} дн. streak`
+                        );
+
+                    }
+
+
+                    overlay.remove();
+
+                    openCategory(
+                        category
+                    );
+
+                    updateHome();
+
+                }
+            );
+
+        }
+
+
+        overlay
+            .querySelector(
+                ".save-button"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    item.current =
+                        Math.max(
+                            0,
+                            Number(
+                                currentInput.value
+                            ) || 0
+                        );
+
+
+                    item.target =
+                        Math.max(
+                            0,
+                            Number(
+                                targetInput.value
+                            ) || 0
+                        );
+
+
+                    saveData();
+
+
+                    overlay.remove();
+
+
+                    openCategory(
+                        category
+                    );
+
+
+                    updateHome();
+
+
+                    showToast(
+                        "Изменения сохранены"
+                    );
+
+                }
+            );
+
+
+        overlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    overlay.remove();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       EXPENSE EDITOR
+    ========================================= */
+
+    function openExpenseEditor(
+        expenseId = null
+    ) {
+
+        const expense =
+            expenses.find(
+                function(item) {
+
+                    return (
+                        String(item.id) ===
+                        String(expenseId)
+                    );
+
+                }
+            );
+
+
+        const overlay =
+            document.createElement(
+                "div"
+            );
+
+
+        overlay.className =
+            "editor-overlay";
+
+
+        overlay.innerHTML = `
+
+            <div class="editor">
+
+                <button
+                    class="editor-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+
+                <div class="editor-icon">
+                    📉
+                </div>
+
+
+                <div class="editor-eyebrow">
+                    ${
+                        expense
+                            ? "EDIT EXPENSE"
+                            : "NEW EXPENSE"
+                    }
+                </div>
+
+
+                <h3>
+                    ${
+                        expense
+                            ? "Изменить расход"
+                            : "Добавить расход"
+                    }
+                </h3>
+
+
+                <label>
+                    Название расхода
+                </label>
+
+
+                <input
+                    class="expense-name-input"
+                    type="text"
+                    inputmode="text"
+                    maxlength="60"
+                    placeholder="Например: Аренда"
+                    value="${
+                        expense
+                            ? escapeHTML(
+                                expense.name
+                            )
+                            : ""
+                    }"
+                >
+
+
+                <label>
+                    Сумма
+                </label>
+
+
+                <input
+                    class="expense-amount-input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                    value="${
+                        expense
+                            ? expense.amount
+                            : ""
+                    }"
+                >
+
+
+                <button
+                    class="save-button"
+                    type="button"
+                >
+                    СОХРАНИТЬ
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        const nameInput =
+            overlay.querySelector(
+                ".expense-name-input"
+            );
+
+
+        const amountInput =
+            overlay.querySelector(
+                ".expense-amount-input"
+            );
+
+
+        overlay
+            .querySelector(
+                ".editor-close"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    overlay.remove();
+
+                }
+            );
+
+
+        overlay
+            .querySelector(
+                ".save-button"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    const name =
+                        nameInput.value.trim();
+
+
+                    const amount =
+                        Number(
+                            amountInput.value
+                        ) || 0;
+
+
+                    if (!name) {
+
+                        showToast(
+                            "Введите название расхода"
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (amount <= 0) {
+
+                        showToast(
+                            "Введите сумму расхода"
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (expense) {
+
+                        expense.name =
+                            name;
+
+                        expense.amount =
+                            amount;
+
+                    } else {
+
+                        expenses.push({
+
+                            id:
+                                Date.now()
+                                .toString(),
+
+                            name:
+                                name,
+
+                            amount:
+                                amount
+
+                        });
+
+                    }
+
+
+                    saveExpenses();
+
+                    updateExpenseMetric();
+
+                    overlay.remove();
+
+
+                    openCategory(
+                        "finance"
+                    );
+
+
+                    updateHome();
+
+
+                    showToast(
+                        "Расход сохранён"
+                    );
+
+                }
+            );
+
+
+        overlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    overlay.remove();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       UPDATE EXPENSE METRIC
+    ========================================= */
+
+    function updateExpenseMetric() {
+
+        const metric =
+            data.finance.find(
+                function(item) {
+
+                    return (
+                        item.id ===
+                        "expenses"
+                    );
+
+                }
+            );
+
+
+        if (!metric) {
+
+            return;
+
+        }
+
+
+        metric.current =
+            getExpensesTotal();
+
+
+        metric.target = 0;
+
+
+        saveData();
+
+    }
+
+
+    /* =========================================
+       DELETE EXPENSE
+    ========================================= */
+
+    function deleteExpense(
+        expenseId
+    ) {
+
+        const expense =
+            expenses.find(
+                function(item) {
+
+                    return (
+                        String(item.id) ===
+                        String(expenseId)
+                    );
+
+                }
+            );
+
+
+        if (!expense) {
+
+            return;
+
+        }
+
+
+        expenses =
+            expenses.filter(
+                function(item) {
+
+                    return (
+                        String(item.id) !==
+                        String(expenseId)
+                    );
+
+                }
+            );
+
+
+        saveExpenses();
+
+        updateExpenseMetric();
+
+
+        openCategory(
+            "finance"
+        );
+
+
+        updateHome();
+
+
+        showToast(
+            "Расход удалён"
+        );
+
+    }
+
+
+    /* =========================================
+       120 MONTH FINANCE SIMULATOR
+       ========================================= */
+
+    function simulateFinance(
+        startingIncome,
+        expenseRate,
+        monthlyGrowth
+    ) {
+
+        const months = [];
+
+        let income =
+            Number(
+                startingIncome
+            ) || 0;
+
+
+        const rate =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        expenseRate
+                    ) || 0
+                )
+            );
+
+
+        const growth =
+            Number(
+                monthlyGrowth
+            ) || 0;
+
+
+        let cumulativeXP = 0;
+
+        let previousIncome = 0;
+
+        let simulatedLevel = 1;
+
+
+        for (
+            let month = 1;
+            month <= 120;
+            month++
+        ) {
+
+            const expensesAmount =
+                income *
+                rate /
+                100;
+
+
+            /*
+             * Используем тот же принцип
+             * diminishing returns, что и
+             * в реальной экономике.
+             */
+
+            const decay =
+                1 /
+                (
+                    1 +
+                    ECONOMY.finance.levelDecay *
+                    Math.pow(
+                        Math.max(
+                            0,
+                            simulatedLevel - 1
+                        ),
+                        1.18
+                    )
+                );
+
+
+            const units =
+                income /
+                50000;
+
+
+            let xp =
+                ECONOMY.finance.baseXP *
+                units *
+                decay;
+
+
+            if (
+                previousIncome > 0 &&
+                income > previousIncome
+            ) {
+
+                const increase =
+                    (
+                        income -
+                        previousIncome
+                    ) /
+                    previousIncome;
+
+
+                xp *=
+                    1 +
+                    Math.min(
+                        1.5,
+                        increase *
+                        ECONOMY.finance.growthBonus
+                    );
+
+            }
+
+
+            const savingsRate =
+                income > 0
+                    ? Math.max(
+                        0,
+                        (
+                            income -
+                            expensesAmount
+                        ) /
+                        income
+                    )
+                    : 0;
+
+
+            xp *=
+                1 +
+                Math.min(
+                    ECONOMY.finance.savingsBonus,
+                    savingsRate *
+                    ECONOMY.finance.savingsBonus
+                );
+
+
+            xp =
+                Math.min(
+                    ECONOMY.finance.maxMonthlyXP,
+                    Math.max(
+                        0,
+                        Math.round(xp)
+                    )
+                );
+
+
+            cumulativeXP +=
+                xp;
+
+
+            while (
+                cumulativeXP >=
+                ECONOMY.levelXP(
+                    simulatedLevel
+                )
+            ) {
+
+                cumulativeXP -=
+                    ECONOMY.levelXP(
+                        simulatedLevel
+                    );
+
+                simulatedLevel++;
+
+            }
+
+
+            months.push({
+
+                month,
+
+                income,
+
+                expenses:
+                    expensesAmount,
+
+                savings:
+                    income -
+                    expensesAmount,
+
+                xp,
+
+                level:
+                    simulatedLevel
+
+            });
+
+
+            previousIncome =
+                income;
+
+
+            income *=
+                1 +
+                growth /
+                100;
+
+        }
+
+
+        return months;
+
+    }
+
+
+    /* =========================================
+       SIMULATOR UI
+       ========================================= */
+
+    function openFinanceSimulator() {
+
+        const overlay =
+            document.createElement(
+                "div"
+            );
+
+
+        overlay.className =
+            "editor-overlay";
+
+
+        overlay.innerHTML = `
+
+            <div class="editor">
+
+                <button
+                    class="editor-close"
+                    type="button"
+                >
+                    ×
+                </button>
+
+
+                <div class="editor-icon">
+                    📊
+                </div>
+
+
+                <div class="editor-eyebrow">
+                    FINANCE SIMULATOR
+                </div>
+
+
+                <h3>
+                    120 месяцев
+                </h3>
+
+
+                <label>
+                    Стартовый заработок
+                </label>
+
+                <input
+                    class="sim-income"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    value="${getIncome() || 50000}"
+                >
+
+
+                <label>
+                    Расходы, %
+                </label>
+
+                <input
+                    class="sim-expenses"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    max="100"
+                    value="${getExpensesPercent() || 35}"
+                >
+
+
+                <label>
+                    Рост заработка каждый месяц, %
+                </label>
+
+                <input
+                    class="sim-growth"
+                    type="number"
+                    inputmode="decimal"
+                    value="10"
+                >
+
+
+                <div class="editor-preview">
+
+                    <span>
+                        СРОК
+                    </span>
+
+                    <strong>
+                        120 месяцев
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="simulator-preview"
+                    style="
+                        margin-bottom:16px;
+                    "
+                ></div>
+
+
+                <button
+                    class="save-button"
+                    type="button"
+                    data-run-simulator="1"
+                >
+                    РАССЧИТАТЬ
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            overlay
+        );
+
+
+        const incomeInput =
+            overlay.querySelector(
+                ".sim-income"
+            );
+
+
+        const expensesInput =
+            overlay.querySelector(
+                ".sim-expenses"
+            );
+
+
+        const growthInput =
+            overlay.querySelector(
+                ".sim-growth"
+            );
+
+
+        const preview =
+            overlay.querySelector(
+                ".simulator-preview"
+            );
+
+
+        function renderSimulation() {
+
+            const months =
+                simulateFinance(
+                    incomeInput.value,
+                    expensesInput.value,
+                    growthInput.value
+                );
+
+
+            const last =
+                months[
+                    months.length - 1
+                ];
+
+
+            const totalIncome =
+                months.reduce(
+                    function(sum, row) {
+
+                        return (
+                            sum +
+                            row.income
+                        );
+
+                    },
+                    0
+                );
+
+
+            const totalSavings =
+                months.reduce(
+                    function(sum, row) {
+
+                        return (
+                            sum +
+                            row.savings
+                        );
+
+                    },
+                    0
+                );
+
+
+            preview.innerHTML = `
+
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(2,1fr);
+                        gap:8px;
+                    "
+                >
+
+                    <div class="simulator-stat">
+
+                        <span>
+                            МЕСЯЦ 120
+                        </span>
+
+                        <strong>
+                            ${formatNumber(
+                                last.income
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+
+                    <div class="simulator-stat">
+
+                        <span>
+                            LEVEL
+                        </span>
+
+                        <strong>
+                            ${last.level}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="simulator-stat">
+
+                        <span>
+                            ДОХОД ЗА 10 ЛЕТ
+                        </span>
+
+                        <strong>
+                            ${formatNumber(
+                                totalIncome
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+
+                    <div class="simulator-stat">
+
+                        <span>
+                            НАКОПЛЕНО
+                        </span>
+
+                        <strong>
+                            ${formatNumber(
+                                totalSavings
+                            )} ₽
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        renderSimulation();
+
+
+        overlay
+            .querySelector(
+                "[data-run-simulator='1']"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    renderSimulation();
+
+                    showToast(
+                        "Симуляция обновлена"
+                    );
+
+                }
+            );
+
+
+        overlay
+            .querySelector(
+                ".editor-close"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    overlay.remove();
+
+                }
+            );
+
+
+        overlay.addEventListener(
+            "click",
+            function(event) {
+
+                if (
+                    event.target ===
+                    overlay
+                ) {
+
+                    overlay.remove();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       DAILY QUEST
+       ========================================= */
+
+    function setupQuest() {
+
+        const button =
+            document.getElementById(
+                "dailyQuest"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            function(event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                const overlay =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                overlay.className =
+                    "editor-overlay";
+
+
+                overlay.innerHTML = `
+
+                    <div class="editor">
+
+                        <button
+                            class="editor-close"
+                            type="button"
+                        >
+                            ×
+                        </button>
+
+
+                        <div class="editor-icon">
+                            ⚡
+                        </div>
+
+
+                        <div class="editor-eyebrow">
+                            DAILY QUEST
+                        </div>
+
+
+                        <h3>
+                            Квесты подключаются
+                        </h3>
+
+
+                        <p
+                            style="
+                                color:#777;
+                                font-size:13px;
+                                line-height:1.5;
+                                margin:0 0 20px;
+                            "
+                        >
+                            Экономическое ядро уже работает.
+                            Следующим этапом сюда подключим
+                            автоматическую генерацию квестов,
+                            награды XP, streak и штрафы
+                            за невыполнение.
+                        </p>
+
+
+                        <button
+                            class="save-button"
+                            type="button"
+                        >
+                            ПОНЯТНО
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                document.body.appendChild(
+                    overlay
+                );
+
+
+                overlay
+                    .querySelector(
+                        ".editor-close"
+                    )
+                    .addEventListener(
+                        "click",
+                        function() {
+
+                            overlay.remove();
+
+                        }
+                    );
+
+
+                overlay
+                    .querySelector(
+                        ".save-button"
+                    )
+                    .addEventListener(
+                        "click",
+                        function() {
+
+                            overlay.remove();
+
+                        }
+                    );
+
+
+                overlay.addEventListener(
+                    "click",
+                    function(event) {
+
+                        if (
+                            event.target ===
+                            overlay
+                        ) {
+
+                            overlay.remove();
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================
+       DEMO / TEST ACTION
+       ========================================= */
+
+    window.LIFE_GAME =
+        {
+
+            addXP,
+
+            removeXP,
+
+            calculateFinanceXP,
+
+            calculateTrainingXP,
+
+            simulateFinance,
+
+            getLevelFromXP,
+
+            getCategoryLevelInfo,
+
+            registerFinanceMonth,
+
+            registerTraining
+
+        };
+
+
+    /* =========================================
+       START
+    ========================================= */
+
+    function startApp() {
+
+        /*
+         * Синхронизируем расходы.
+         */
+
+        updateExpenseMetric();
+
+
+        /*
+         * Нормализуем уровни.
+         */
+
+        Object.keys(
+            data.categories
+        ).forEach(
+            normalizeCategoryLevel
+        );
+
+
+        calculateCharacterXP();
+
+        saveData();
+
+
+        setupNavigation();
+
+        setupQuest();
+
+        updateHome();
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            startApp
+        );
+
+    } else {
+
+        startApp();
+
+    }
+
+
+})();
+
+</script>
+
 
 </body>
 
