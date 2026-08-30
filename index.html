@@ -1336,67 +1336,30 @@ button:active{
         class="active"
         data-nav="home"
     >
-
-        <span class="nav-icon">
-            ⌂
-        </span>
-
-        <span class="nav-label">
-            Главная
-        </span>
-
+        <span class="nav-icon">⌂</span>
+        <span class="nav-label">Главная</span>
     </button>
 
-
-    <button
-        data-nav="finance"
-    >
-
-        <span class="nav-icon">
-            💰
-        </span>
-
-        <span class="nav-label">
-            Финансы
-        </span>
-
+    <button data-nav="finance">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Финансы</span>
     </button>
 
-
-    <button
-        data-nav="health"
-    >
-
-        <span class="nav-icon">
-            ❤️
-        </span>
-
-        <span class="nav-label">
-            Здоровье
-        </span>
-
+    <button data-nav="health">
+        <span class="nav-icon">❤️</span>
+        <span class="nav-label">Здоровье</span>
     </button>
 
-
-    <button
-        data-nav="development"
-    >
-
-        <span class="nav-icon">
-            🧠
-        </span>
-
-        <span class="nav-label">
-            Развитие
-        </span>
-
+    <button data-nav="development">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-label">Развитие</span>
     </button>
 
 </nav>
 
 
 <!-- =====================================================
-     CORE MODULES
+     CORE
      ===================================================== -->
 
 <script src="js/core/state.js"></script>
@@ -1410,6 +1373,8 @@ button:active{
      ===================================================== -->
 
 <script src="js/sections/finance.js"></script>
+<script src="js/sections/health.js"></script>
+<script src="js/sections/development.js"></script>
 
 
 <script>
@@ -1419,10 +1384,8 @@ button:active{
 
 
 /* =====================================================
-   FALLBACK CORE
-   Нужен для совместимости с текущей структурой.
+   FALLBACK CORE / COMPATIBILITY
    ===================================================== */
-
 
 const SK='life_game_core_v3';
 const EK='life_game_expenses_v3';
@@ -1559,25 +1522,18 @@ const DEFAULT={
 
 
 const clone=function(o){
-
-    return JSON.parse(
-        JSON.stringify(o)
-    );
-
+    return JSON.parse(JSON.stringify(o));
 };
 
 
 const num=function(v){
-
     return Number.isFinite(Number(v))
         ? Number(v)
         : 0;
-
 };
 
 
 const clamp=function(v,a,b){
-
     return Math.min(
         b,
         Math.max(
@@ -1585,18 +1541,15 @@ const clamp=function(v,a,b){
             v
         )
     );
-
 };
 
 
 const fmt=function(v){
-
     return new Intl.NumberFormat(
         'ru-RU'
     ).format(
         num(v)
     );
-
 };
 
 
@@ -1607,13 +1560,11 @@ const esc=function(v){
         function(m){
 
             return {
-
                 '&':'&amp;',
                 '<':'&lt;',
                 '>':'&gt;',
                 '"':'&quot;',
                 "'":'&#039;'
-
             }[m];
 
         }
@@ -1630,31 +1581,19 @@ function normalize(s){
 
     let r=clone(DEFAULT);
 
-    if(
-        !s ||
-        typeof s!=='object'
-    ){
-
+    if(!s || typeof s!=='object'){
         return r;
-
     }
-
 
     if(s.player){
 
-        Object.keys(
-            r.player
-        ).forEach(function(k){
+        Object.keys(r.player).forEach(function(k){
 
-            if(
-                s.player[k]!==undefined
-            ){
+            if(s.player[k]!==undefined){
 
                 r.player[k]=Math.max(
                     0,
-                    num(
-                        s.player[k]
-                    )
+                    num(s.player[k])
                 );
 
             }
@@ -1664,9 +1603,7 @@ function normalize(s){
     }
 
 
-    Object.keys(
-        r.categories
-    ).forEach(function(c){
+    Object.keys(r.categories).forEach(function(c){
 
         if(
             s.categories &&
@@ -1693,40 +1630,32 @@ function normalize(s){
     });
 
 
-    if(
-        Array.isArray(s.quests)
-    ){
+    if(Array.isArray(s.quests)){
 
-        r.quests=s.quests.map(
-            function(q){
+        r.quests=s.quests.map(function(q){
 
-                return {
+            return {
 
-                    id:String(
-                        q.id||''
-                    ),
+                id:String(q.id||''),
 
-                    category:String(
-                        q.category||'health'
-                    ),
+                category:String(
+                    q.category||'health'
+                ),
 
-                    title:String(
-                        q.title||'Quest'
-                    ),
+                title:String(
+                    q.title||'Quest'
+                ),
 
-                    xp:Math.max(
-                        0,
-                        num(q.xp)
-                    ),
+                xp:Math.max(
+                    0,
+                    num(q.xp)
+                ),
 
-                    done:Boolean(
-                        q.done
-                    )
+                done:Boolean(q.done)
 
-                };
+            };
 
-            }
-        );
+        });
 
     }
 
@@ -1741,14 +1670,10 @@ function loadState(){
     try{
 
         const r=
-            localStorage.getItem(
-                SK
-            );
+            localStorage.getItem(SK);
 
         return r
-            ? normalize(
-                JSON.parse(r)
-            )
+            ? normalize(JSON.parse(r))
             : clone(DEFAULT);
 
     }catch(e){
@@ -1828,9 +1753,7 @@ function loadUI(){
     }catch(e){
 
         return {
-
             expensesCollapsed:false
-
         };
 
     }
@@ -1938,12 +1861,8 @@ function addPlayerXP(a){
     state.player.xp=
         Math.max(
             0,
-            num(
-                state.player.xp
-            )+
-            Math.round(
-                num(a)
-            )
+            num(state.player.xp)+
+            Math.round(num(a))
         );
 
     state.player.level=
@@ -1958,18 +1877,12 @@ function addCatXP(c,a){
 
     const v=Math.max(
         0,
-        Math.round(
-            num(a)
-        )
+        Math.round(num(a))
     );
 
 
-    if(
-        !state.categories[c]
-    ){
-
+    if(!state.categories[c]){
         return;
-
     }
 
 
@@ -1990,9 +1903,7 @@ function addCatXP(c,a){
 
 
     addPlayerXP(
-        Math.round(
-            v*.65
-        )
+        Math.round(v*.65)
     );
 
 
@@ -2026,10 +1937,7 @@ function incomeXP(v){
 }
 
 
-function applyIncome(
-    oldV,
-    newV
-){
+function applyIncome(oldV,newV){
 
     const d=Math.max(
         0,
@@ -2055,68 +1963,54 @@ function applyIncome(
 
 
 /* =====================================================
-   DEVELOPMENT
+   DEVELOPMENT MODULE
    ===================================================== */
 
 function developmentProgress(){
 
-    const x=
-        state.categories.development;
+    if(
+        window.LifeGameDevelopment &&
+        typeof
+        window.LifeGameDevelopment.progress===
+        'function'
+    ){
 
+        return window.LifeGameDevelopment.progress(
+            state
+        );
 
-    const books=
-        x.books>=2
-            ? 100
-            : Math.round(
-                x.books/2*100
-            );
+    }
 
-
-    const language=
-        x.languageMinutes>=30
-            ? 100
-            : Math.round(
-                x.languageMinutes/
-                30*
-                100
-            );
-
-
-    const meditation=
-        x.meditationMinutes>=15
-            ? 100
-            : Math.round(
-                x.meditationMinutes/
-                15*
-                100
-            );
-
-
-    return Math.round(
-        (
-            books+
-            language+
-            meditation
-        )/3
-    );
+    return 0;
 
 }
 
 
 /* =====================================================
-   HEALTH
+   HEALTH MODULE
    ===================================================== */
 
 function healthProgress(){
 
+    if(
+        window.LifeGameHealth &&
+        typeof
+        window.LifeGameHealth.progress===
+        'function'
+    ){
+
+        return window.LifeGameHealth.progress(
+            state
+        );
+
+    }
+
+
     const h=
         state.categories.health;
 
-    const t=
-        state.categories.training;
 
-
-    const healthPart=
+    return Math.round(
         (
             clamp(
                 num(h.routine),
@@ -2137,35 +2031,14 @@ function healthProgress(){
                 0,
                 100
             )
-        )/3;
-
-
-    const trainingPart=
-        t.monthlyTarget>0
-            ? clamp(
-                Math.round(
-                    t.workouts/
-                    t.monthlyTarget*
-                    100
-                ),
-                0,
-                100
-            )
-            : 0;
-
-
-    return Math.round(
-        (
-            healthPart+
-            trainingPart
-        )/2
+        )/3
     );
 
 }
 
 
 /* =====================================================
-   GENERIC HELPERS
+   PROGRESS
    ===================================================== */
 
 function progress(c){
@@ -2344,30 +2217,26 @@ function metric(
 
 function healthPage(){
 
+    if(
+        window.LifeGameHealth &&
+        typeof
+        window.LifeGameHealth.page===
+        'function'
+    ){
+
+        return window.LifeGameHealth.page(
+            state,
+            ui
+        );
+
+    }
+
+
     const h=
         state.categories.health;
 
-    const t=
-        state.categories.training;
-
     const p=
         healthProgress();
-
-
-    const workoutXP=
-        Math.max(
-            5,
-            Math.round(
-                80/
-                Math.pow(
-                    Math.max(
-                        1,
-                        t.level
-                    ),
-                    .58
-                )
-            )
-        );
 
 
     return `
@@ -2422,223 +2291,56 @@ function healthPage(){
 
         </div>
 
-
-        <div class="cards">
-
-            <div class="training-divider">
-                TRAINING
-            </div>
-
-            ${metric(
-                '🏋️',
-                'Тренировки',
-                fmt(t.workouts),
-                fmt(t.monthlyTarget),
-                t.monthlyTarget>0
-                    ? clamp(
-                        Math.round(
-                            t.workouts/
-                            t.monthlyTarget*
-                            100
-                        ),
-                        0,
-                        100
-                    )
-                    : 0,
-                'workouts'
-            )}
-
-
-            <div class="metric">
-
-                <div class="metric-head">
-
-                    <div class="metric-left">
-
-                        <div class="metric-icon">
-                            ⚡
-                        </div>
-
-                        <div class="metric-text">
-
-                            <strong>
-                                XP за тренировку
-                            </strong>
-
-                            <span>
-                                Чем выше уровень,
-                                тем сложнее прокачка
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="metric-percent">
-                        +${workoutXP}
-                    </div>
-
-                </div>
-
-                <button
-                    class="edit"
-                    id="completeWorkout"
-                >
-                    ВЫПОЛНИТЬ ТРЕНИРОВКУ
-                </button>
-
-            </div>
-
-
-            <div class="training-divider">
-                HEALTH
-            </div>
-
-
-            ${metric(
-                '⏰',
-                'Режим дня',
-                fmt(h.routine)+'%',
-                '100%',
-                clamp(
-                    num(h.routine),
-                    0,
-                    100
-                ),
-                'routine'
-            )}
-
-
-            ${metric(
-                '🍎',
-                'Питание',
-                fmt(h.nutrition)+'%',
-                '100%',
-                clamp(
-                    num(h.nutrition),
-                    0,
-                    100
-                ),
-                'nutrition'
-            )}
-
-
-            ${metric(
-                '🚶',
-                'Шаги',
-                fmt(h.steps),
-                '10 000',
-                clamp(
-                    Math.round(
-                        num(h.steps)/
-                        10000*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'steps'
-            )}
-
-
-            <div class="notice">
-
-                Прогресс тренировок теперь
-                входит в общий показатель
-                здоровья.
-
-                Все ранее сохранённые
-                тренировки сохранены.
-
-            </div>
-
-
-            ${creatorHTML()}
-
-        </div>
-
     `;
 
 }
 
 
 /* =====================================================
-   DEVELOPMENT PAGE
+   CATEGORY PAGE
    ===================================================== */
 
 function genericPage(c){
 
-    const x=
-        state.categories[c];
-
-    const p=
-        progress(c);
-
-    let body='';
-
+    /*
+     * DEVELOPMENT полностью вынесен
+     * в js/sections/development.js
+     */
 
     if(c==='development'){
 
-        body=
+        if(
+            window.LifeGameDevelopment &&
+            typeof
+            window.LifeGameDevelopment.page===
+            'function'
+        ){
 
-            metric(
-                '📚',
-                'Чтение книг',
-                fmt(x.books),
-                '2',
-                clamp(
-                    Math.round(
-                        x.books/
-                        2*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'books'
-            )+
-
-            metric(
-                '🌐',
-                'Изучение языка',
-                fmt(
-                    x.languageMinutes
-                )+
-                ' мин',
-                '30 мин',
-                clamp(
-                    Math.round(
-                        x.languageMinutes/
-                        30*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'languageMinutes'
-            )+
-
-            metric(
-                '🧘',
-                'Медитация',
-                fmt(
-                    x.meditationMinutes
-                )+
-                ' мин',
-                '15 мин',
-                clamp(
-                    Math.round(
-                        x.meditationMinutes/
-                        15*
-                        100
-                    ),
-                    0,
-                    100
-                ),
-                'meditationMinutes'
+            return window.LifeGameDevelopment.page(
+                state,
+                {
+                    metric:metric,
+                    fmt:fmt,
+                    clamp:clamp,
+                    esc:esc,
+                    creatorHTML:creatorHTML
+                }
             );
 
+        }
+
+
+        return `
+            <div class="notice">
+                Модуль развития не загружен.
+            </div>
+        `;
+
     }
+
+
+    const x=
+        state.categories[c];
 
 
     return `
@@ -2652,14 +2354,14 @@ function genericPage(c){
             </div>
 
             <div class="summary-number">
-                ${p}%
+                ${progress(c)}%
             </div>
 
             <div class="progress">
 
                 <i
                     style="width:${clamp(
-                        p,
+                        progress(c),
                         0,
                         100
                     )}%"
@@ -2700,18 +2402,9 @@ function genericPage(c){
 
         <div class="cards">
 
-            ${body}
-
             <div class="notice">
-
-                Прогресс сохраняется
-                автоматически.
-
-                Повышение уровня XP
-                происходит сразу после
-                изменения показателя
-                или выполнения действия.
-
+                Раздел готовится к дальнейшему
+                расширению.
             </div>
 
             ${creatorHTML()}
@@ -2724,7 +2417,7 @@ function genericPage(c){
 
 
 /* =====================================================
-   PAGE OPEN
+   OPEN CATEGORY
    ===================================================== */
 
 function openCategory(c){
@@ -2747,21 +2440,18 @@ function openCategory(c){
 
     if(c==='finance'){
 
-        /*
-         * FINANCE IS NOW TAKEN
-         * FROM finance.js
-         */
-
         pageContent=
             window.LifeGameFinance &&
             typeof
             window.LifeGameFinance.page===
             'function'
+
                 ? window.LifeGameFinance.page(
                     state,
                     expenses,
                     ui
                 )
+
                 : `
                     <div class="notice">
                         Финансовый модуль
@@ -2773,6 +2463,13 @@ function openCategory(c){
 
         pageContent=
             healthPage();
+
+    }else if(c==='development'){
+
+        pageContent=
+            genericPage(
+                'development'
+            );
 
     }else{
 
@@ -2862,9 +2559,7 @@ function bindPage(p,c){
     });
 
 
-    /*
-     * FINANCE EVENTS
-     */
+    /* FINANCE */
 
     if(c==='finance'){
 
@@ -2937,9 +2632,7 @@ function bindPage(p,c){
     }
 
 
-    /*
-     * HEALTH / TRAINING
-     */
+    /* HEALTH */
 
     if(c==='health'){
 
@@ -3309,6 +3002,8 @@ function swipes(p){
 
 function openEditor(c,id){
 
+    /* FINANCE */
+
     if(
         c==='finance' &&
         id==='income'
@@ -3412,9 +3107,7 @@ function openEditor(c,id){
             const goal=
                 Math.max(
                     1,
-                    num(
-                        g.value
-                    )
+                    num(g.value)
                 );
 
 
@@ -3448,18 +3141,14 @@ function openEditor(c,id){
             x.monthlyIncome=
                 Math.max(
                     0,
-                    num(
-                        i.value
-                    )
+                    num(i.value)
                 );
 
 
             x.monthlyGoal=
                 Math.max(
                     1,
-                    num(
-                        g.value
-                    )
+                    num(g.value)
                 );
 
 
@@ -3490,6 +3179,111 @@ function openEditor(c,id){
 
     }
 
+
+    /* DEVELOPMENT */
+
+    if(
+        c==='development' &&
+        window.LifeGameDevelopment &&
+        typeof
+        window.LifeGameDevelopment.canEdit===
+        'function' &&
+        window.LifeGameDevelopment.canEdit(id)
+    ){
+
+        const x=
+            state.categories.development;
+
+
+        const labels=
+            window.LifeGameDevelopment.labels ||
+            {};
+
+
+        modal(`
+
+            <div class="modal-icon">
+                🧠
+            </div>
+
+            <div class="modal-label">
+                DEVELOPMENT
+            </div>
+
+            <h3>
+                ${esc(
+                    labels[id] || id
+                )}
+            </h3>
+
+            <label>
+                Текущее значение
+            </label>
+
+            <input
+                id="v"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                value="${num(
+                    x[id]
+                )}"
+            >
+
+            <button
+                class="primary"
+                id="save"
+            >
+                СОХРАНИТЬ
+            </button>
+
+        `);
+
+
+        const o=
+            document.querySelector(
+                '.overlay'
+            );
+
+
+        o.querySelector(
+            '#save'
+        ).onclick=function(){
+
+            x[id]=
+                Math.max(
+                    0,
+                    num(
+                        o.querySelector(
+                            '#v'
+                        ).value
+                    )
+                );
+
+
+            save();
+
+            closeModal();
+
+            renderHome();
+
+            openCategory(
+                'development'
+            );
+
+            toast(
+                'Изменения сохранены'
+            );
+
+        };
+
+
+        return;
+
+    }
+
+
+    /* HEALTH */
 
     if(
         c==='health' &&
@@ -3581,129 +3375,243 @@ function openEditor(c,id){
     }
 
 
-    const x=
-        state.categories[c];
+    /*
+     * Если это поле здоровья,
+     * которое находится в health.js,
+     * используем обычный редактор.
+     */
+
+    if(c==='health'){
+
+        const x=
+            state.categories.health;
 
 
-    const labels={
+        const labels={
 
-        yearlyGoal:
-            'Цель на год',
+            sleep:'Сон %',
+            sport:'Спорт %',
+            nutrition:'Питание %',
+            water:'Вода %',
+            routine:'Режим дня %',
+            steps:'Шаги'
 
-        books:
-            'Книги',
-
-        languageMinutes:
-            'Минуты изучения языка',
-
-        meditationMinutes:
-            'Минуты медитации',
-
-        routine:
-            'Режим дня %',
-
-        nutrition:
-            'Питание %',
-
-        steps:
-            'Шаги'
-
-    };
+        };
 
 
-    modal(`
+        if(
+            x[id]!==undefined
+        ){
 
-        <div class="modal-icon">
-            ${META[c].icon}
-        </div>
+            modal(`
 
-        <div class="modal-label">
-            EDIT VALUE
-        </div>
+                <div class="modal-icon">
+                    ❤️
+                </div>
 
-        <h3>
-            ${esc(
-                labels[id]||id
-            )}
-        </h3>
+                <div class="modal-label">
+                    HEALTH
+                </div>
 
-        <label>
-            Текущее значение
-        </label>
+                <h3>
+                    ${esc(
+                        labels[id]||id
+                    )}
+                </h3>
 
-        <input
-            id="v"
-            type="number"
-            inputmode="decimal"
-            min="0"
-            value="${num(
-                x[id]
-            )}"
-        >
+                <label>
+                    Текущее значение
+                </label>
 
-        <button
-            class="primary"
-            id="save"
-        >
-            СОХРАНИТЬ
-        </button>
+                <input
+                    id="v"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    value="${num(
+                        x[id]
+                    )}"
+                >
 
-    `);
+                <button
+                    class="primary"
+                    id="save"
+                >
+                    СОХРАНИТЬ
+                </button>
 
-
-    const o=
-        document.querySelector(
-            '.overlay'
-        );
+            `);
 
 
-    o.querySelector(
-        '#save'
-    ).onclick=function(){
-
-        x[id]=
-            Math.max(
-                0,
-                num(
-                    o.querySelector(
-                        '#v'
-                    ).value
-                )
-            );
+            const o=
+                document.querySelector(
+                    '.overlay'
+                );
 
 
-        save();
+            o.querySelector(
+                '#save'
+            ).onclick=function(){
 
-        closeModal();
+                x[id]=
+                    Math.max(
+                        0,
+                        num(
+                            o.querySelector(
+                                '#v'
+                            ).value
+                        )
+                    );
 
-        renderHome();
 
-        openCategory(c);
+                save();
 
-        toast(
-            'Изменения сохранены'
-        );
+                closeModal();
 
-    };
+                renderHome();
+
+                openCategory(
+                    'health'
+                );
+
+                toast(
+                    'Изменения сохранены'
+                );
+
+            };
+
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+     * DEVELOPMENT FALLBACK
+     */
+
+    if(c==='development'){
+
+        const x=
+            state.categories.development;
+
+
+        const labels={
+
+            books:'Книги',
+
+            languageMinutes:
+                'Минуты изучения языка',
+
+            meditationMinutes:
+                'Минуты медитации'
+
+        };
+
+
+        if(
+            x[id]!==undefined
+        ){
+
+            modal(`
+
+                <div class="modal-icon">
+                    🧠
+                </div>
+
+                <div class="modal-label">
+                    DEVELOPMENT
+                </div>
+
+                <h3>
+                    ${esc(
+                        labels[id]||id
+                    )}
+                </h3>
+
+                <label>
+                    Текущее значение
+                </label>
+
+                <input
+                    id="v"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    value="${num(
+                        x[id]
+                    )}"
+                >
+
+                <button
+                    class="primary"
+                    id="save"
+                >
+                    СОХРАНИТЬ
+                </button>
+
+            `);
+
+
+            const o=
+                document.querySelector(
+                    '.overlay'
+                );
+
+
+            o.querySelector(
+                '#save'
+            ).onclick=function(){
+
+                x[id]=
+                    Math.max(
+                        0,
+                        num(
+                            o.querySelector(
+                                '#v'
+                            ).value
+                        )
+                    );
+
+
+                save();
+
+                closeModal();
+
+                renderHome();
+
+                openCategory(
+                    'development'
+                );
+
+                toast(
+                    'Изменения сохранены'
+                );
+
+            };
+
+        }
+
+    }
 
 }
 
 
 /* =====================================================
-   EXPENSE MODAL
+   EXPENSE
    ===================================================== */
 
 function openExpense(id){
 
     const e=
-        expenses.find(
-            function(x){
+        expenses.find(function(x){
 
-                return String(x.id)===
-                    String(id);
+            return String(x.id)===
+                String(id);
 
-            }
-        );
+        });
 
 
     modal(`
@@ -3867,14 +3775,12 @@ function openExpense(id){
 function deleteExpense(id){
 
     expenses=
-        expenses.filter(
-            function(e){
+        expenses.filter(function(e){
 
-                return String(e.id)!==
-                    String(id);
+            return String(e.id)!==
+                String(id);
 
-            }
-        );
+        });
 
 
     save();
@@ -4047,40 +3953,32 @@ function toast(m){
     document.body.appendChild(t);
 
 
-    requestAnimationFrame(
-        function(){
+    requestAnimationFrame(function(){
 
-            t.classList.add(
-                'show'
-            );
+        t.classList.add(
+            'show'
+        );
 
-        }
-    );
+    });
 
 
     clearTimeout(tt);
 
 
-    tt=setTimeout(
-        function(){
+    tt=setTimeout(function(){
 
-            t.classList.remove(
-                'show'
-            );
+        t.classList.remove(
+            'show'
+        );
 
 
-            setTimeout(
-                function(){
+        setTimeout(function(){
 
-                    t.remove();
+            t.remove();
 
-                },
-                220
-            );
+        },220);
 
-        },
-        1800
-    );
+    },1800);
 
 }
 
@@ -4137,59 +4035,55 @@ function quests(){
 
                 ${
                     state.quests
-                        .map(
-                            function(q,i){
+                        .map(function(q,i){
 
-                                return `
+                            return `
+
+                                <div
+                                    class="quest-item"
+                                >
 
                                     <div
-                                        class="quest-item"
+                                        class="quest-row"
                                     >
 
                                         <div
-                                            class="quest-row"
+                                            class="quest-title"
                                         >
-
-                                            <div
-                                                class="quest-title"
-                                            >
-                                                ${esc(
-                                                    q.title
-                                                )}
-                                            </div>
-
-                                            <div
-                                                class="quest-xp"
-                                            >
-                                                +${q.xp} XP
-                                            </div>
-
+                                            ${esc(q.title)}
                                         </div>
 
-
-                                        <button
-                                            class="complete ${
-                                                q.done
-                                                    ? 'done'
-                                                    : ''
-                                            }"
-                                            data-q="${i}"
+                                        <div
+                                            class="quest-xp"
                                         >
-
-                                            ${
-                                                q.done
-                                                    ? '✓ ВЫПОЛНЕНО'
-                                                    : 'ВЫПОЛНИТЬ'
-                                            }
-
-                                        </button>
+                                            +${q.xp} XP
+                                        </div>
 
                                     </div>
 
-                                `;
 
-                            }
-                        )
+                                    <button
+                                        class="complete ${
+                                            q.done
+                                                ? 'done'
+                                                : ''
+                                        }"
+                                        data-q="${i}"
+                                    >
+
+                                        ${
+                                            q.done
+                                                ? '✓ ВЫПОЛНЕНО'
+                                                : 'ВЫПОЛНИТЬ'
+                                        }
+
+                                    </button>
+
+                                </div>
+
+                            `;
+
+                        })
                         .join('')
                 }
 
@@ -4204,7 +4098,6 @@ function quests(){
 
 
     document.body.appendChild(p);
-
 
     document.body.classList.add(
         'locked'
@@ -4316,7 +4209,7 @@ function quests(){
 
 
 /* =====================================================
-   HOME RENDER
+   HOME
    ===================================================== */
 
 function renderHome(){
@@ -4481,9 +4374,7 @@ document.querySelectorAll(
         }
 
 
-        if(
-            META[c]
-        ){
+        if(META[c]){
 
             openCategory(c);
 
@@ -4495,7 +4386,7 @@ document.querySelectorAll(
 
 
 /* =====================================================
-   HOME CATEGORY CARDS
+   HOME CARDS
    ===================================================== */
 
 document.querySelectorAll(
@@ -4530,7 +4421,7 @@ document.querySelectorAll(
 
 
 /* =====================================================
-   DAILY QUEST BUTTON
+   DAILY QUEST
    ===================================================== */
 
 document.getElementById(
@@ -4565,4 +4456,4 @@ console.log(
 
 </body>
 </html>
-```
+
