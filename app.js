@@ -1,4 +1,4 @@
-```javascript
+<\> JavaScript
 /* =========================================
    LIFE GAME
    Interactive MVP
